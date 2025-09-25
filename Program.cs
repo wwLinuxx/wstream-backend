@@ -5,6 +5,9 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using UzTube.Database;
 using UzTube.Entities;
+using UzTube.Interfaces;
+using UzTube.Repositories;
+using UzTube.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,7 +65,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 
 var app = builder.Build();
