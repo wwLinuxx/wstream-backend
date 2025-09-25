@@ -133,7 +133,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ==== ROLES SEED ====
-/*using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -142,15 +142,10 @@ using (var scope = app.Services.CreateScope())
         new Role
         {
             Id = 1,
-            Name = "SuperAdmin",
-            Description = "SuperAdmin - Role",
+            Name = "root",
+            Description = "root - Role",
             RolePermissions = new List<RolePermission>
             {
-                new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewTasks },
-                new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.CreateTask },
-                new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.UpdateTask },
-                new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.DeleteTask },
-                new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.AssignTask },
                 new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewUsers },
                 new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ManageUser },
                 new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewRoles },
@@ -172,30 +167,6 @@ using (var scope = app.Services.CreateScope())
                 new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ViewRoles },
                 new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ManageRoles }
             }
-        },
-        new Role
-        {
-            Id = 3,
-            Name = "Manager",
-            Description = "Manager - Role",
-            RolePermissions = new List<RolePermission>
-            {
-                new RolePermission { RoleId = 3, PermissionId = (int)SystemPermissions.ViewTasks },
-                new RolePermission { RoleId = 3, PermissionId = (int)SystemPermissions.CreateTask },
-                new RolePermission { RoleId = 3, PermissionId = (int)SystemPermissions.UpdateTask },
-                new RolePermission { RoleId = 3, PermissionId = (int)SystemPermissions.DeleteTask },
-                new RolePermission { RoleId = 3, PermissionId = (int)SystemPermissions.AssignTask }
-            }
-        },
-        new Role
-        {
-            Id = 4,
-            Name = "Employee",
-            Description = "Employee - Role",
-            RolePermissions = new List<RolePermission>
-            {
-                new RolePermission { RoleId = 4, PermissionId = (int)SystemPermissions.ViewPermissions }
-            }
         }
     };
 
@@ -212,7 +183,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     _context.SaveChanges();
-}*/
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
