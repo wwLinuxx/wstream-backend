@@ -16,8 +16,24 @@ builder.Services.AddSwaggerGen(s =>
         Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer YOUR_TOKEN')",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = 
-    })
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+
+    s.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddDbContextPool<AppDbContext>(options =>
