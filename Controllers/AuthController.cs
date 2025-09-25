@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
 
@@ -28,6 +29,7 @@ public class AuthController : ControllerBase
         return _userRepository.Register(dto);
     }
 
+    [UserOrAdminProfileView]
     [HttpGet("profile/{userId}")]
     public IActionResult UserProfile([FromRoute] int userId)
     {
