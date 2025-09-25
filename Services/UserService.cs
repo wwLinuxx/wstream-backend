@@ -16,8 +16,14 @@ public class UserService : IUserService
     public bool Exists(int userId)
         => _context.Users.Any(u => u.Id == userId);
 
+    public bool Exists(string email)
+        => _context.Users.Any(u => u.Email == email);
+
     public User GetById(int userId)
         => _context.Users.FirstOrDefault(u => u.Id == userId);
+
+    public User GetByEmail(string email)
+        => _context.Users.FirstOrDefault(u => u.Email == email);
 
     public IEnumerable<User> Users()
         => _context.Users;
@@ -45,5 +51,4 @@ public class UserService : IUserService
             .Select(ur => ur.Role.Name)
             .Distinct();
     }
-
 }
