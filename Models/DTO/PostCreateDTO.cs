@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace UzTube.Models.DTO;
 
@@ -21,5 +22,6 @@ public record PostCreateDTO
     public string VideoUrl { get; set; }
 
     [Required]
-    public bool IsPrivate { get; set; } = false;
+    [DefaultValue(false)]
+    public bool IsPrivate { get; set; }
 }
