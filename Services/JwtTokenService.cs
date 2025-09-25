@@ -33,7 +33,6 @@ public class JwtTokenService : IJwtTokenService
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Role, JsonSerializer.Serialize(_userService.Roles(user.Id))),
             new Claim("permissions", JsonSerializer.Serialize(_userService.Permissions(user.Id)))
         };
