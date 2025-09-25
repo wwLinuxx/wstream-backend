@@ -82,12 +82,12 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(u => u.Id);
 
-            entity.HasIndex(u => u.UserName)
-                .IsUnique();
+            //entity.HasIndex(u => u.Username)
+            //    .IsUnique();
 
-            entity.Property(u => u.UserName)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+            //entity.Property(u => u.Username)
+            //    .HasMaxLength(50)
+            //    .IsUnicode(false);
 
             entity.HasIndex(u => u.Email)
                 .IsUnique();
