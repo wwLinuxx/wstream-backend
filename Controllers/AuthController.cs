@@ -27,4 +27,10 @@ public class AuthController : ControllerBase
     {
         return _userRepository.Register(dto);
     }
+
+    [HttpGet("profile/{userId}")]
+    public IActionResult UserProfile([FromRoute] int userId)
+    {
+        return _userRepository.UserProfile(userId);
+    }
 }

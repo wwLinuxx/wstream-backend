@@ -7,5 +7,6 @@ namespace UzTube.Interfaces
     {
         Result Login(LoginDTO dto);
         Result Register(RegisterDTO dto);
+        Result<UserGetDTO> UserProfile(int userId);
     }
 }
