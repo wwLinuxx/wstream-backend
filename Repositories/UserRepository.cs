@@ -96,4 +96,37 @@ public class UserRepository : IUserRepository
             StatusCode = 201
         };
     }
+
+    public Result<UserGetDTO> UserProfile(int userId)
+    {
+        if (!_userService.Exists(userId))
+        {
+            return new Result<UserGetDTO>
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        UserGetDTO? user = _context.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new UserGetDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.Profile.FirstName,
+                LastName = u.Profile.LastName,
+                PhoneNumber = u.Profile.PhoneNumber,
+                Age = u.Profile.Age,
+                Country = u.Profile.Country.Name,
+                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
+            })
+            .FirstOrDefault();
+
+        return new Result<UserGetDTO>
+        {
+            StatusCode = 200,
+            Data = user
+        };
+    }
 }
