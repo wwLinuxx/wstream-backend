@@ -5,10 +5,13 @@ namespace UzTube.Models.DTO;
 public record LoginDTO
 {
     [Required]
-    [StringLength(maximumLength: 30, MinimumLength = 5, ErrorMessage = "Username most be minimum legth 5 maximum 30")]
+    [EmailAddress(ErrorMessage = "Email address required")]
+    [StringLength(maximumLength: 30, MinimumLength = 8, 
+        ErrorMessage = "Email most be minimum length 8 maximum 30")]
     public string Email { get; set; }
 
     [Required]
-    [StringLength(maximumLength: 30, MinimumLength = 5, ErrorMessage = "Password most be minimum legth 5 maximum 30")]
+    [StringLength(maximumLength: 30, MinimumLength = 8, 
+        ErrorMessage = "Password most be minimum length 8 maximum 30")]
     public string Password { get; set; }
 }
