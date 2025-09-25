@@ -21,7 +21,7 @@ public class Post
 
     public DateTime PostedAt { get; set; } = DateTime.UtcNow;
 
-    public VideoStatus Status { get; set; }
+    public VideoStatus Status { get; set; } = VideoStatus.Loading;
 
     public bool IsPrivate = false;
 
