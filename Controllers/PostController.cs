@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
 
@@ -16,6 +18,7 @@ public class PostController : ControllerBase
         _postRepository = postRepository;
     }
 
+    [RequirePermission]
     [HttpPost]
     public IActionResult CreatePost([FromBody] PostCreateDTO dto)
     {
