@@ -19,7 +19,7 @@ public class PostController : ControllerBase
     }
 
     [RequirePermission]
-    [HttpPost]
+    [HttpPost("create-post")]
     public IActionResult CreatePost([FromBody] PostCreateDTO dto)
     {
         return _postRepository.CreatePost(dto);
