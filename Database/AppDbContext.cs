@@ -232,6 +232,10 @@ public class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false);
 
+            entity.Property(p => p.PhotoUrl)
+                .HasMaxLength(1000)
+                .IsUnicode(false);
+
             entity.Property(p => p.VideoUrl)
                 .HasMaxLength(1000)
                 .IsUnicode(false);
