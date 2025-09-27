@@ -7,4 +7,5 @@ public interface IPostRepository
 {
     Result CreatePost(PostCreateDTO dto);
     Result<List<PostViewDTO>> ViewAllPosts();
+    Result<PostGetDTO> GetPostById(int id);
 }

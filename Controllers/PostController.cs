@@ -24,8 +24,17 @@ public class PostController : ControllerBase
         return _postRepository.CreatePost(dto);
     }
 
-    [HttpGet("view-all-posts")]
-    public IActionResult ViewAllPosts()
+    [HttpGet()]
+    public IActionResult GetAllPosts()
+    {
+        return _postRepository.GetAllPosts();
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetPostById([FromRoute] int id)
+    {
+        return _postRepository.GetPostById(id);
+    }
     {
         return _postRepository.ViewAllPosts();
     }
