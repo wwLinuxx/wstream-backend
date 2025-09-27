@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
@@ -23,5 +22,11 @@ public class PostController : ControllerBase
     public IActionResult CreatePost([FromBody] PostCreateDTO dto)
     {
         return _postRepository.CreatePost(dto);
+    }
+
+    [HttpGet("view-all-posts")]
+    public IActionResult ViewAllPosts()
+    {
+        return _postRepository.ViewAllPosts();
     }
 }
