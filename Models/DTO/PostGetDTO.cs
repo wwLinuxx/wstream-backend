@@ -1,6 +1,6 @@
 ﻿namespace UzTube.Models.DTO;
 
-public class PostViewDTO
+public class PostGetDTO
 {
     public int Id { get; set; }
 
