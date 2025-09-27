@@ -35,7 +35,11 @@ public class PostController : ControllerBase
     {
         return _postRepository.GetPostById(id);
     }
+
+    [RequirePermission]
+    [HttpGet("user-own-posts")]
+    public IActionResult GetUserOwnPost()
     {
-        return _postRepository.ViewAllPosts();
+        return _postRepository.GetUserOwnPosts();
     }
 }

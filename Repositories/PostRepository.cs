@@ -45,11 +45,11 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public Result<List<PostViewDTO>> ViewAllPosts()
+    public Result<List<PostGetDTO>> GetAllPosts()
     {
-        List<PostViewDTO> posts = _context.Posts
+        List<PostGetDTO> posts = _context.Posts
             .Where(p => p.IsPrivate == false)
-            .Select(p => new PostViewDTO
+            .Select(p => new PostGetDTO
             {
                 Id = p.Id,
                 UserId = p.UserId,
@@ -66,7 +66,22 @@ public class PostRepository : IPostRepository
             })
             .ToList();
 
-        return new Result<List<PostViewDTO>>
+        if (posts.Count == 0)
+        {
+            return new Result<List<PostGetDTO>>
+            {
+                Message = "Posts not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<List<PostGetDTO>>
+        {
+            StatusCode = 200,
+            Data = posts
+        };
+    }
+
     public Result<PostGetDTO> GetPostById(int id)
     {
         PostGetDTO? post = _context.Posts
@@ -104,9 +119,46 @@ public class PostRepository : IPostRepository
             Data = post
         };
     }
+
+    public Result<List<PostGetDTO>> GetUserOwnPosts()
+    {
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        List<PostGetDTO> posts = _context.Posts
+            .Where(p => p.UserId == userId)
+            .Select(p => new PostGetDTO
+            {
+                Id = p.Id,
+                UserId = userId,
+                Title = p.Title,
+                Description = p.Description,
+                PhotoUrl = p.PhotoUrl,
+                VideoUrl = p.VideoUrl,
+                Duration = p.Duration,
+                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                ViewsCount = p.ViewsCount,
+                LikesCount = p.LikesCount,
+                Rating = p.Rating,
+                IsPrivate = p.IsPrivate
+            })
+            .ToList();
+
+        if (posts.Count == 0)
         {
+            return new Result<List<PostGetDTO>>
+            {
+                Message = "Posts not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<List<PostGetDTO>>
+        {
+            Message = "From Database",
             StatusCode = 200,
             Data = posts
         };
     }
+
+
 }
