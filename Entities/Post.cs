@@ -13,17 +13,23 @@ public class Post
 
     public string Description { get; set; }
 
-    public string Duration { get; set; }
-
-    public int Rating { get; set; }
+    public string PhotoUrl { get; set; }
 
     public string VideoUrl { get; set; }
 
+    public string Duration { get; set; }
+
+    public int ViewsCount { get; set; }
+
+    public int LikesCount { get; set; }
+
+    public int Rating { get; set; }
+    
     public DateTime PostedAt { get; set; } = DateTime.UtcNow;
 
     public VideoStatus Status { get; set; } = VideoStatus.Loading;
 
-    public bool IsPrivate = false;
+    public bool IsPrivate { get; set; } = false;
 
     public ICollection<PostView> PostViews { get; set; }
 

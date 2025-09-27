@@ -19,6 +19,10 @@ public record PostCreateDTO
 
     [Required]
     [StringLength(1000)]
+    public string PhotoUrl { get; set; }
+
+    [Required]
+    [StringLength(1000)]
     public string VideoUrl { get; set; }
 
     [Required]

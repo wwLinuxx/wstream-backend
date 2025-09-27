@@ -1,12 +1,11 @@
 ﻿using UzTube.Models.DTO;
 using UzTube.Services;
 
-namespace UzTube.Interfaces
+namespace UzTube.Interfaces;
+
+public interface IUserRepository
 {
-    public interface IUserRepository
-    {
-        Result Login(LoginDTO dto);
-        Result Register(RegisterDTO dto);
-        Result<UserGetDTO> UserProfile(int userId);
-    }
+    Result Login(LoginDTO dto);
+    Result Register(RegisterDTO dto);
+    Result<UserGetDTO> UserProfile(int userId);
 }
