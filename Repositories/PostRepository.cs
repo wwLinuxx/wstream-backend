@@ -30,6 +30,7 @@ public class PostRepository : IPostRepository
             Title = dto.Title,
             Description = dto.Description,
             Duration = dto.Duration,
+            PhotoUrl = dto.PhotoUrl,
             VideoUrl = dto.VideoUrl,
             IsPrivate = dto.IsPrivate
         };
@@ -41,6 +42,34 @@ public class PostRepository : IPostRepository
         {
             Message = "Post created successfully",
             StatusCode = 201
+        };
+    }
+
+    public Result<List<PostViewDTO>> ViewAllPosts()
+    {
+        List<PostViewDTO> posts = _context.Posts
+            .Where(p => p.IsPrivate == false)
+            .Select(p => new PostViewDTO
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Description = p.Description,
+                PhotoUrl = p.PhotoUrl,
+                VideoUrl = p.VideoUrl,
+                Duration = p.Duration,
+                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                ViewsCount = p.ViewsCount,
+                LikesCount = p.LikesCount,
+                Rating = p.Rating,
+                IsPrivate = p.IsPrivate
+            })
+            .ToList();
+
+        return new Result<List<PostViewDTO>>
+        {
+            StatusCode = 200,
+            Data = posts
         };
     }
 }
