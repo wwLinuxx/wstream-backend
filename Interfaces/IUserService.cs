@@ -8,8 +8,8 @@ public interface IUserService
     Task<bool> ExistsAsync(string email);
     Task<User> GetByIdAsync(int userId);
     Task<User> GetByEmailAsync(string email);
-    Task<IEnumerable<User>> Users();
-    Task<IEnumerable<string>> Roles();
-    Task<IEnumerable<string>> Roles(int userId);
-    Task<IEnumerable<string>> Permissions(int userId);
+    Task<List<User>> Users();
+    Task<List<string>> Roles();
+    Task<List<string>> Roles(int userId);
+    Task<List<string>> Permissions(int userId);
 }
