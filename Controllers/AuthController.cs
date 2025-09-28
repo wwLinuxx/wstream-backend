@@ -18,21 +18,21 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginDTO dto)
+    public async Task<IActionResult> Login(LoginDTO dto)
     {
-        return _userRepository.Login(dto);
+        return await _userRepository.Login(dto);
     }
 
     [HttpPost("register")]
-    public IActionResult Register(RegisterDTO dto)
+    public async Task<IActionResult> Register(RegisterDTO dto)
     {
-        return _userRepository.Register(dto);
+        return await _userRepository.Register(dto);
     }
 
     [UserOrAdminProfileView]
     [HttpGet("profile/{userId}")]
-    public IActionResult UserProfile([FromRoute] int userId)
+    public async Task<IActionResult> UserProfile([FromRoute] int userId)
     {
-        return _userRepository.UserProfile(userId);
+        return await _userRepository.UserProfile(userId);
     }
 }

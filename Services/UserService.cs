@@ -1,4 +1,5 @@
-﻿using UzTube.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using UzTube.Database;
 using UzTube.Entities;
 using UzTube.Interfaces;
 
@@ -13,42 +14,45 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public bool Exists(int userId)
-        => _context.Users.Any(u => u.Id == userId);
+    public async Task<bool> ExistsAsync(int userId)
+        => await _context.Users.AnyAsync(u => u.Id == userId);
 
-    public bool Exists(string email)
-        => _context.Users.Any(u => u.Email == email);
+    public async Task<bool> ExistsAsync(string email)
+        => await _context.Users.AnyAsync(u => u.Email == email);
 
-    public User GetById(int userId)
-        => _context.Users.FirstOrDefault(u => u.Id == userId);
+    public async Task<User?> GetByIdAsync(int userId)
+        => await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-    public User GetByEmail(string email)
-        => _context.Users.FirstOrDefault(u => u.Email == email);
+    public async Task<User?> GetByEmailAsync(string email)
+        => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-    public IEnumerable<User> Users()
-        => _context.Users;
+    public async Task<IEnumerable<User>> Users()
+        => await _context.Users.ToListAsync();
 
-    public IEnumerable<string> Permissions(int userId)
+    public async Task<IEnumerable<string>> Permissions(int userId)
     {
-        return _context.UserRoles
+        return await _context.UserRoles
             .Where(ur => ur.UserId == userId)
             .SelectMany(ur => ur.Role.RolePermissions)
             .Select(rp => rp.Permission.Name)
-            .Distinct();
+            .Distinct()
+            .ToListAsync();
     }
 
-    public IEnumerable<string> Roles()
+    public async Task<IEnumerable<string>> Roles()
     {
-        return _context.UserRoles
+        return await _context.UserRoles
             .Select(ur => ur.Role.Name)
-            .Distinct();
+            .Distinct()
+            .ToListAsync();
     }
 
-    public IEnumerable<string> Roles(int userId)
+    public async Task<IEnumerable<string>> Roles(int userId)
     {
-        return _context.UserRoles
+        return await _context.UserRoles
             .Where(ur => ur.UserId == userId)
             .Select(ur => ur.Role.Name)
-            .Distinct();
+            .Distinct()
+            .ToListAsync();
     }
 }

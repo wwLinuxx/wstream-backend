@@ -1,4 +1,5 @@
-﻿using UzTube.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using UzTube.Database;
 using UzTube.Entities;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
@@ -25,9 +26,9 @@ public class UserRepository : IUserRepository
         _jwtTokenService = jwtTokenService;
     }
 
-    public Result Login(LoginDTO dto)
+    public async Task<Result> Login(LoginDTO dto)
     {
-        if (!_userService.Exists(dto.Email))
+        if (!await _userService.ExistsAsync(dto.Email))
         {
             return new Result
             {
@@ -36,7 +37,7 @@ public class UserRepository : IUserRepository
             };
         }
 
-        User user = _userService.GetByEmail(dto.Email);
+        User user = await _userService.GetByEmailAsync(dto.Email);
 
         if (!_passwordHasher.Verify(user.PasswordHash, dto.Password, user.Salt))
         {
@@ -56,18 +57,18 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public Result Register(RegisterDTO dto)
+    public async Task<Result> Register(RegisterDTO dto)
     {
-        if (_userService.Exists(dto.Email))
+        if (await _userService.ExistsAsync(dto.Email))
         {
             return new Result
             {
-                Message = "Email already exists",
+                Message = "Email is already registered",
                 StatusCode = 400
             };
         }
 
-        string salt = Guid.NewGuid().ToString();
+        string salt = Guid.NewGuid().ToString()[..16];
         string passwordHash = _passwordHasher.Encrypt(dto.Password, salt);
 
         UserProfile userProfile = new UserProfile
@@ -87,8 +88,8 @@ public class UserRepository : IUserRepository
             Profile = userProfile
         };
 
-        _context.Users.Add(newUser);
-        _context.SaveChanges();
+        await _context.Users.AddAsync(newUser);
+        await _context.SaveChangesAsync();
 
         return new Result
         {
@@ -97,18 +98,9 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public Result<UserGetDTO> UserProfile(int userId)
+    public async Task<Result<UserGetDTO>> UserProfile(int userId)
     {
-        if (!_userService.Exists(userId))
-        {
-            return new Result<UserGetDTO>
-            {
-                Message = "User not found",
-                StatusCode = 404
-            };
-        }
-
-        UserGetDTO? user = _context.Users
+        UserGetDTO? user = await _context.Users
             .Where(u => u.Id == userId)
             .Select(u => new UserGetDTO
             {
@@ -121,7 +113,16 @@ public class UserRepository : IUserRepository
                 Country = u.Profile.Country.Name,
                 CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
             })
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return new Result<UserGetDTO>
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
 
         return new Result<UserGetDTO>
         {

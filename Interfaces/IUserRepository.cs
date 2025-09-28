@@ -5,7 +5,7 @@ namespace UzTube.Interfaces;
 
 public interface IUserRepository
 {
-    Result Login(LoginDTO dto);
-    Result Register(RegisterDTO dto);
-    Result<UserGetDTO> UserProfile(int userId);
+    Task<Result> Login(LoginDTO dto);
+    Task<Result> Register(RegisterDTO dto);
+    Task<Result<UserGetDTO>> UserProfile(int userId);
 }
