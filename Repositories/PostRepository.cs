@@ -123,7 +123,7 @@ public class PostRepository : IPostRepository
 
     public async Task<Result<List<PostGetDTO>>> GetUserOwnPosts()
     {
-        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         List<PostGetDTO> posts = await _context.Posts
             .Where(p => p.UserId == userId)
@@ -161,5 +161,43 @@ public class PostRepository : IPostRepository
         };
     }
 
+    public async Task<Result> UpdatePost(int id, PostUpdateDTO dto)
+    {
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
+        if (userId != dto.UserId)
+        {
+            return new Result
+            {
+                Message = "Forbidden",
+                StatusCode = 403
+            };
+        }
+
+        Post? post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (post == null)
+        {
+            return new Result
+            {
+                Message = "Post not found",
+                StatusCode = 404
+            };
+        }
+
+        post.Id = id;
+        post.Title = dto.Title;
+        post.Description = dto.Description;
+        post.PhotoUrl = dto.PhotoUrl;
+        post.IsPrivate = dto.IsPrivate;
+
+        _context.Posts.Update(post);
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "Post updated successfully",
+            StatusCode = 200
+        };
+    }
 }

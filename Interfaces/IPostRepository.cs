@@ -9,5 +9,5 @@ public interface IPostRepository
     Task<Result<List<PostGetDTO>>> GetAllPosts();
     Task<Result<PostGetDTO>> GetPostById(int id);
     Task<Result<List<PostGetDTO>>> GetUserOwnPosts();
-    Result UpdatePostById(PostUpdateDTO dto);
+    Task<Result> UpdatePost(int id, PostUpdateDTO dto);
 }

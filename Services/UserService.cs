@@ -26,10 +26,10 @@ public class UserService : IUserService
     public async Task<User?> GetByEmailAsync(string email)
         => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-    public async Task<IEnumerable<User>> Users()
+    public async Task<List<User>> Users()
         => await _context.Users.ToListAsync();
 
-    public async Task<IEnumerable<string>> Permissions(int userId)
+    public async Task<List<string>> Permissions(int userId)
     {
         return await _context.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -39,7 +39,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<string>> Roles()
+    public async Task<List<string>> Roles()
     {
         return await _context.UserRoles
             .Select(ur => ur.Role.Name)
@@ -47,7 +47,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<string>> Roles(int userId)
+    public async Task<List<string>> Roles(int userId)
     {
         return await _context.UserRoles
             .Where(ur => ur.UserId == userId)
