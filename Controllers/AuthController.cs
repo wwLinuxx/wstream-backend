@@ -29,10 +29,10 @@ public class AuthController : ControllerBase
         return await _userRepository.Register(dto);
     }
 
-    [UserOrAdminProfileView]
-    [HttpGet("profile/{userId}")]
-    public async Task<IActionResult> UserProfile([FromRoute] int userId)
+    [UserOrAdminAccess]
+    [HttpGet("profile/{id}")]
+    public async Task<IActionResult> UserProfile([FromRoute] int id)
     {
-        return await _userRepository.UserProfile(userId);
+        return await _userRepository.UserProfile(id);
     }
 }
