@@ -19,27 +19,27 @@ public class PostController : ControllerBase
 
     [RequirePermission]
     [HttpPost("create-post")]
-    public IActionResult CreatePost([FromBody] PostCreateDTO dto)
+    public async Task<IActionResult> CreatePost([FromBody] PostCreateDTO dto)
     {
-        return _postRepository.CreatePost(dto);
+        return await _postRepository.CreatePost(dto);
     }
 
     [HttpGet()]
-    public IActionResult GetAllPosts()
+    public async Task<IActionResult> GetAllPosts()
     {
-        return _postRepository.GetAllPosts();
+        return await _postRepository.GetAllPosts();
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetPostById([FromRoute] int id)
+    public async Task<IActionResult> GetPostById([FromRoute] int id)
     {
-        return _postRepository.GetPostById(id);
+        return await _postRepository.GetPostById(id);
     }
 
     [RequirePermission]
     [HttpGet("user-own-posts")]
-    public IActionResult GetUserOwnPost()
+    public async Task<IActionResult> GetUserOwnPost()
     {
-        return _postRepository.GetUserOwnPosts();
+        return await _postRepository.GetUserOwnPosts();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using UzTube.Database;
 using UzTube.Entities;
 using UzTube.Interfaces;
@@ -20,9 +21,9 @@ public class PostRepository : IPostRepository
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Result CreatePost(PostCreateDTO dto)
+    public async Task<Result> CreatePost(PostCreateDTO dto)
     {
-        int userId = int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         Post newPost = new Post
         {
@@ -35,8 +36,8 @@ public class PostRepository : IPostRepository
             IsPrivate = dto.IsPrivate
         };
 
-        _context.Posts.Add(newPost);
-        _context.SaveChanges();
+        await _context.Posts.AddAsync(newPost);
+        await _context.SaveChangesAsync();
 
         return new Result
         {
@@ -45,9 +46,9 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public Result<List<PostGetDTO>> GetAllPosts()
+    public async Task<Result<List<PostGetDTO>>> GetAllPosts()
     {
-        List<PostGetDTO> posts = _context.Posts
+        List<PostGetDTO> posts = await _context.Posts
             .Where(p => p.IsPrivate == false)
             .Select(p => new PostGetDTO
             {
@@ -64,7 +65,7 @@ public class PostRepository : IPostRepository
                 Rating = p.Rating,
                 IsPrivate = p.IsPrivate
             })
-            .ToList();
+            .ToListAsync();
 
         if (posts.Count == 0)
         {
@@ -82,9 +83,9 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public Result<PostGetDTO> GetPostById(int id)
+    public async Task<Result<PostGetDTO>> GetPostById(int id)
     {
-        PostGetDTO? post = _context.Posts
+        PostGetDTO? post = await _context.Posts
             .Where(p => p.Id == id)
             .Select(p => new PostGetDTO
             {
@@ -101,7 +102,7 @@ public class PostRepository : IPostRepository
                 Rating = p.Rating,
                 IsPrivate = p.IsPrivate
             })
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if (post == null)
         {
@@ -120,11 +121,11 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public Result<List<PostGetDTO>> GetUserOwnPosts()
+    public async Task<Result<List<PostGetDTO>>> GetUserOwnPosts()
     {
         int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-        List<PostGetDTO> posts = _context.Posts
+        List<PostGetDTO> posts = await _context.Posts
             .Where(p => p.UserId == userId)
             .Select(p => new PostGetDTO
             {
@@ -141,7 +142,7 @@ public class PostRepository : IPostRepository
                 Rating = p.Rating,
                 IsPrivate = p.IsPrivate
             })
-            .ToList();
+            .ToListAsync();
 
         if (posts.Count == 0)
         {

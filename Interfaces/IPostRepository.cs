@@ -5,9 +5,9 @@ namespace UzTube.Interfaces;
 
 public interface IPostRepository
 {
-    Result CreatePost(PostCreateDTO dto);
-    Result<List<PostGetDTO>> GetAllPosts();
-    Result<PostGetDTO> GetPostById(int id);
-    Result<List<PostGetDTO>> GetUserOwnPosts();
+    Task<Result> CreatePost(PostCreateDTO dto);
+    Task<Result<List<PostGetDTO>>> GetAllPosts();
+    Task<Result<PostGetDTO>> GetPostById(int id);
+    Task<Result<List<PostGetDTO>>> GetUserOwnPosts();
     Result UpdatePostById(PostUpdateDTO dto);
 }
