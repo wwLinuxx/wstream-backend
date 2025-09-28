@@ -48,7 +48,7 @@ public class UserRepository : IUserRepository
             };
         }
 
-        string token = _jwtTokenService.GenerateToken(user);
+        string token = await _jwtTokenService.GenerateToken(user);
 
         return new Result
         {

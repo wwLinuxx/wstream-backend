@@ -4,5 +4,5 @@ namespace UzTube.Interfaces;
 
 public interface IJwtTokenService
 {
-    string GenerateToken(User user);
+    Task<string> GenerateToken(User user);
 }

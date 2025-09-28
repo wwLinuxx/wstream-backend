@@ -25,7 +25,7 @@ public class JwtTokenService : IJwtTokenService
         _userService = userService;
     }
 
-    public string GenerateToken(User user)
+    public async Task<string> GenerateToken(User user)
     {
         IConfigurationSection jwtSection = _configuration.GetSection("JwtOptions");
 
@@ -33,8 +33,8 @@ public class JwtTokenService : IJwtTokenService
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, JsonSerializer.Serialize(_userService.Roles(user.Id))),
-            new Claim("permissions", JsonSerializer.Serialize(_userService.Permissions(user.Id)))
+            new Claim(ClaimTypes.Role, JsonSerializer.Serialize(await _userService.Roles(user.Id))),
+            new Claim("permissions", JsonSerializer.Serialize(await _userService.Permissions(user.Id)))
         };
 
         SigningCredentials signingCredentions = new SigningCredentials(
@@ -44,7 +44,7 @@ public class JwtTokenService : IJwtTokenService
         JwtSecurityToken token = new JwtSecurityToken(
             claims: claims,
             signingCredentials: signingCredentions,
-            expires: DateTime.UtcNow.AddHours(int.Parse(jwtSection["ExpireHours"]))
+            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(jwtSection["ExpireHours"]))
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
