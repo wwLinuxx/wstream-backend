@@ -44,7 +44,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePost(
+    public async Task<IActionResult> UpdatePostById(
         [FromRoute] int id,
         [FromBody] PostUpdateDTO dto)
     {
