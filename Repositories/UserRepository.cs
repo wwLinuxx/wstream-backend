@@ -303,4 +303,29 @@ public class UserRepository : IUserRepository
             StatusCode = 200
         };
     }
+
+    public async Task<Result> RestoreUserById(int id)
+    {
+        User user = await _userService.GetByIdAsync(id);
+
+        if (user == null)
+        {
+            return new Result
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        user.IsDeleted = false;
+        user.DeletedAt = null;
+
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "User restored successfully",
+            StatusCode = 200
+        };
+    }
 }
