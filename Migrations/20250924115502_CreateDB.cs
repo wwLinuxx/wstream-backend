@@ -505,7 +505,7 @@ public partial class CreateDB : Migration
             name: "IX_UserProfiles_CountryId",
             table: "UserProfiles",
             column: "CountryId",
-            unique: true);
+            unique: false);
 
         migrationBuilder.CreateIndex(
             name: "IX_UserProfiles_PhoneNumber",

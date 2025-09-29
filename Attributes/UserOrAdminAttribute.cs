@@ -5,7 +5,7 @@ using UzTube.Services;
 
 namespace UzTube.Attributes;
 
-public class UserOrAdminProfileViewAttribute : Attribute, IAuthorizationFilter
+public class UserOrAdminAttribute : Attribute, IAuthorizationFilter
 {
     public void OnAuthorization(AuthorizationFilterContext context)
     {
@@ -17,19 +17,20 @@ public class UserOrAdminProfileViewAttribute : Attribute, IAuthorizationFilter
             {
                 Message = "Unauthorized",
                 StatusCode = 401
-            }; 
-            
+            };
+
             return;
         }
 
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-        string? requestUserId = context.HttpContext.Request.RouteValues["userId"]?.ToString();
+        string? requestUserId = context.HttpContext.Request.RouteValues["id"]?.ToString();
 
         string rolesJson = user.FindFirstValue(ClaimTypes.Role);
 
-        if (rolesJson != null)
+        if (userId != null && requestUserId != null && rolesJson != null)
         {
             List<string> roles = JsonSerializer.Deserialize<List<string>>(rolesJson);
+
             bool hasRole = roles.Contains("Admin") || roles.Contains("root");
 
             if (hasRole) return;

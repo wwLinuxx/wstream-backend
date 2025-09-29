@@ -121,16 +121,14 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result<List<PostGetDTO>>> GetUserOwnPosts()
+    public async Task<Result<List<PostGetDTO>>> GetUserPosts(int id)
     {
-        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
-
         List<PostGetDTO> posts = await _context.Posts
-            .Where(p => p.UserId == userId)
+            .Where(p => p.UserId == id)
             .Select(p => new PostGetDTO
             {
                 Id = p.Id,
-                UserId = userId,
+                UserId = id,
                 Title = p.Title,
                 Description = p.Description,
                 PhotoUrl = p.PhotoUrl,
@@ -161,5 +159,32 @@ public class PostRepository : IPostRepository
         };
     }
 
+    public async Task<Result> UpdatePostById(int id, PostUpdateDTO dto)
+    {
+        Post? post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
 
+        if (post == null)
+        {
+            return new Result
+            {
+                Message = "Post not found",
+                StatusCode = 404
+            };
+        }
+
+        post.Id = id;
+        post.Title = dto.Title;
+        post.Description = dto.Description;
+        post.PhotoUrl = dto.PhotoUrl;
+        post.IsPrivate = dto.IsPrivate;
+
+        _context.Posts.Update(post);
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "Post updated successfully",
+            StatusCode = 200
+        };
+    }
 }
