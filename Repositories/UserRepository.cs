@@ -278,4 +278,29 @@ public class UserRepository : IUserRepository
             StatusCode = 200
         };
     }
+
+    public async Task<Result> DeleteUserById(int id)
+    {
+        User user = await _userService.GetByIdAsync(id);
+
+        if (user == null)
+        {
+            return new Result
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        user.IsDeleted = true;
+        user.DeletedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "User deleted successfully",
+            StatusCode = 200
+        };
+    }
 }

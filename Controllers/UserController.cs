@@ -67,5 +67,12 @@ namespace UzTube.Controllers
         {
             return await _postRepository.UpdatePostById(id, dto);
         }
+
+        [RequirePermission(SystemPermissions.ManageUser)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserById([FromRoute] int id)
+        {
+            return await _userRepository.DeleteUserById(id);
+        }
     }
 }
