@@ -30,6 +30,9 @@ public class RequirePermissionAttribute : Attribute, IAuthorizationFilter
             return;
         }
 
+        if (_permissions.Contains(SystemPermissions.Authorize))
+            return;
+
         string permissionsJson = user.FindFirstValue("permissions");
 
         List<string> permissions = JsonSerializer.Deserialize<List<string>>(permissionsJson);

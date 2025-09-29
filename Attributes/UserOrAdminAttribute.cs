@@ -5,7 +5,7 @@ using UzTube.Services;
 
 namespace UzTube.Attributes;
 
-public class UserOrAdminAccessAttribute : Attribute, IAuthorizationFilter
+public class UserOrAdminAttribute : Attribute, IAuthorizationFilter
 {
     public void OnAuthorization(AuthorizationFilterContext context)
     {
@@ -30,6 +30,7 @@ public class UserOrAdminAccessAttribute : Attribute, IAuthorizationFilter
         if (userId != null && requestUserId != null && rolesJson != null)
         {
             List<string> roles = JsonSerializer.Deserialize<List<string>>(rolesJson);
+
             bool hasRole = roles.Contains("Admin") || roles.Contains("root");
 
             if (hasRole) return;

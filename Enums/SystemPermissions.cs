@@ -7,5 +7,7 @@
     ViewPermissions = 5,
     ViewAuditLogs = 6,
     ManageSystem = 7,
-    ViewPost = 8
+    ViewPost = 8,
+    
+    Authorize = 9,
 }

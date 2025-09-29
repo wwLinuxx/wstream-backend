@@ -17,6 +17,11 @@ public class PasswordHasher : IPasswordHasher
         return Convert.ToBase64String(algorithm.GetBytes(50));
     }
 
+    public string GenerateSalt()
+    {
+        return Guid.NewGuid().ToString()[..16];
+    }
+
     public bool Verify(string passwordHash, string password, string salt)
     {
         return passwordHash == Encrypt(password, salt);

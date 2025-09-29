@@ -7,5 +7,9 @@ public interface IUserRepository
 {
     Task<Result> Login(LoginDTO dto);
     Task<Result> Register(RegisterDTO dto);
-    Task<Result<UserGetDTO>> UserProfile(int userId);
+    Task<Result<UserGetDTO>> Me();
+    Task<Result<List<UserGetDTO>>> GetAllUsers();
+    Task<Result<UserGetDTO>> GetUserProfileById(int id);
+    Task<Result> UpdateUserProfileById(int id, UserProfileUpdateDTO dto);
+    Task<Result> UpdateUserPasswordById(int id, UserPasswordUpdateDTO dto);
 }
