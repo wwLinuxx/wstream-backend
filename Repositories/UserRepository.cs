@@ -89,7 +89,7 @@ public class UserRepository : IUserRepository
             Email = dto.Email,
             PasswordHash = passwordHash,
             Salt = salt,
-            Profile = userProfile
+            UserProfile = userProfile
         };
 
         await _context.Users.AddAsync(newUser);
@@ -107,17 +107,25 @@ public class UserRepository : IUserRepository
         int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         UserGetDTO? user = await _context.Users
+            //.Include(u => u.UserRoles)
             .Where(u => u.Id == userId)
             .Select(u => new UserGetDTO
             {
                 Id = u.Id,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                Country = u.Profile.Country.Name,
-                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
+                FirstName = u.UserProfile.FirstName,
+                LastName = u.UserProfile.LastName,
+                PhoneNumber = u.UserProfile.PhoneNumber,
+                Age = u.UserProfile.Age,
+                Country = u.UserProfile.Country.Name,
+                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                Roles = u.UserRoles
+                    .OrderBy(p => p.RoleId)
+                    .Select(ur => new RoleGetDTO
+                    {
+                        Id = ur.Role.Id,
+                        Name = ur.Role.Name
+                    }).ToList()
             })
             .FirstOrDefaultAsync();
 
@@ -140,15 +148,16 @@ public class UserRepository : IUserRepository
     public async Task<Result<List<UserGetDTO>>> GetAllUsers()
     {
         List<UserGetDTO>? users = await _context.Users
+            .OrderBy(p => p.Id)
             .Select(u => new UserGetDTO
             {
                 Id = u.Id,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                Country = u.Profile.Country.Name,
+                FirstName = u.UserProfile.FirstName,
+                LastName = u.UserProfile.LastName,
+                PhoneNumber = u.UserProfile.PhoneNumber,
+                Age = u.UserProfile.Age,
+                Country = u.UserProfile.Country.Name,
                 CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
             })
             .ToListAsync();
@@ -177,11 +186,11 @@ public class UserRepository : IUserRepository
             {
                 Id = u.Id,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                Country = u.Profile.Country.Name,
+                FirstName = u.UserProfile.FirstName,
+                LastName = u.UserProfile.LastName,
+                PhoneNumber = u.UserProfile.PhoneNumber,
+                Age = u.UserProfile.Age,
+                Country = u.UserProfile.Country.Name,
                 CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
             })
             .FirstOrDefaultAsync();
@@ -202,10 +211,45 @@ public class UserRepository : IUserRepository
         };
     }
 
+    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
+    {
+        UserGetDTO? user = await _context.Users
+            .Include(u => u.UserProfile)
+            .Where(u => u.Id == id)
+            .Select(u => new UserGetDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.UserProfile.FirstName,
+                LastName = u.UserProfile.LastName,
+                PhoneNumber = u.UserProfile.PhoneNumber,
+                Age = u.UserProfile.Age,
+                Country = u.UserProfile.Country.Name,
+                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return new Result<UserGetDTO>
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<UserGetDTO>
+        {
+            Message = "From Database",
+            StatusCode = 200,
+            Data = user
+        };
+    }
+
     public async Task<Result> UpdateUserProfileById(int id, UserProfileUpdateDTO dto)
     {
         User? user = await _context.Users
-            .Include(p => p.Profile)
+            .Include(p => p.UserProfile)
             .FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
@@ -217,11 +261,11 @@ public class UserRepository : IUserRepository
             };
         }
 
-        user.Profile.FirstName = dto.FirstName;
-        user.Profile.LastName = dto.LastName;
-        user.Profile.PhoneNumber = dto.PhoneNumber;
-        user.Profile.Age = dto.Age;
-        user.Profile.CountryId = dto.Country;
+        user.UserProfile.FirstName = dto.FirstName;
+        user.UserProfile.LastName = dto.LastName;
+        user.UserProfile.PhoneNumber = dto.PhoneNumber;
+        user.UserProfile.Age = dto.Age;
+        user.UserProfile.CountryId = dto.Country;
 
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
@@ -279,6 +323,40 @@ public class UserRepository : IUserRepository
         };
     }
 
+    public async Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto)
+    {
+        if (!await _userService.ExistsAsync(id))
+        {
+            return new Result
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        List<UserRole> userRoles = await _context.UserRoles
+            .Where(ur => ur.UserId == id)
+            .ToListAsync();
+
+        _context.UserRoles.RemoveRange(userRoles);
+
+        List<UserRole> newUserRoles = dto.RoleIds.Select(rid => new UserRole
+        {
+            UserId = id,
+            RoleId = rid
+        })
+        .ToList();
+
+        await _context.UserRoles.AddRangeAsync(newUserRoles);
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "User roles updated successfully",
+            StatusCode = 200
+        };
+    }
+    
     public async Task<Result> DeleteUserById(int id)
     {
         User user = await _userService.GetByIdAsync(id);
@@ -326,41 +404,6 @@ public class UserRepository : IUserRepository
         {
             Message = "User restored successfully",
             StatusCode = 200
-        };
-    }
-
-    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
-    {
-        UserGetDTO? user = await _context.Users
-            .Include(u => u.Profile)
-            .Where(u => u.Id == id)
-            .Select(u => new UserGetDTO
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                Country = u.Profile.Country.Name,
-                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
-            })
-            .FirstOrDefaultAsync();
-
-        if (user == null)
-        {
-            return new Result<UserGetDTO>
-            {
-                Message = "User not found",
-                StatusCode = 404
-            };
-        }
-
-        return new Result<UserGetDTO>
-        {
-            Message = "From Database",
-            StatusCode = 200,
-            Data = user
         };
     }
 }

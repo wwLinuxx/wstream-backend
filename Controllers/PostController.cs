@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
@@ -34,5 +35,11 @@ public class PostController : ControllerBase
     public async Task<IActionResult> GetPostById([FromRoute] int id)
     {
         return await _postRepository.GetPostById(id);
+    }
+
+    [HttpGet("/search")]
+    public async Task<IActionResult> SearchPostByQuery([FromQuery] [Required] int id)
+    {
+        return await _postRepository.SearchPostByQuery(id);
     }
 }

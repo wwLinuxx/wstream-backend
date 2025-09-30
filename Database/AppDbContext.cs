@@ -141,7 +141,7 @@ public class AppDbContext : DbContext
             });
 
             entity.HasOne(ur => ur.User)
-                .WithMany(u => u.Roles)
+                .WithMany(u => u.UserRoles)
                 .HasForeignKey(ur => ur.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -157,7 +157,7 @@ public class AppDbContext : DbContext
             entity.HasKey(up => up.UserId);
 
             entity.HasOne(up => up.User)
-                .WithOne(u => u.Profile)
+                .WithOne(u => u.UserProfile)
                 .HasForeignKey<UserProfile>(u => u.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -190,12 +190,12 @@ public class AppDbContext : DbContext
             });
 
             entity.HasOne(uf => uf.Follower)
-                .WithMany(f => f.Followers)
+                .WithMany(f => f.UserFollowers)
                 .HasForeignKey(uf => uf.FollowerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(uf => uf.Following)
-                .WithMany(f => f.Following)
+                .WithMany(f => f.UserFollowing)
                 .HasForeignKey(uf => uf.FollowingId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
@@ -216,7 +216,7 @@ public class AppDbContext : DbContext
             entity.HasKey(p => p.Id);
 
             entity.HasOne(p => p.User)
-                .WithMany(u => u.Posts)
+                .WithMany(u => u.UserPosts)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 

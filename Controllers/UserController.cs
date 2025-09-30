@@ -35,6 +35,12 @@ namespace UzTube.Controllers
             return await _userRepository.GetUserProfileById(id);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchUserByQuery([FromQuery] [Required] int id)
+        {
+            return await _userRepository.SearchUserByQuery(id);
+        }
+
         [UserOrAdmin]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUserProfileById(
@@ -51,6 +57,15 @@ namespace UzTube.Controllers
             [FromBody] UserPasswordUpdateDTO dto)
         {
             return await _userRepository.UpdateUserPasswordById(id, dto);
+        }
+
+        [RequirePermission(SystemPermissions.ManageRoles)]
+        [HttpPut("{id}/roles")]
+        public async Task<IActionResult> UpdateUserRoleById(
+            [FromRoute] int id,
+            [FromBody] UserRoleUpdateDTO dto)
+        {
+            return await _userRepository.UpdateUserRoleById(id, dto);
         }
 
         [UserOrAdmin]
@@ -81,12 +96,6 @@ namespace UzTube.Controllers
         public async Task<IActionResult> RestoreUserById([FromRoute] int id)
         {
             return await _userRepository.RestoreUserById(id);
-        }
-
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchUserByQuery([FromQuery] [Required] int id)
-        {
-            return await _userRepository.SearchUserByQuery(id);
         }
     }
 }

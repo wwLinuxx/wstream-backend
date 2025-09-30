@@ -21,14 +21,14 @@ public class User
 
     public DateTime? DeletedAt { get; set; }
 
-    public ICollection<UserRole> Roles { get; set; }
+    public ICollection<UserRole> UserRoles { get; set; }
 
-    public UserProfile Profile { get; set; }
+    public UserProfile UserProfile { get; set; }
 
-    public ICollection<UserFollower> Followers { get; set; }
-    public ICollection<UserFollower> Following { get; set; }
+    public ICollection<UserFollower> UserFollowers { get; set; }
+    public ICollection<UserFollower> UserFollowing { get; set; }
 
-    public ICollection<Post> Posts { get; set; }
+    public ICollection<Post> UserPosts { get; set; }
 
     public ICollection<PostView> PostViews { get; set; }
 

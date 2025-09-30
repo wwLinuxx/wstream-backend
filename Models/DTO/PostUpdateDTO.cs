@@ -1,15 +1,10 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using UzTube.Attributes;
 
 namespace UzTube.Models.DTO;
 
 public class PostUpdateDTO
 {
-    [Required]
-    [NotZero]
-    public int UserId { get; set; }
-
     [Required]
     [StringLength(100)]
     public string Title { get; set; }
