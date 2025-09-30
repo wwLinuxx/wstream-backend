@@ -329,6 +329,40 @@ public class UserRepository : IUserRepository
         };
     }
 
+    public async Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto)
+    {
+        if (!await _userService.ExistsAsync(id))
+        {
+            return new Result
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        List<UserRole> userRoles = await _context.UserRoles
+            .Where(ur => ur.UserId == id)
+            .ToListAsync();
+
+        _context.UserRoles.RemoveRange(userRoles);
+
+        List<UserRole> newUserRoles = dto.RoleIds.Select(rid => new UserRole
+        {
+            UserId = id,
+            RoleId = rid
+        })
+        .ToList();
+
+        await _context.UserRoles.AddRangeAsync(newUserRoles);
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "User roles updated successfully",
+            StatusCode = 200
+        };
+    }
+
     public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
     {
         UserGetDTO? user = await _context.Users

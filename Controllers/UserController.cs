@@ -83,6 +83,14 @@ namespace UzTube.Controllers
             return await _userRepository.RestoreUserById(id);
         }
 
+        [HttpPut("{id}/roles")]
+        public async Task<IActionResult> UpdateUserRoleById(
+            [FromRoute] int id,
+            [FromBody] UserRoleUpdateDTO dto)
+        {
+            return await _userRepository.UpdateUserRoleById(id, dto);
+        }
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchUserByQuery([FromQuery] [Required] int id)
         {
