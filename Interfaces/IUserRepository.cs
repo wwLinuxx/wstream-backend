@@ -14,5 +14,6 @@ public interface IUserRepository
     Task<Result> UpdateUserPasswordById(int id, UserPasswordUpdateDTO dto);
     Task<Result> DeleteUserById(int id);
     Task<Result> RestoreUserById(int id);
+    Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto);
     Task<Result<UserGetDTO>> SearchUserByQuery(int id);
 }
