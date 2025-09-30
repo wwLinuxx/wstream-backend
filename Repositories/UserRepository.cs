@@ -328,4 +328,39 @@ public class UserRepository : IUserRepository
             StatusCode = 200
         };
     }
+
+    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
+    {
+        UserGetDTO? user = await _context.Users
+            .Include(u => u.Profile)
+            .Where(u => u.Id == id)
+            .Select(u => new UserGetDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.Profile.FirstName,
+                LastName = u.Profile.LastName,
+                PhoneNumber = u.Profile.PhoneNumber,
+                Age = u.Profile.Age,
+                Country = u.Profile.Country.Name,
+                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return new Result<UserGetDTO>
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<UserGetDTO>
+        {
+            Message = "From Database",
+            StatusCode = 200,
+            Data = user
+        };
+    }
 }
