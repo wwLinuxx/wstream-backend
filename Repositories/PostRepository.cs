@@ -121,6 +121,44 @@ public class PostRepository : IPostRepository
         };
     }
 
+    public async Task<Result<PostGetDTO>> SearchPostByQuery(int id)
+    {
+        PostGetDTO? post = await _context.Posts
+            .Where(p => p.Id == id && p.IsPrivate == false)
+            .Select(p => new PostGetDTO
+            {
+                Id = id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Description = p.Description,
+                PhotoUrl = p.PhotoUrl,
+                VideoUrl = p.VideoUrl,
+                Duration = p.Duration,
+                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                ViewsCount = p.ViewsCount,
+                LikesCount = p.LikesCount,
+                Rating = p.Rating,
+                IsPrivate = p.IsPrivate
+            })
+            .FirstOrDefaultAsync();
+
+        if (post == null)
+        {
+            return new Result<PostGetDTO>
+            {
+                Message = "Post not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<PostGetDTO>
+        {
+            Message = "From Database",
+            StatusCode = 200,
+            Data = post
+        };
+    }
+
     public async Task<Result<List<PostGetDTO>>> GetUserPosts(int id)
     {
         List<PostGetDTO> posts = await _context.Posts
