@@ -37,7 +37,7 @@ public class PostController : ControllerBase
         return await _postRepository.GetPostById(id);
     }
 
-    [HttpGet("/search")]
+    [HttpGet("search")]
     public async Task<IActionResult> SearchPostByQuery([FromQuery] [Required] int id)
     {
         return await _postRepository.SearchPostByQuery(id);
