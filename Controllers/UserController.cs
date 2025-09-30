@@ -83,6 +83,7 @@ namespace UzTube.Controllers
             return await _userRepository.RestoreUserById(id);
         }
 
+        [RequirePermission(SystemPermissions.ManageRoles)]
         [HttpPut("{id}/roles")]
         public async Task<IActionResult> UpdateUserRoleById(
             [FromRoute] int id,
