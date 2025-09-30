@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models.DTO;
@@ -80,6 +81,12 @@ namespace UzTube.Controllers
         public async Task<IActionResult> RestoreUserById([FromRoute] int id)
         {
             return await _userRepository.RestoreUserById(id);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchUserByQuery([FromQuery] [Required] int id)
+        {
+            return await _userRepository.SearchUserByQuery(id);
         }
     }
 }

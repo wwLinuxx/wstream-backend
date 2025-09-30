@@ -135,7 +135,7 @@ using (var scope = app.Services.CreateScope())
 // ==== ROLES SEED ====
 using (var scope = app.Services.CreateScope())
 {
-    var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    AppDbContext? _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     List<Role> defaultRoles = new List<Role>
     {
