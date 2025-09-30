@@ -50,6 +50,7 @@ public class PostRepository : IPostRepository
     {
         List<PostGetDTO> posts = await _context.Posts
             .Where(p => p.IsPrivate == false)
+            .OrderBy(p => p.Id)
             .Select(p => new PostGetDTO
             {
                 Id = p.Id,
@@ -163,6 +164,7 @@ public class PostRepository : IPostRepository
     {
         List<PostGetDTO> posts = await _context.Posts
             .Where(p => p.UserId == id)
+            .OrderBy(p => p.Id)
             .Select(p => new PostGetDTO
             {
                 Id = p.Id,

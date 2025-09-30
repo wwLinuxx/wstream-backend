@@ -120,6 +120,7 @@ public class UserRepository : IUserRepository
                 Country = u.UserProfile.Country.Name,
                 CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss"),
                 Roles = u.UserRoles
+                    .OrderBy(p => p.RoleId)
                     .Select(ur => new RoleGetDTO
                     {
                         Id = ur.Role.Id,
@@ -147,6 +148,7 @@ public class UserRepository : IUserRepository
     public async Task<Result<List<UserGetDTO>>> GetAllUsers()
     {
         List<UserGetDTO>? users = await _context.Users
+            .OrderBy(p => p.Id)
             .Select(u => new UserGetDTO
             {
                 Id = u.Id,
