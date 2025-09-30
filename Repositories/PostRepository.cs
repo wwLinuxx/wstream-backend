@@ -218,7 +218,6 @@ public class PostRepository : IPostRepository
         post.PhotoUrl = dto.PhotoUrl;
         post.IsPrivate = dto.IsPrivate;
 
-        _context.Posts.Update(post);
         await _context.SaveChangesAsync();
 
         return new Result
