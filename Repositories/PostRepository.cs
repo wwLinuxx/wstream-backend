@@ -23,7 +23,7 @@ public class PostRepository : IPostRepository
 
     public async Task<Result> CreatePost(PostCreateDTO dto)
     {
-        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         Post newPost = new Post
         {
