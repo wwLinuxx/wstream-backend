@@ -212,7 +212,6 @@ public class PostRepository : IPostRepository
             };
         }
 
-        post.Id = id;
         post.Title = dto.Title;
         post.Description = dto.Description;
         post.PhotoUrl = dto.PhotoUrl;
