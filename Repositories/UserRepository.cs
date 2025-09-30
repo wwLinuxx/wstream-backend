@@ -209,6 +209,41 @@ public class UserRepository : IUserRepository
         };
     }
 
+    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
+    {
+        UserGetDTO? user = await _context.Users
+            .Include(u => u.UserProfile)
+            .Where(u => u.Id == id)
+            .Select(u => new UserGetDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.UserProfile.FirstName,
+                LastName = u.UserProfile.LastName,
+                PhoneNumber = u.UserProfile.PhoneNumber,
+                Age = u.UserProfile.Age,
+                Country = u.UserProfile.Country.Name,
+                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return new Result<UserGetDTO>
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        return new Result<UserGetDTO>
+        {
+            Message = "From Database",
+            StatusCode = 200,
+            Data = user
+        };
+    }
+
     public async Task<Result> UpdateUserProfileById(int id, UserProfileUpdateDTO dto)
     {
         User? user = await _context.Users
@@ -286,6 +321,40 @@ public class UserRepository : IUserRepository
         };
     }
 
+    public async Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto)
+    {
+        if (!await _userService.ExistsAsync(id))
+        {
+            return new Result
+            {
+                Message = "User not found",
+                StatusCode = 404
+            };
+        }
+
+        List<UserRole> userRoles = await _context.UserRoles
+            .Where(ur => ur.UserId == id)
+            .ToListAsync();
+
+        _context.UserRoles.RemoveRange(userRoles);
+
+        List<UserRole> newUserRoles = dto.RoleIds.Select(rid => new UserRole
+        {
+            UserId = id,
+            RoleId = rid
+        })
+        .ToList();
+
+        await _context.UserRoles.AddRangeAsync(newUserRoles);
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "User roles updated successfully",
+            StatusCode = 200
+        };
+    }
+    
     public async Task<Result> DeleteUserById(int id)
     {
         User user = await _userService.GetByIdAsync(id);
@@ -333,75 +402,6 @@ public class UserRepository : IUserRepository
         {
             Message = "User restored successfully",
             StatusCode = 200
-        };
-    }
-
-    public async Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto)
-    {
-        if (!await _userService.ExistsAsync(id))
-        {
-            return new Result
-            {
-                Message = "User not found",
-                StatusCode = 404
-            };
-        }
-
-        List<UserRole> userRoles = await _context.UserRoles
-            .Where(ur => ur.UserId == id)
-            .ToListAsync();
-
-        _context.UserRoles.RemoveRange(userRoles);
-
-        List<UserRole> newUserRoles = dto.RoleIds.Select(rid => new UserRole
-        {
-            UserId = id,
-            RoleId = rid
-        })
-        .ToList();
-
-        await _context.UserRoles.AddRangeAsync(newUserRoles);
-        await _context.SaveChangesAsync();
-
-        return new Result
-        {
-            Message = "User roles updated successfully",
-            StatusCode = 200
-        };
-    }
-
-    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
-    {
-        UserGetDTO? user = await _context.Users
-            .Include(u => u.UserProfile)
-            .Where(u => u.Id == id)
-            .Select(u => new UserGetDTO
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.UserProfile.FirstName,
-                LastName = u.UserProfile.LastName,
-                PhoneNumber = u.UserProfile.PhoneNumber,
-                Age = u.UserProfile.Age,
-                Country = u.UserProfile.Country.Name,
-                CreatedAt = u.CreatedAt.ToString("yyyy:MM:dd HH:mm:ss")
-            })
-            .FirstOrDefaultAsync();
-
-        if (user == null)
-        {
-            return new Result<UserGetDTO>
-            {
-                Message = "User not found",
-                StatusCode = 404
-            };
-        }
-
-        return new Result<UserGetDTO>
-        {
-            Message = "From Database",
-            StatusCode = 200,
-            Data = user
         };
     }
 }
