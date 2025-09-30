@@ -10,6 +10,9 @@ public class NotZeroAttribute : ValidationAttribute
 
         if (value is int number && number > 0)
             return true;
+        else if (value is IEnumerable<int> numbers && numbers.All(n => n > 0))
+            return true;
+
         return false;
     }
 }
