@@ -17,4 +17,6 @@ public record UserGetDTO
     public string Country { get; set; }
 
     public string CreatedAt { get; set; }
+
+    public List<RoleGetDTO> Roles { get; set; }
 }
