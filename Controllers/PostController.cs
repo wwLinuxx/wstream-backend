@@ -19,7 +19,7 @@ public class PostController : ControllerBase
     }
 
     [RequirePermission(SystemPermissions.Authorize)]
-    [HttpPost("create-post")]
+    [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] PostCreateDTO dto)
     {
         return await _postRepository.CreatePost(dto);
