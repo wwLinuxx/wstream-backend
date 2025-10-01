@@ -42,4 +42,13 @@ public class PostController : ControllerBase
     {
         return await _postRepository.SearchPostByQuery(id);
     }
+
+    [UserOrAdmin]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdatePostById(
+        [FromRoute] int id,
+        [FromBody] PostUpdateDTO dto)
+    {
+        return await _postRepository.UpdatePostById(id, dto);
+    }
 }
