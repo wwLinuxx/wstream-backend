@@ -51,4 +51,18 @@ public class PostController : ControllerBase
     {
         return await _postRepository.UpdatePostById(id, dto);
     }
+
+    [UserOrAdmin]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePostById([FromRoute] int id)
+    {
+        return await _postRepository.DeletePostById(id);
+    }
+
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> RestorePostById([FromRoute] int id)
+    {
+        return await _postRepository.RestorePostById(id);
+    }
 }
