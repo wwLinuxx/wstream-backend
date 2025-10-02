@@ -50,7 +50,7 @@ public class PostRepository : IPostRepository
                 StatusCode = uploadVideoResult.StatusCode
             };
 
-        string thumbnailUrl = uploadVideoResult.Data;
+        string thumbnailUrl = uploadThumbnailResult.Data;
         string videoUrl = uploadVideoResult.Data;
 
         Post newPost = new Post
@@ -71,7 +71,7 @@ public class PostRepository : IPostRepository
         {
             Succeed = true,
             Message = "Post created successfully",
-            StatusCode = 201,
+            StatusCode = 201
         };
     }
 
