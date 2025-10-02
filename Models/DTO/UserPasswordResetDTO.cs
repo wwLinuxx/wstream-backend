@@ -2,7 +2,7 @@
 
 namespace UzTube.Models.DTO;
 
-public class UserPasswordResetDTO
+public record UserPasswordResetDTO
 {
     [Required]
     [EmailAddress(ErrorMessage = "Email address required")]

@@ -3,7 +3,7 @@ using UzTube.Attributes;
 
 namespace UzTube.Models.DTO;
 
-public class UserProfileUpdateDTO
+public record UserProfileUpdateDTO
 {
     [Required]
     [StringLength(maximumLength: 30, MinimumLength = 4,

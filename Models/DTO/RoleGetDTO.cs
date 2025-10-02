@@ -1,6 +1,6 @@
 ﻿namespace UzTube.Models.DTO;
 
-public class RoleGetDTO
+public record RoleGetDTO
 {
     public int Id { get; set; }
 

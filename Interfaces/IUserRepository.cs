@@ -8,12 +8,12 @@ public interface IUserRepository
     Task<Result> Login(LoginDTO dto);
     Task<Result> Register(RegisterDTO dto);
     Task<Result<UserGetDTO>> Me();
-    Task<Result<List<UserGetDTO>>> GetAllUsers();
-    Task<Result<UserGetDTO>> GetUserProfileById(int id);
-    Task<Result<UserGetDTO>> SearchUserByQuery(int id);
-    Task<Result> UpdateUserProfileById(int id, UserProfileUpdateDTO dto);
-    Task<Result> UpdateUserPasswordById(int id, UserPasswordUpdateDTO dto);
-    Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto);
-    Task<Result> DeleteUserById(int id);
-    Task<Result> RestoreUserById(int id);
+    Task<Result<List<UserGetDTO>>> GetAllUsersAsync();
+    Task<Result<UserGetDTO>> GetUserProfileByIdAsync(int id);
+    Task<Result<UserGetDTO>> SearchUserByQueryAsync(int id);
+    Task<Result> UpdateUserProfileByIdAsync(int id, UserProfileUpdateDTO dto);
+    Task<Result> UpdateUserPasswordByIdAsync(int id, UserPasswordUpdateDTO dto);
+    Task<Result> UpdateUserRoleByIdAsync(int id, UserRoleUpdateDTO dto);
+    Task<Result> DeleteUserByIdAsync(int id);
+    Task<Result> RestoreUserByIdAsync(int id);
 }
