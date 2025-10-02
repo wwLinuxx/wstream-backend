@@ -4,6 +4,8 @@ namespace UzTube.Services;
 
 public class Result : IActionResult
 {
+    public bool Succeed { get; set; }
+
     public string? Message { get; set; }
 
     public int StatusCode { get; set; }

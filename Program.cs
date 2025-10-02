@@ -6,6 +6,7 @@ using System.Text;
 using UzTube.Database;
 using UzTube.Entities;
 using UzTube.Interfaces;
+using UzTube.Models.DTO;
 using UzTube.Repositories;
 using UzTube.Services;
 
@@ -71,6 +72,10 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+builder.Services.Configure<FileStorageOptions>(
+    builder.Configuration.GetSection("FileStorage"));
 
 
 var app = builder.Build();

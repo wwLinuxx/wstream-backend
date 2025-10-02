@@ -38,6 +38,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Email not found",
                 StatusCode = 404
             };
@@ -47,6 +48,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Email or Password not correct",
                 StatusCode = 400
             };
@@ -56,6 +58,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = token,
             StatusCode = 200
         };
@@ -67,6 +70,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Email is already registered",
                 StatusCode = 400
             };
@@ -97,6 +101,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User registred successfully",
             StatusCode = 201
         };
@@ -133,6 +138,7 @@ public class UserRepository : IUserRepository
         {
             return new Result<UserGetDTO>
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -140,6 +146,7 @@ public class UserRepository : IUserRepository
 
         return new Result<UserGetDTO>
         {
+            Succeed = true,
             StatusCode = 200,
             Data = user
         };
@@ -166,6 +173,7 @@ public class UserRepository : IUserRepository
         {
             return new Result<List<UserGetDTO>>
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -173,6 +181,7 @@ public class UserRepository : IUserRepository
 
         return new Result<List<UserGetDTO>>
         {
+            Succeed = true,
             StatusCode = 200,
             Data = users
         };
@@ -199,6 +208,7 @@ public class UserRepository : IUserRepository
         {
             return new Result<UserGetDTO>
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -206,6 +216,7 @@ public class UserRepository : IUserRepository
 
         return new Result<UserGetDTO>
         {
+            Succeed = true,
             StatusCode = 200,
             Data = user
         };
@@ -233,6 +244,7 @@ public class UserRepository : IUserRepository
         {
             return new Result<UserGetDTO>
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -240,6 +252,7 @@ public class UserRepository : IUserRepository
 
         return new Result<UserGetDTO>
         {
+            Succeed = true,
             Message = "From Database",
             StatusCode = 200,
             Data = user
@@ -256,6 +269,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -272,6 +286,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User updated successfully",
             StatusCode = 200
         };
@@ -285,6 +300,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -294,6 +310,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Old Password not correct",
                 StatusCode = 400
             };
@@ -303,6 +320,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "NewPassword and ConfirmPassword not equal",
                 StatusCode = 400
             };
@@ -318,6 +336,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User password updated successfully",
             StatusCode = 200
         };
@@ -329,6 +348,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -352,6 +372,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User roles updated successfully",
             StatusCode = 200
         };
@@ -365,6 +386,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -377,6 +399,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User deleted successfully",
             StatusCode = 200
         };
@@ -390,6 +413,7 @@ public class UserRepository : IUserRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "User not found",
                 StatusCode = 404
             };
@@ -402,6 +426,7 @@ public class UserRepository : IUserRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "User restored successfully",
             StatusCode = 200
         };

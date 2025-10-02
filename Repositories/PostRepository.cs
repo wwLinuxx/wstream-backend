@@ -13,16 +13,16 @@ public class PostRepository : IPostRepository
 {
     private readonly AppDbContext _context;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IWebHostEnvironment _env;
+    private readonly IFileUploadService _fileUploadService;
 
     public PostRepository(
         AppDbContext context,
         IHttpContextAccessor httpContextAccessor,
-        IWebHostEnvironment env)
+        IFileUploadService fileUploadService)
     {
         _context = context;
         _httpContextAccessor = httpContextAccessor;
-        _env = env;
+        _fileUploadService = fileUploadService;
     }
 
     public async Task<Result> CreatePostAsync(PostCreateDTO dto)
@@ -30,58 +30,35 @@ public class PostRepository : IPostRepository
         int userId = Convert.ToInt32(
             _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
         );
-        HttpRequest? request = _httpContextAccessor.HttpContext?.Request;
 
-        string[] allowedThumbnailExtensions = { ".jpg", ".png" };
-        string[] allowedVideoExtensions = { ".mp4" };
-
-        string thumbnailsFolder = Path.Combine(_env.WebRootPath, "uploads", "videos", "thumbnails");
-        string videosFolder = Path.Combine(_env.WebRootPath, "uploads", "videos");
-
-        Directory.CreateDirectory(thumbnailsFolder);
-        Directory.CreateDirectory(videosFolder);
-
-        if (dto.ThumbnailFile == null || dto.VideoFile == null)
-            return new Result { Message = "Thumbnail and Video are required", StatusCode = 400};
-
-        string thumbnailExt = Path.GetExtension(dto.ThumbnailFile.FileName).ToLower();
-        string videoExt = Path.GetExtension(dto.VideoFile.FileName).ToLower();
-
-        if (!allowedThumbnailExtensions.Contains(thumbnailExt))
+        Result<string> uploadThumbnailResult = await _fileUploadService.UploadThumbnail(dto.ThumbnailFile);
+        Result<string> uploadVideoResult = await _fileUploadService.UploadVideo(dto.VideoFile);
+        
+        if (!uploadThumbnailResult.Succeed)
             return new Result
             {
-                Message = $"Thumbnail must be one of: {string.Join(", ", allowedThumbnailExtensions)}",
-                StatusCode = 400
+                Succeed = false,
+                Message = uploadThumbnailResult.Message,
+                StatusCode = uploadThumbnailResult.StatusCode
             };
 
-        if (!allowedVideoExtensions.Contains(videoExt))
+        if (!uploadVideoResult.Succeed)
             return new Result
             {
-                Message = $"Video must be one of: {string.Join(", ", allowedVideoExtensions)}",
-                StatusCode = 400
+                Succeed = false,
+                Message = uploadVideoResult.Message,
+                StatusCode = uploadVideoResult.StatusCode
             };
 
-        string thumbnailFileName = $"{Guid.NewGuid()}{thumbnailExt}";
-        string videoFileName = $"{Guid.NewGuid()}{videoExt}";
-
-        string thumbnailPath = Path.Combine(thumbnailsFolder, thumbnailFileName);
-        string videoPath = Path.Combine(videosFolder, videoFileName);
-
-        using (FileStream stream = new FileStream(thumbnailPath, FileMode.Create))
-            await dto.ThumbnailFile.CopyToAsync(stream);
-
-        using (FileStream stream = new FileStream(videoPath, FileMode.Create))
-            await dto.VideoFile.CopyToAsync(stream);
-
-        string thumbnailUrl = $"{request?.Scheme}://{request?.Host}/uploads/videos/thumbnails/{thumbnailFileName}";
-        string videoUrl = $"{request?.Scheme}://{request?.Host}/uploads/videos/{videoFileName}";
+        string thumbnailUrl = uploadVideoResult.Data;
+        string videoUrl = uploadVideoResult.Data;
 
         Post newPost = new Post
         {
             UserId = userId,
             Title = dto.Title,
             Description = dto.Description,
-            Duration = "00:12", // TODO: video duration ni hisoblash kerak
+            Duration = "00:12", // TODO: video duration hisoblash
             PhotoUrl = thumbnailUrl,
             VideoUrl = videoUrl,
             IsPrivate = dto.IsPrivate
@@ -92,10 +69,12 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
-            Message = "Post creted successfully",
-            StatusCode = 201
+            Succeed = true,
+            Message = "Post created successfully",
+            StatusCode = 201,
         };
     }
+
 
     public async Task<Result<List<PostGetDTO>>> GetAllPostsAsync()
     {
@@ -123,6 +102,7 @@ public class PostRepository : IPostRepository
         {
             return new Result<List<PostGetDTO>>
             {
+                Succeed = false,
                 Message = "Posts not found",
                 StatusCode = 404
             };
@@ -130,6 +110,7 @@ public class PostRepository : IPostRepository
 
         return new Result<List<PostGetDTO>>
         {
+            Succeed = true,
             StatusCode = 200,
             Data = posts
         };
@@ -160,6 +141,7 @@ public class PostRepository : IPostRepository
         {
             return new Result<PostGetDTO>
             {
+                Succeed = false,
                 Message = "Post not found",
                 StatusCode = 404
             };
@@ -167,6 +149,7 @@ public class PostRepository : IPostRepository
 
         return new Result<PostGetDTO>
         {
+            Succeed = true,
             Message = "From Database",
             StatusCode = 200,
             Data = post
@@ -198,6 +181,7 @@ public class PostRepository : IPostRepository
         {
             return new Result<PostGetDTO>
             {
+                Succeed = false,
                 Message = "Post not found",
                 StatusCode = 404
             };
@@ -205,6 +189,7 @@ public class PostRepository : IPostRepository
 
         return new Result<PostGetDTO>
         {
+            Succeed = true,
             Message = "From Database",
             StatusCode = 200,
             Data = post
@@ -237,6 +222,7 @@ public class PostRepository : IPostRepository
         {
             return new Result<List<PostGetDTO>>
             {
+                Succeed = false,
                 Message = "Posts not found",
                 StatusCode = 404
             };
@@ -244,6 +230,7 @@ public class PostRepository : IPostRepository
 
         return new Result<List<PostGetDTO>>
         {
+            Succeed = true,
             Message = "From Database",
             StatusCode = 200,
             Data = posts
@@ -258,6 +245,7 @@ public class PostRepository : IPostRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Post not found",
                 StatusCode = 404
             };
@@ -272,6 +260,7 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "Post updated successfully",
             StatusCode = 200
         };
@@ -285,6 +274,7 @@ public class PostRepository : IPostRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Post not found",
                 StatusCode = 404
             };
@@ -297,6 +287,7 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "Post deleted successfully",
             StatusCode = 200
         };
@@ -310,6 +301,7 @@ public class PostRepository : IPostRepository
         {
             return new Result
             {
+                Succeed = false,
                 Message = "Post not found",
                 StatusCode = 404
             };
@@ -322,6 +314,7 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
+            Succeed = true,
             Message = "Post restored successfully",
             StatusCode = 200
         };
