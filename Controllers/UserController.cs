@@ -72,7 +72,7 @@ namespace UzTube.Controllers
         [HttpGet("{id}/posts")]
         public async Task<IActionResult> GetUserPosts([FromRoute] int id)
         {
-            return await _postRepository.GetUserPosts(id);
+            return await _postRepository.GetUserPostsAsync(id);
         }
 
         [RequirePermission(SystemPermissions.ManageUser)]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.IO;
 using System.Security.Claims;
 using UzTube.Database;
 using UzTube.Entities;
@@ -12,27 +13,77 @@ public class PostRepository : IPostRepository
 {
     private readonly AppDbContext _context;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IWebHostEnvironment _env;
 
     public PostRepository(
         AppDbContext context,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IWebHostEnvironment env)
     {
         _context = context;
         _httpContextAccessor = httpContextAccessor;
+        _env = env;
     }
 
-    public async Task<Result> CreatePost(PostCreateDTO dto)
+    public async Task<Result> CreatePostAsync(PostCreateDTO dto)
     {
-        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int userId = Convert.ToInt32(
+            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
+        );
+        HttpRequest? request = _httpContextAccessor.HttpContext?.Request;
+
+        string[] allowedThumbnailExtensions = { ".jpg", ".png" };
+        string[] allowedVideoExtensions = { ".mp4" };
+
+        string thumbnailsFolder = Path.Combine(_env.WebRootPath, "uploads", "videos", "thumbnails");
+        string videosFolder = Path.Combine(_env.WebRootPath, "uploads", "videos");
+
+        Directory.CreateDirectory(thumbnailsFolder);
+        Directory.CreateDirectory(videosFolder);
+
+        if (dto.ThumbnailFile == null || dto.VideoFile == null)
+            return new Result { Message = "Thumbnail and Video are required", StatusCode = 400};
+
+        string thumbnailExt = Path.GetExtension(dto.ThumbnailFile.FileName).ToLower();
+        string videoExt = Path.GetExtension(dto.VideoFile.FileName).ToLower();
+
+        if (!allowedThumbnailExtensions.Contains(thumbnailExt))
+            return new Result
+            {
+                Message = $"Thumbnail must be one of: {string.Join(", ", allowedThumbnailExtensions)}",
+                StatusCode = 400
+            };
+
+        if (!allowedVideoExtensions.Contains(videoExt))
+            return new Result
+            {
+                Message = $"Video must be one of: {string.Join(", ", allowedVideoExtensions)}",
+                StatusCode = 400
+            };
+
+        string thumbnailFileName = $"{Guid.NewGuid()}{thumbnailExt}";
+        string videoFileName = $"{Guid.NewGuid()}{videoExt}";
+
+        string thumbnailPath = Path.Combine(thumbnailsFolder, thumbnailFileName);
+        string videoPath = Path.Combine(videosFolder, videoFileName);
+
+        using (FileStream stream = new FileStream(thumbnailPath, FileMode.Create))
+            await dto.ThumbnailFile.CopyToAsync(stream);
+
+        using (FileStream stream = new FileStream(videoPath, FileMode.Create))
+            await dto.VideoFile.CopyToAsync(stream);
+
+        string thumbnailUrl = $"{request?.Scheme}://{request?.Host}/uploads/videos/thumbnails/{thumbnailFileName}";
+        string videoUrl = $"{request?.Scheme}://{request?.Host}/uploads/videos/{videoFileName}";
 
         Post newPost = new Post
         {
             UserId = userId,
             Title = dto.Title,
             Description = dto.Description,
-            Duration = dto.Duration,
-            PhotoUrl = dto.PhotoUrl,
-            VideoUrl = dto.VideoUrl,
+            Duration = "00:12", // TODO: video duration ni hisoblash kerak
+            PhotoUrl = thumbnailUrl,
+            VideoUrl = videoUrl,
             IsPrivate = dto.IsPrivate
         };
 
@@ -41,15 +92,15 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
-            Message = "Post created successfully",
+            Message = "Post muvaffaqiyatli yaratildi",
             StatusCode = 201
         };
     }
 
-    public async Task<Result<List<PostGetDTO>>> GetAllPosts()
+    public async Task<Result<List<PostGetDTO>>> GetAllPostsAsync()
     {
         List<PostGetDTO> posts = await _context.Posts
-            .Where(p => p.IsPrivate == false)
+            .Where(p => p.IsPrivate == false && p.IsDeleted == false)
             .OrderBy(p => p.Id)
             .Select(p => new PostGetDTO
             {
@@ -84,7 +135,7 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result<PostGetDTO>> GetPostById(int id)
+    public async Task<Result<PostGetDTO>> GetPostByIdAsync(int id)
     {
         PostGetDTO? post = await _context.Posts
             .Where(p => p.Id == id)
@@ -122,7 +173,7 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result<PostGetDTO>> SearchPostByQuery(int id)
+    public async Task<Result<PostGetDTO>> SearchPostByQueryAsync(int id)
     {
         PostGetDTO? post = await _context.Posts
             .Where(p => p.Id == id && p.IsPrivate == false)
@@ -160,10 +211,10 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result<List<PostGetDTO>>> GetUserPosts(int id)
+    public async Task<Result<List<PostGetDTO>>> GetUserPostsAsync(int id)
     {
         List<PostGetDTO> posts = await _context.Posts
-            .Where(p => p.UserId == id)
+            .Where(p => p.UserId == id && p.IsDeleted == false)
             .OrderBy(p => p.Id)
             .Select(p => new PostGetDTO
             {
@@ -199,7 +250,7 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result> UpdatePostById(int id, PostUpdateDTO dto)
+    public async Task<Result> UpdatePostByIdAsync(int id, PostUpdateDTO dto)
     {
         Post? post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
 
@@ -226,7 +277,7 @@ public class PostRepository : IPostRepository
         };
     }
 
-    public async Task<Result> DeletePostById(int id)
+    public async Task<Result> DeletePostByIdAsync(int id)
     {
         Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
 
@@ -246,12 +297,12 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
-            Message = "Post updated successfully",
+            Message = "Post deleted successfully",
             StatusCode = 200
         };
     }
 
-    public async Task<Result> RestorePostById(int id)
+    public async Task<Result> RestorePostByIdAsync(int id)
     {
         Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
 
