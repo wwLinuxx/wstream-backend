@@ -11,6 +11,8 @@
 
     //Root
     ManageSystem = 8,
-
+    
+    //User 
+    Authorize = 9
 
 }
