@@ -92,7 +92,7 @@ public class PostRepository : IPostRepository
 
         return new Result
         {
-            Message = "Post muvaffaqiyatli yaratildi",
+            Message = "Post creted successfully",
             StatusCode = 201
         };
     }
