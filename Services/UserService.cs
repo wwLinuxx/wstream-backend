@@ -20,16 +20,16 @@ public class UserService : IUserService
     public async Task<bool> ExistsAsync(string email)
         => await _context.Users.AnyAsync(u => u.Email == email);
 
-    public async Task<User?> GetByIdAsync(int userId)
+    public async Task<User?> GetUserByIdAsync(int userId)
         => await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-    public async Task<User?> GetByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
         => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-    public async Task<List<User>> Users()
+    public async Task<List<User>> GetAllUsersAsync()
         => await _context.Users.ToListAsync();
 
-    public async Task<List<string>> Permissions(int userId)
+    public async Task<List<string>> GetUserAllPermissionsAsync(int userId)
     {
         return await _context.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -39,7 +39,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
-    public async Task<List<string>> Roles()
+    public async Task<List<string>> GetAllRolesAsync()
     {
         return await _context.UserRoles
             .Select(ur => ur.Role.Name)
@@ -47,7 +47,7 @@ public class UserService : IUserService
             .ToListAsync();
     }
 
-    public async Task<List<string>> Roles(int userId)
+    public async Task<List<string>> GetUserAllRolesAsync(int userId)
     {
         return await _context.UserRoles
             .Where(ur => ur.UserId == userId)

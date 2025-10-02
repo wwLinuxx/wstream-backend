@@ -2,7 +2,7 @@
 
 namespace UzTube.Models.DTO;
 
-public class UserPasswordUpdateDTO
+public record UserPasswordUpdateDTO
 {
     [Required]
     [StringLength(maximumLength: 30, MinimumLength = 8,

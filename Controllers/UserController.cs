@@ -25,20 +25,20 @@ namespace UzTube.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            return await _userRepository.GetAllUsers();
+            return await _userRepository.GetAllUsersAsync();
         }
 
         [UserOrAdmin]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserProfileById([FromRoute] int id)
         {
-            return await _userRepository.GetUserProfileById(id);
+            return await _userRepository.GetUserProfileByIdAsync(id);
         }
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchUserByQuery([FromQuery] [Required] int id)
         {
-            return await _userRepository.SearchUserByQuery(id);
+            return await _userRepository.SearchUserByQueryAsync(id);
         }
 
         [UserOrAdmin]
@@ -47,7 +47,7 @@ namespace UzTube.Controllers
             [FromRoute] int id,
             [FromBody] UserProfileUpdateDTO dto)
         {
-            return await _userRepository.UpdateUserProfileById(id, dto);
+            return await _userRepository.UpdateUserProfileByIdAsync(id, dto);
         }
 
         [UserOrAdmin]
@@ -56,7 +56,7 @@ namespace UzTube.Controllers
             [FromRoute] int id,
             [FromBody] UserPasswordUpdateDTO dto)
         {
-            return await _userRepository.UpdateUserPasswordById(id, dto);
+            return await _userRepository.UpdateUserPasswordByIdAsync(id, dto);
         }
 
         [RequirePermission(SystemPermissions.ManageRoles)]
@@ -65,28 +65,28 @@ namespace UzTube.Controllers
             [FromRoute] int id,
             [FromBody] UserRoleUpdateDTO dto)
         {
-            return await _userRepository.UpdateUserRoleById(id, dto);
+            return await _userRepository.UpdateUserRoleByIdAsync(id, dto);
         }
 
         [UserOrAdmin]
         [HttpGet("{id}/posts")]
         public async Task<IActionResult> GetUserPosts([FromRoute] int id)
         {
-            return await _postRepository.GetUserPosts(id);
+            return await _postRepository.GetUserPostsAsync(id);
         }
 
         [RequirePermission(SystemPermissions.ManageUser)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserById([FromRoute] int id)
         {
-            return await _userRepository.DeleteUserById(id);
+            return await _userRepository.DeleteUserByIdAsync(id);
         }
 
         [RequirePermission(SystemPermissions.ManageUser)]
         [HttpPut("{id}/restore")]
         public async Task<IActionResult> RestoreUserById([FromRoute] int id)
         {
-            return await _userRepository.RestoreUserById(id);
+            return await _userRepository.RestoreUserByIdAsync(id);
         }
     }
 }

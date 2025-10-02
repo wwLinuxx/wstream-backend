@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UzTube.Models.DTO;
 
-public class PostUpdateDTO
+public record PostUpdateDTO
 {
     [Required]
     [StringLength(100)]

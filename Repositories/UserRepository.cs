@@ -32,7 +32,7 @@ public class UserRepository : IUserRepository
 
     public async Task<Result> Login(LoginDTO dto)
     {
-        User user = await _userService.GetByEmailAsync(dto.Email);
+        User user = await _userService.GetUserByEmailAsync(dto.Email);
 
         if (user == null)
         {
@@ -52,7 +52,7 @@ public class UserRepository : IUserRepository
             };
         }
 
-        string token = await _jwtTokenService.GenerateToken(user);
+        string token = await _jwtTokenService.GenerateTokenAsync(user);
 
         return new Result
         {
@@ -145,7 +145,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result<List<UserGetDTO>>> GetAllUsers()
+    public async Task<Result<List<UserGetDTO>>> GetAllUsersAsync()
     {
         List<UserGetDTO>? users = await _context.Users
             .OrderBy(p => p.Id)
@@ -178,7 +178,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result<UserGetDTO>> GetUserProfileById(int id)
+    public async Task<Result<UserGetDTO>> GetUserProfileByIdAsync(int id)
     {
         UserGetDTO? user = await _context.Users
             .Where(u => u.Id == id)
@@ -211,7 +211,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result<UserGetDTO>> SearchUserByQuery(int id)
+    public async Task<Result<UserGetDTO>> SearchUserByQueryAsync(int id)
     {
         UserGetDTO? user = await _context.Users
             .Include(u => u.UserProfile)
@@ -246,7 +246,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result> UpdateUserProfileById(int id, UserProfileUpdateDTO dto)
+    public async Task<Result> UpdateUserProfileByIdAsync(int id, UserProfileUpdateDTO dto)
     {
         User? user = await _context.Users
             .Include(p => p.UserProfile)
@@ -277,9 +277,9 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result> UpdateUserPasswordById(int id, UserPasswordUpdateDTO dto)
+    public async Task<Result> UpdateUserPasswordByIdAsync(int id, UserPasswordUpdateDTO dto)
     {
-        User? user = await _userService.GetByIdAsync(id);
+        User? user = await _userService.GetUserByIdAsync(id);
 
         if (user == null)
         {
@@ -323,7 +323,7 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result> UpdateUserRoleById(int id, UserRoleUpdateDTO dto)
+    public async Task<Result> UpdateUserRoleByIdAsync(int id, UserRoleUpdateDTO dto)
     {
         if (!await _userService.ExistsAsync(id))
         {
@@ -357,9 +357,9 @@ public class UserRepository : IUserRepository
         };
     }
     
-    public async Task<Result> DeleteUserById(int id)
+    public async Task<Result> DeleteUserByIdAsync(int id)
     {
-        User user = await _userService.GetByIdAsync(id);
+        User user = await _userService.GetUserByIdAsync(id);
 
         if (user == null)
         {
@@ -382,9 +382,9 @@ public class UserRepository : IUserRepository
         };
     }
 
-    public async Task<Result> RestoreUserById(int id)
+    public async Task<Result> RestoreUserByIdAsync(int id)
     {
-        User user = await _userService.GetByIdAsync(id);
+        User user = await _userService.GetUserByIdAsync(id);
 
         if (user == null)
         {
