@@ -52,7 +52,7 @@ public class FileUploadService : IFileUploadService
         using (FileStream stream = new FileStream(thumbnailPath, FileMode.Create))
             await file.CopyToAsync(stream);
 
-        string thumbnailUrl = $"{request?.Scheme}://{request?.Host}/{_fileOptions.Value.BaseUrl}/{_fileOptions.Value.Thumbnails}/{thumbnailFileName}";
+        string thumbnailUrl = $@"{request?.Scheme}://{request?.Host}/{_fileOptions.Value.BaseUrl}/{_fileOptions.Value.Thumbnails}/{thumbnailFileName}";
 
         return new Result<string>
         {
@@ -94,7 +94,7 @@ public class FileUploadService : IFileUploadService
         using (FileStream stream = new FileStream(videoPath, FileMode.Create))
             await file.CopyToAsync(stream);
 
-        string videoUrl = $"{request?.Scheme}://{request?.Host}{_fileOptions.Value.BaseUrl}/{_fileOptions.Value.Videos}/{videoFileName}";
+        string videoUrl = $@"{request?.Scheme}://{request?.Host}/{_fileOptions.Value.BaseUrl}/{_fileOptions.Value.Videos}/{videoFileName}";
 
         return new Result<string>
         {
