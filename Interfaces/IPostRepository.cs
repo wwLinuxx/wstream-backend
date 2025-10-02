@@ -11,4 +11,6 @@ public interface IPostRepository
     Task<Result<PostGetDTO>> SearchPostByQuery(int id);
     Task<Result<List<PostGetDTO>>> GetUserPosts(int id);
     Task<Result> UpdatePostById(int id, PostUpdateDTO dto);
+    Task<Result> DeletePostById(int id);
+    Task<Result> RestorePostById(int id);
 }

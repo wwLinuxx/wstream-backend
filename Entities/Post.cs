@@ -31,6 +31,10 @@ public class Post
 
     public bool IsPrivate { get; set; } = false;
 
+    public bool IsDeleted { get; set; } = false;
+
+    public DateTime? DeletedAt { get; set; }
+
     public ICollection<PostView> PostViews { get; set; }
 
     public ICollection<PostLike> PostLikes { get; set; }

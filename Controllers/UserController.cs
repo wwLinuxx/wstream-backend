@@ -75,15 +75,6 @@ namespace UzTube.Controllers
             return await _postRepository.GetUserPosts(id);
         }
 
-        [UserOrAdmin]
-        [HttpPut("{id}/post")]
-        public async Task<IActionResult> UpdatePostById(
-            [FromRoute] int id,
-            [FromBody] PostUpdateDTO dto)
-        {
-            return await _postRepository.UpdatePostById(id, dto);
-        }
-
         [RequirePermission(SystemPermissions.ManageUser)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserById([FromRoute] int id)

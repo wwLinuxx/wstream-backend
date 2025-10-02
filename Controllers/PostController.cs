@@ -19,7 +19,7 @@ public class PostController : ControllerBase
     }
 
     [RequirePermission(SystemPermissions.Authorize)]
-    [HttpPost("create-post")]
+    [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] PostCreateDTO dto)
     {
         return await _postRepository.CreatePost(dto);
@@ -37,9 +37,32 @@ public class PostController : ControllerBase
         return await _postRepository.GetPostById(id);
     }
 
-    [HttpGet("/search")]
+    [HttpGet("search")]
     public async Task<IActionResult> SearchPostByQuery([FromQuery] [Required] int id)
     {
         return await _postRepository.SearchPostByQuery(id);
+    }
+
+    [UserOrAdmin]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdatePostById(
+        [FromRoute] int id,
+        [FromBody] PostUpdateDTO dto)
+    {
+        return await _postRepository.UpdatePostById(id, dto);
+    }
+
+    [UserOrAdmin]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePostById([FromRoute] int id)
+    {
+        return await _postRepository.DeletePostById(id);
+    }
+
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> RestorePostById([FromRoute] int id)
+    {
+        return await _postRepository.RestorePostById(id);
     }
 }

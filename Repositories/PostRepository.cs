@@ -23,7 +23,7 @@ public class PostRepository : IPostRepository
 
     public async Task<Result> CreatePost(PostCreateDTO dto)
     {
-        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        int userId = Convert.ToInt32(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
         Post newPost = new Post
         {
@@ -212,18 +212,66 @@ public class PostRepository : IPostRepository
             };
         }
 
-        post.Id = id;
         post.Title = dto.Title;
         post.Description = dto.Description;
         post.PhotoUrl = dto.PhotoUrl;
         post.IsPrivate = dto.IsPrivate;
 
-        _context.Posts.Update(post);
         await _context.SaveChangesAsync();
 
         return new Result
         {
             Message = "Post updated successfully",
+            StatusCode = 200
+        };
+    }
+
+    public async Task<Result> DeletePostById(int id)
+    {
+        Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
+
+        if (post == null)
+        {
+            return new Result
+            {
+                Message = "Post not found",
+                StatusCode = 404
+            };
+        }
+
+        post.IsDeleted = true;
+        post.DeletedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "Post updated successfully",
+            StatusCode = 200
+        };
+    }
+
+    public async Task<Result> RestorePostById(int id)
+    {
+        Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
+
+        if (post == null)
+        {
+            return new Result
+            {
+                Message = "Post not found",
+                StatusCode = 404
+            };
+        }
+
+        post.IsDeleted = false;
+        post.DeletedAt = null;
+
+        await _context.SaveChangesAsync();
+
+        return new Result
+        {
+            Message = "Post restored successfully",
             StatusCode = 200
         };
     }
