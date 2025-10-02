@@ -75,7 +75,6 @@ public class PostRepository : IPostRepository
         };
     }
 
-
     public async Task<Result<List<PostGetDTO>>> GetAllPostsAsync()
     {
         List<PostGetDTO> posts = await _context.Posts
