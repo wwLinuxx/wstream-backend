@@ -14,16 +14,10 @@ public record PostCreateDTO
     public string Description { get; set; }
 
     [Required]
-    [StringLength(20)]
-    public string Duration { get; set; }
+    public IFormFile ThumbnailFile { get; set; }
 
     [Required]
-    [StringLength(1000)]
-    public string PhotoUrl { get; set; }
-
-    [Required]
-    [StringLength(1000)]
-    public string VideoUrl { get; set; }
+    public IFormFile VideoFile { get; set; }
 
     [Required]
     [DefaultValue(false)]
