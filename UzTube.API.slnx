@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/asd/" />
+  <Folder Name="/src/">
+    <Project Path="src/UzTube.API/UzTube.API.csproj" />
+  </Folder>
+</Solution>
