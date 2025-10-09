@@ -7,7 +7,7 @@ using UzTube.Models.DTO;
 namespace UzTube.Controllers;
 
 [ApiController]
-[Route("api/posts")]
+[Route("api/[controller]")]
 public class PostController : ControllerBase
 {
     private readonly IPostRepository _postRepository;
@@ -61,7 +61,6 @@ public class PostController : ControllerBase
     {
         return await _postRepository.DeletePostByIdAsync(id);
     }
-
 
     [HttpPut("{id}/restore")]
     public async Task<IActionResult> RestorePostById([FromRoute] int id)

@@ -1,9 +1,8 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/UzTube.API/UzTube.API.csproj" />
+    <Project Path="src/UzTube.Application/UzTube.Application.csproj" />
     <Project Path="src/UzTube.Core/UzTube.Core.csproj" Id="74009c6d-ef4a-4999-9b9d-7b1f0a346768" />
     <Project Path="src/UzTube.DataAccess/UzTube.DataAccess.csproj" Id="9fb3c786-be2e-40a6-9ecf-340c33d1aee2" />
-    <Project Path="src/UzTube.Shared/UzTube.Shared.csproj" Id="e0dc26cc-fb37-4fc9-a7f1-18505bb1f640" />
-    <Project Path="UzTube.Application/UzTube.Application.csproj" Id="6489a0d0-412a-4c75-bb95-ecaeac22f769" />
   </Folder>
 </Solution>

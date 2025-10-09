@@ -6,7 +6,7 @@ using UzTube.Models.DTO;
 namespace UzTube.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
