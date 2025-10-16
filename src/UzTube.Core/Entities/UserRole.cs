@@ -1,8 +1,10 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class UserRole
+namespace UzTube.Entities;
+
+public class UserRole : BaseEntity
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     public int RoleId { get; set; }

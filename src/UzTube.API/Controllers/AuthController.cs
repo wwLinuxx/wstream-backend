@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UzTube.Attributes;
 using UzTube.Interfaces;
+using UzTube.Models;
 using UzTube.Models.DTO;
 
 namespace UzTube.Controllers;
@@ -9,30 +11,32 @@ namespace UzTube.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IUserService _userService;
 
     public AuthController(
-        IUserRepository userRepository)
+        IHttpContextAccessor httpContextAccessor,
+        IUserService userService)
     {
-        _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
+        _userService = userService;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDTO dto)
-    {
-        return await _userRepository.Login(dto);
-    }
+    public async Task<IActionResult> LoginAsync(LoginUserModel dto)
+        => Ok(ApiResult<LoginResponseModel>.Success(
+            await _userService.LoginAsync(dto)));
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDTO dto)
-    {
-        return await _userRepository.Register(dto);
-    }
+    public async Task<IActionResult> CreateAsync(CreateUserModel dto)
+        => Ok(ApiResult<CreateUserResponseModel>.Success(
+            await _userService.CreateAsync(dto)));
 
     [RequirePermission(SystemPermissions.Authorize)]
     [HttpGet("me")]
-    public async Task<IActionResult> Me()
+    public async Task<IActionResult> GetMeAsync()
     {
-        return await _userRepository.Me();
+        return Ok(ApiResult<UserResponseModel>.Success(
+            await _userService.GetMeAsync()));
     }
 }

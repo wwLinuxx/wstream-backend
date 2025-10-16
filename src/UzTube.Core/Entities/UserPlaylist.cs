@@ -1,10 +1,10 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class UserPlaylist
+namespace UzTube.Entities;
+
+public class UserPlaylist : BaseEntity
 {
-    public int Id { get; set; }
-
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     public string Name { get; set; }

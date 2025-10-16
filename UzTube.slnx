@@ -4,5 +4,6 @@
     <Project Path="src/UzTube.Application/UzTube.Application.csproj" />
     <Project Path="src/UzTube.Core/UzTube.Core.csproj" Id="74009c6d-ef4a-4999-9b9d-7b1f0a346768" />
     <Project Path="src/UzTube.DataAccess/UzTube.DataAccess.csproj" Id="9fb3c786-be2e-40a6-9ecf-340c33d1aee2" />
+    <Project Path="src/UzTube.Shared/UzTube.Shared.csproj" Id="3368778d-3433-4bb6-8a9b-61e32fed71ef" />
   </Folder>
 </Solution>

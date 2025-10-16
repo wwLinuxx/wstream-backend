@@ -1,11 +1,13 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class PostCommentLike
+namespace UzTube.Entities;
+
+public class PostCommentLike : BaseEntity
 {
-    public int CommentId { get; set; }
+    public Guid CommentId { get; set; }
     public PostComment PostComment { get; set; }
 
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     public DateTime LikedAt { get; set; } = DateTime.UtcNow;

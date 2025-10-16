@@ -1,9 +1,9 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class UserCountry
+namespace UzTube.Entities;
+
+public class UserCountry : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Name { get; set; }
 
     public UserProfile UserProfile { get; set; }

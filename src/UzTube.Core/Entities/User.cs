@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using UzTube.Core.Common;
 
 namespace UzTube.Entities;
 
-public class User
+public class User : BaseEntity
 {
-    public int Id { get; set; }
-
     //public string Username { get; set; }
 
     [EmailAddress]

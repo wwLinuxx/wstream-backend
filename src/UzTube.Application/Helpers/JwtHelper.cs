@@ -1,46 +1,40 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using UzTube.Application.Helpers.Interfaces;
 using UzTube.Entities;
-using UzTube.Interfaces;
 
-namespace UzTube.Application.Helpers;
-
-public class JwtHelper : IJwtHelper
+public static class JwtHelper
 {
-    private readonly IConfiguration _configuration;
-    private readonly IUserRepository _userRepository;
-
-    public JwtHelper(
-        IConfiguration configuration,
-        IUserRepository userRepository)
+    public static string GenerateToken(
+        User user,
+        IEnumerable<string> permissions,
+        IConfiguration configuration)
     {
-        _configuration = configuration;
-        _userRepository = userRepository;
-    }
+        var jwtSection = configuration.GetSection("JwtConfigurations");
+        var secretKey = jwtSection["SecretKey"];
+        var expireHours = Convert.ToInt32(jwtSection["ExpireHours"]);
 
-    public async Task<string> GenerateTokenAsync(User user)
-    {
-        IConfigurationSection jwtSection = _configuration.GetSection("JwtOptions");
-
-        Claim[] claims = new Claim[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, JsonSerializer.Serialize(await _userRepository.GetUserAllRolesAsync(user.Id))),
-            new Claim("permissions", JsonSerializer.Serialize(await _userService.GetUserAllPermissionsAsync(user.Id)))
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim("permissions", JsonSerializer.Serialize(permissions))
         };
 
-        SigningCredentials signingCredentions = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["SecretKey"])),
-            SecurityAlgorithms.HmacSha256);
+        var signingCredentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            SecurityAlgorithms.HmacSha256
+        );
 
-        JwtSecurityToken token = new JwtSecurityToken(
+        var token = new JwtSecurityToken(
             claims: claims,
-            signingCredentials: signingCredentions,
-            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(jwtSection["ExpireHours"]))
+            expires: DateTime.UtcNow.AddHours(expireHours),
+            signingCredentials: signingCredentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

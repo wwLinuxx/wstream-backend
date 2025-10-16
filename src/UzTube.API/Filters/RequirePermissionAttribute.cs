@@ -1,54 +1,47 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Json;
-using UzTube.Models;
+using UzTube.Application.Exeptions;
 
 namespace UzTube.Attributes;
 
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class RequirePermissionAttribute : Attribute, IAuthorizationFilter
 {
-    private readonly SystemPermissions[] _permissions;
+    private readonly SystemPermissions[] _requiredPermissions;
 
     public RequirePermissionAttribute(params SystemPermissions[] permissions)
     {
-        _permissions = permissions;
+        _requiredPermissions = permissions;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        ClaimsPrincipal user = context.HttpContext.User;
+        var user = context.HttpContext.User;
 
         if (user.Identity == null || !user.Identity.IsAuthenticated)
-        {
-            context.Result = new ApiResult
-            {
-                Succeed = true,
-                Message = "Unauthorized",
-                StatusCode = 401
-            };
+            throw new UnauthorizedException("Unauthorized");
 
-            return;
-        }
-
-        if (_permissions.Contains(SystemPermissions.Authorize))
+        if (_requiredPermissions.Contains(SystemPermissions.Authorize))
             return;
 
-        string permissionsJson = user.FindFirstValue("permissions");
+        var permissionsJson = user.FindFirstValue("permissions");
 
-        List<string> permissions = JsonSerializer.Deserialize<List<string>>(permissionsJson);
+        if (string.IsNullOrEmpty(permissionsJson))
+            throw new ForbiddenException("Forbidden");
 
-        bool hasPermission = permissions.Any(p => permissions.Contains(p.ToString()));
+        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        if (permissionsJson.IsNullOrEmpty() || !hasPermission)
-        {
-            context.Result = new ApiResult
-            {
-                Message = "Forbidden",
-                StatusCode = 403
-            };
+        List<string>? userPermissions = JsonSerializer.Deserialize<List<string>>(permissionsJson, jsonOptions);
 
-            return;
-        }
+        if (userPermissions is null || userPermissions.Count == 0)
+            throw new ForbiddenException("Forbidden");
+
+        bool hasPermission = _requiredPermissions
+            .Select(p => p.ToString())
+            .Any(rp => userPermissions.Contains(rp, StringComparer.OrdinalIgnoreCase));
+
+        if (!hasPermission)
+            throw new ForbiddenException("Forbidden");
     }
 }

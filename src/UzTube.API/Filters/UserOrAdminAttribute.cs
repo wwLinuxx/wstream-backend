@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 using System.Text.Json;
-using UzTube.Services;
+using UzTube.Application.Exeptions;
 
 namespace UzTube.Attributes;
 
@@ -12,20 +12,12 @@ public class UserOrAdminAttribute : Attribute, IAuthorizationFilter
         ClaimsPrincipal user = context.HttpContext.User;
 
         if (user.Identity == null || !user.Identity.IsAuthenticated)
-        {
-            context.Result = new Result
-            {
-                Message = "Unauthorized",
-                StatusCode = 401
-            };
-
-            return;
-        }
+            throw new UnauthorizedAccessException("Unauthorized");
 
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         string? requestUserId = context.HttpContext.Request.RouteValues["id"]?.ToString();
 
-        string rolesJson = user.FindFirstValue(ClaimTypes.Role);
+        string? rolesJson = user.FindFirstValue(ClaimTypes.Role);
 
         if (userId != null && requestUserId != null && rolesJson != null)
         {
@@ -37,14 +29,6 @@ public class UserOrAdminAttribute : Attribute, IAuthorizationFilter
         }
 
         if (userId != requestUserId)
-        {
-            context.Result = new Result
-            {
-                Message = "Forbidden",
-                StatusCode = 403
-            };
-
-            return;
-        }
+            throw new ForbiddenException("Forbidden");
     }
 }

@@ -1,12 +1,11 @@
-﻿using UzTube.Enums;
+﻿using UzTube.Core.Common;
+using UzTube.Enums;
 
 namespace UzTube.Entities;
 
-public class Post
+public class Post : BaseEntity
 {
-    public int Id { get; set; }
-
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     public string Title { get; set; }

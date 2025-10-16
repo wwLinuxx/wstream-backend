@@ -1,11 +1,13 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class UserFollower
+namespace UzTube.Entities;
+
+public class UserFollower : BaseEntity
 {
-    public int FollowerId { get; set; }
+    public Guid FollowerId { get; set; }
     public User Follower { get; set; }
 
-    public int FollowingId { get; set; }
+    public Guid FollowingId { get; set; }
     public User Following { get; set; }
 
     public DateTime FollowedAt { get; set; } = DateTime.UtcNow;

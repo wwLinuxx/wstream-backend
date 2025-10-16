@@ -1,10 +1,12 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class PlaylistPost
+namespace UzTube.Entities;
+
+public class PlaylistPost : BaseEntity
 {
-    public int PlaylistId { get; set; }
+    public Guid PlaylistId { get; set; }
     public UserPlaylist UserPlaylist { get; set; }
 
-    public int PostId { get; set; }
+    public Guid PostId { get; set; }
     public Post Post { get; set; }
 }

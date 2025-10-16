@@ -1,9 +1,9 @@
-﻿namespace UzTube.Entities;
+﻿using UzTube.Core.Common;
 
-public class Category
+namespace UzTube.Entities;
+
+public class Category : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Name { get; set; }
 
     public ICollection<PostCategory> PostCategories { get; set; }
