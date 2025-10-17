@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using UzTube.API.Controllers;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
 using UzTube.Attributes;
@@ -10,9 +11,7 @@ using UzTube.Models.DTO;
 
 namespace UzTube.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class PostController : ControllerBase
+public class PostController : ApiController
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IPostService _postService;

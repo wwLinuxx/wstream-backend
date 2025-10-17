@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UzTube.API.Controllers;
 using UzTube.Attributes;
 using UzTube.Interfaces;
 using UzTube.Models;
@@ -7,9 +8,7 @@ using UzTube.Models.DTO;
 
 namespace UzTube.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : ApiController
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserService _userService;

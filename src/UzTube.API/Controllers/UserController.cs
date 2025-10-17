@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using UzTube.API.Controllers;
 using UzTube.Application.Models;
 using UzTube.Application.Models.User;
 using UzTube.Attributes;
@@ -9,9 +10,7 @@ using UzTube.Models.DTO;
 
 namespace UzTube.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserController : ApiController
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserService _userService;
