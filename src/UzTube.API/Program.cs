@@ -8,17 +8,14 @@ using UzTube.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddSwagger();
-
 builder.Services.AddDataAccess(builder.Configuration);
-
 builder.Services.AddApplication();
 
+builder.Services.AddSwagger();
 builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.Configure<MinioOptions>(
@@ -26,11 +23,8 @@ builder.Services.Configure<MinioOptions>(
 
 var app = builder.Build();
 
-// Permission sync
 await app.SyncPermissionsAsync();
-
-// Roles seed
-await app.SyncPermissionsAsync();
+await app.SeedDefaultRolesAsync();
 
 app.UseSwagger();
 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube"); });
@@ -44,11 +38,9 @@ app.UseCors(corsPolicyBuilder =>
 );
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.UseMiddleware<PerformanceMiddleware>();
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
