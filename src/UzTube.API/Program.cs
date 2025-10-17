@@ -24,7 +24,7 @@ await app.SyncPermissionsAsync();
 await app.SeedDefaultRolesAsync();
 
 app.UseSwagger();
-app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube"); });
+app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube"); });
 
 app.UseHttpsRedirection();
 
