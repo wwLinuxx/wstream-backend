@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Minio;
 using System.Text;
+using UzTube.Models;
 
 namespace UzTube.API;
 
@@ -13,16 +16,16 @@ public static class ApiDependencyInjection
 
         var key = Encoding.UTF8.GetBytes(secretKey);
 
-        services.AddAuthentication(x =>
+        services.AddAuthentication(s =>
         {
-            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            s.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            s.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
-            .AddJwtBearer(x =>
+            .AddJwtBearer(s =>
             {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+                s.RequireHttpsMetadata = false;
+                s.SaveToken = true;
+                s.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -60,5 +63,35 @@ public static class ApiDependencyInjection
                 }
             });
         });
+    }
+
+    public static void AddMinio(this IServiceCollection services)
+    {
+        services.AddSingleton<IMinioClient>(sp =>
+        {
+            MinioOptions? minioSettings = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
+
+            IMinioClient client = new MinioClient()
+                .WithEndpoint(minioSettings.Endpoint)
+                .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey);
+
+            // Agar SSL yoqilgan bo'lsa
+            if (minioSettings.UseSSL)
+            {
+                client = client.WithSSL();
+            }
+
+            return client.Build(); // MinioClient ni qurish
+        });
+
+    }
+
+    public static void AddCors(this IApplicationBuilder app)
+    {
+        app.UseCors(corsPolicyBuilder =>
+            corsPolicyBuilder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+        );
     }
 }

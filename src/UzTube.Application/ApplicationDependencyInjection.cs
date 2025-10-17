@@ -14,8 +14,6 @@ public static class ApplicationDependencyInjection
     {
         services.AddServices();
 
-        //services.AddCorsConfiguration();
-
         return services;
     }
 
@@ -25,10 +23,5 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<IPasswordHelper, PasswordHelper>();
         services.AddScoped<IClaimService, ClaimService>();
-    }
-
-    private static void AddCorsConfiguration(this IServiceCollection services)
-    {
-        
     }
 }
