@@ -14,14 +14,14 @@ namespace UzTube.Controllers;
 public class PostController : ApiController
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IPostService _postService;
+    private readonly IPostService _service;
 
     public PostController(
         IHttpContextAccessor httpContextAccessor,
         IPostService postService)
     {
         _httpContextAccessor = httpContextAccessor;
-        _postService = postService;
+        _service = postService;
     }
 
     [RequirePermission(SystemPermissions.Authorize)]
@@ -33,35 +33,35 @@ public class PostController : ApiController
         );
 
         return Ok(ApiResult<CreatePostResponseModel>.Success(
-            await _postService.CreatePostAsync(dto, userId)));
+            await _service.CreatePostAsync(dto, userId)));
     }
       
     [HttpGet]
     public async Task<IActionResult> GetPostsAsync()
     {
         return Ok(ApiResult<List<PostResponseModel>>.Success(
-            await _postService.GetPostsAsync()));
+            await _service.GetPostsAsync()));
     }
 
     [HttpPost("get-posts-list")]
     public async Task<IActionResult> GetListPostsAsync([FromBody] PageOption option)
     {
         return Ok(ApiResult<PaginatedList<PostListResonseModel>>.Success(
-            await _postService.GetListPostsAsync(option)));
+            await _service.GetListPostsAsync(option)));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPostByIdAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<PostResponseModel>.Success(
-            await _postService.GetPostByIdAsync(id)));
+            await _service.GetPostByIdAsync(id)));
     }
 
     [HttpGet("search")]
     public async Task<IActionResult> SearchPostByQueryAsync([FromQuery] [Required] Guid id)
     {
         return Ok(ApiResult<PostResponseModel>.Success(
-            await _postService.SearchPostByQueryAsync(id)));
+            await _service.SearchPostByQueryAsync(id)));
     }
 
     [UserOrAdmin]
@@ -71,7 +71,7 @@ public class PostController : ApiController
         [FromBody] UpdatePostModel dto)
     {
         return Ok(ApiResult<UpdatePostResponseModel>.Success(
-            await _postService.UpdatePostByIdAsync(id, dto)));
+            await _service.UpdatePostByIdAsync(id, dto)));
     }
 
     [UserOrAdmin]
@@ -79,13 +79,13 @@ public class PostController : ApiController
     public async Task<IActionResult> DeletePostByIdAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<DeletePostResponseModel>.Success(
-            await _postService.DeletePostByIdAsync(id)));
+            await _service.DeletePostByIdAsync(id)));
     }
 
     [HttpPut("{id}/restore")]
     public async Task<IActionResult> RestorePostByIdAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<RestorePostResponseModel>.Success(
-            await _postService.RestorePostByIdAsync(id)));
+            await _service.RestorePostByIdAsync(id)));
     }
 }

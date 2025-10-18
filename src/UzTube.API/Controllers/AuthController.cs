@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using UzTube.API.Controllers;
 using UzTube.Attributes;
 using UzTube.Interfaces;
@@ -22,14 +21,18 @@ public class AuthController : ApiController
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(LoginUserModel dto)
-        => Ok(ApiResult<LoginResponseModel>.Success(
-            await _userService.LoginAsync(dto)));
+    public async Task<IActionResult> LoginAsync(LoginUserModel model)
+    {
+        return Ok(ApiResult<LoginResponseModel>.Success(
+            await _userService.LoginAsync(model)));
+    }
 
     [HttpPost("register")]
-    public async Task<IActionResult> CreateAsync(CreateUserModel dto)
-        => Ok(ApiResult<CreateUserResponseModel>.Success(
-            await _userService.CreateAsync(dto)));
+    public async Task<IActionResult> CreateAsync(CreateUserModel model)
+    {
+        return Ok(ApiResult<CreateUserResponseModel>.Success(
+            await _userService.CreateAsync(model)));
+    }
 
     [RequirePermission(SystemPermissions.Authorize)]
     [HttpGet("me")]
