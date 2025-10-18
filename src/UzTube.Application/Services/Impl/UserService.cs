@@ -230,7 +230,7 @@ public class UserService : IUserService
             throw new NotFoundException("User not found");
 
         return user;
-    }
+    } //TODO: name bo'yicha qidirish
 
     public async Task<UpdateUserProfileResponseModel> UpdateUserProfileByIdAsync(Guid id, UpdateUserProfileModel dto)
     {

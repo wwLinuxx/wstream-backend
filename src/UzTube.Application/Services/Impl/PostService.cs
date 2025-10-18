@@ -19,7 +19,7 @@ public class PostService : IPostService
         _context = context;
     }
 
-    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel dto, Guid id) // TODO: Create Post Min.io ni o'rnatish
+    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel dto, Guid id) //TODO: Create Post Min.io ni o'rnatish
     {
         Post newPost = new Post
         {
