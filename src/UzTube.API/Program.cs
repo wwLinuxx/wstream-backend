@@ -1,13 +1,23 @@
-﻿using UzTube.API;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using UzTube.API;
+using UzTube.API.Filters;
 using UzTube.API.Middleware;
 using UzTube.Application;
 using UzTube.Application.Extensions;
+using UzTube.Application.Models.Validators;
+using UzTube.Application.Models.Validators.User;
 using UzTube.DataAccess;
+using UzTube.Models.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllers(
+    config => config.Filters.Add(typeof(ValidateModelAttribute))
+);
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(IValidationMarker));
 
 builder.Services.AddHttpContextAccessor();
 

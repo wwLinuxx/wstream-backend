@@ -68,15 +68,17 @@ public class PostService : IPostService
 
     public async Task<PaginatedList<PostListResonseModel>> GetListPostsAsync(PageOption option)
     {
-        List<PostListResonseModel> posts = await _context.Posts
-            .Skip(option.PageSize * (option.PageNumber - 1))
+        IQueryable<Post> query = _context.Posts;
+
+        if (!string.IsNullOrEmpty(option.Search))
+            query = query.Where(p => p.Title.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        List<PostListResonseModel> posts = await query
+            .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
-            .Where(p => p.IsPrivate == false && p.IsDeleted == false)
-            //.OrderBy(p => p.Id)
             .Select(p => new PostListResonseModel
             {
                 Id = p.Id,
-                UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
                 PhotoUrl = p.PhotoUrl,
@@ -91,15 +93,15 @@ public class PostService : IPostService
             .ToListAsync();
 
         if (posts.Count == 0)
-            throw new NotFoundException("Post not found");
+            throw new NotFoundException("Posts not found");
 
-        return new PaginatedList<PostListResonseModel>
-        {
-            Items = posts,
-            TotalPages = option.PageSize,
-            PageNumber = option.PageNumber,
-            TotalCount = posts.Count
-        };
+        int postsCount = await _context.Posts.CountAsync();
+
+        return PaginatedList<PostListResonseModel>.Create(
+            posts,
+            postsCount,
+            option.PageNumber,
+            option.PageSize);
     }
 
     public async Task<PostResponseModel> GetPostByIdAsync(Guid id)

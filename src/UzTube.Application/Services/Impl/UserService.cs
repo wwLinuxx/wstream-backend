@@ -38,8 +38,8 @@ public class UserService : IUserService
 
     public async Task<CreateUserResponseModel> CreateAsync(CreateUserModel dto)
     {
-        if (await _userRepository.CheckUserByEmailAsync(dto.Email))
-            throw new BadRequestException("Email is already registered");
+        //if (await _userRepository.CheckUserByEmailAsync(dto.Email))
+        //    throw new BadRequestException("Email is already registered");
 
         string salt = _passwordHelper.GenerateSalt();
         string passwordHash = _passwordHelper.Encrypt(dto.Password, salt);
@@ -150,8 +150,8 @@ public class UserService : IUserService
     {
         IQueryable<User> query = _context.Users;
 
-        if (string.IsNullOrWhiteSpace(option.Search))
-            query = query.Where(u => u.UserProfile.FirstName.Contains(option.Search));
+        if (!string.IsNullOrEmpty(option.Search))
+            query = query.Where(u => u.UserProfile.FirstName.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
 
         List<UserListResponseModel> users = await query
             .Skip((option.PageNumber - 1) * option.PageSize)
@@ -172,7 +172,7 @@ public class UserService : IUserService
         if (users.Count == 0)
             throw new NotFoundException("Users not found");
 
-        int pagesCount = query.Count();
+        int pagesCount = await _context.Posts.CountAsync();
 
         return PaginatedList<UserListResponseModel>.Create(
             users, 

@@ -21,7 +21,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique();
 
         builder.Property(u => u.Email)
-            .HasMaxLength(50)
+            .HasMaxLength(100)
             .IsUnicode(false);
     }
 }

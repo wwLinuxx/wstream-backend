@@ -37,14 +37,12 @@ public class CommentsService : ICommentService
         if (comments.Count > 0)
             throw new NotFoundException("Comments not found");
 
-        int coundComments = _context.PostComments.Count();
+        int commentsCount = _context.PostComments.Count();
 
-        return new PaginatedList<CommentListResponseModel>
-        {
-            Items = comments,
-            TotalCount = coundComments,
-            PageNumber = option.PageNumber,
-            TotalPages = option.PageSize
-        };
+        return PaginatedList<CommentListResponseModel>.Create(
+            comments,
+            commentsCount,
+            option.PageNumber,
+            option.PageSize);
     }
 }
