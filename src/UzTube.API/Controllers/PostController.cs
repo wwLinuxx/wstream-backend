@@ -46,7 +46,7 @@ public class PostController : ApiController
     [HttpPost("get-posts-list")]
     public async Task<IActionResult> GetListPostsAsync([FromBody] PageOption option)
     {
-        return Ok(ApiResult<PaginationResult<PostListResonseModel>>.Success(
+        return Ok(ApiResult<PaginatedList<PostListResonseModel>>.Success(
             await _postService.GetListPostsAsync(option)));
     }
 

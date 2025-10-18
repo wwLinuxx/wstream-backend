@@ -121,7 +121,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<List<UserResponseModel>> GetAllUsersAsync()
+    public async Task<List<UserResponseModel>> GetUsersAsync()
     {
         IQueryable<User> query = _userRepository.QueryUsers();
 
@@ -146,7 +146,7 @@ public class UserService : IUserService
         return users;
     }
 
-    public async Task<PaginationResult<UserListResponseModel>> GetAllUsersAsync(PageOption option)
+    public async Task<PaginatedList<UserListResponseModel>> GetUsersListAsync(PageOption option)
     {
         IQueryable<User> query = _context.Users;
 
@@ -154,7 +154,7 @@ public class UserService : IUserService
             query = query.Where(u => u.UserProfile.FirstName.Contains(option.Search));
 
         List<UserListResponseModel> users = await query
-            .Skip(option.PageSize * (option.PageNumber - 1))
+            .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(u => new UserListResponseModel
             {
@@ -172,15 +172,13 @@ public class UserService : IUserService
         if (users.Count == 0)
             throw new NotFoundException("Users not found");
 
-        int pageCount = _context.Users.Count();
+        int pagesCount = query.Count();
 
-        return new PaginationResult<UserListResponseModel>
-        {
-            Values = users,
-            PageNumber = option.PageNumber,
-            PageSize = option.PageSize,
-            TotalCount = users.Count
-        };
+        return PaginatedList<UserListResponseModel>.Create(
+            users, 
+            pagesCount, 
+            option.PageNumber, 
+            option.PageSize);
     }
 
     public async Task<UserResponseModel> GetUserProfileByIdAsync(Guid id)

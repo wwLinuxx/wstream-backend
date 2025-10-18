@@ -66,7 +66,7 @@ public class PostService : IPostService
         return posts;
     }
 
-    public async Task<PaginationResult<PostListResonseModel>> GetListPostsAsync(PageOption option)
+    public async Task<PaginatedList<PostListResonseModel>> GetListPostsAsync(PageOption option)
     {
         List<PostListResonseModel> posts = await _context.Posts
             .Skip(option.PageSize * (option.PageNumber - 1))
@@ -93,10 +93,10 @@ public class PostService : IPostService
         if (posts.Count == 0)
             throw new NotFoundException("Post not found");
 
-        return new PaginationResult<PostListResonseModel>
+        return new PaginatedList<PostListResonseModel>
         {
-            Values = posts,
-            PageSize = option.PageSize,
+            Items = posts,
+            TotalPages = option.PageSize,
             PageNumber = option.PageNumber,
             TotalCount = posts.Count
         };

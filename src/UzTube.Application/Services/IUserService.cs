@@ -12,9 +12,9 @@ public interface IUserService
 
     Task<UserResponseModel> GetMeAsync();
 
-    Task<List<UserResponseModel>> GetAllUsersAsync();
+    Task<List<UserResponseModel>> GetUsersAsync();
 
-    Task<PaginationResult<UserListResponseModel>> GetAllUsersAsync(PageOption option);
+    Task<PaginatedList<UserListResponseModel>> GetUsersListAsync(PageOption option);
 
     Task<UserResponseModel> GetUserProfileByIdAsync(Guid id);
 

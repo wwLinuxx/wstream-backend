@@ -10,7 +10,7 @@ public interface IPostService
 
     Task<List<PostResponseModel>> GetPostsAsync();
     
-    Task<PaginationResult<PostListResonseModel>> GetListPostsAsync(PageOption option);
+    Task<PaginatedList<PostListResonseModel>> GetListPostsAsync(PageOption option);
 
     Task<PostResponseModel> GetPostByIdAsync(Guid id);
 

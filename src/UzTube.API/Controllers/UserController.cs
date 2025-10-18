@@ -32,15 +32,15 @@ public class UserController : ApiController
     public async Task<IActionResult> GetUsersAsync()
     {
         return Ok(ApiResult<List<UserResponseModel>>.Success(
-            await _userService.GetAllUsersAsync()));
+            await _userService.GetUsersAsync()));
     }
 
     [RequirePermission(SystemPermissions.ViewUsers)]
     [HttpPost("get-users-list")]
     public async Task<IActionResult> GetListUsersAsync([FromBody] PageOption option)
     {
-        return Ok(ApiResult<PaginationResult<UserListResponseModel>>.Success(
-            await _userService.GetAllUsersAsync(option)));
+        return Ok(ApiResult<PaginatedList<UserListResponseModel>>.Success(
+            await _userService.GetUsersListAsync(option)));
     }
 
     [UserOrAdmin]
