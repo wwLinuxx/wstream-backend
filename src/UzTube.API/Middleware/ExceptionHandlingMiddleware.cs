@@ -26,10 +26,10 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
         code = ex switch
         {
+            BadRequestException => StatusCodes.Status400BadRequest,
             UnauthorizedException => StatusCodes.Status401Unauthorized,
             ForbiddenException => StatusCodes.Status403Forbidden,
             NotFoundException => StatusCodes.Status404NotFound,
-            BadRequestException => StatusCodes.Status400BadRequest,
             UnprocessableRequestException => StatusCodes.Status422UnprocessableEntity,
             _ => code
         };
