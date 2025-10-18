@@ -10,28 +10,28 @@ namespace UzTube.Controllers;
 public class AuthController : ApiController
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUserService _userService;
+    private readonly IUserService _service;
 
     public AuthController(
         IHttpContextAccessor httpContextAccessor,
         IUserService userService)
     {
         _httpContextAccessor = httpContextAccessor;
-        _userService = userService;
+        _service = userService;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(LoginUserModel model)
     {
         return Ok(ApiResult<LoginResponseModel>.Success(
-            await _userService.LoginAsync(model)));
+            await _service.LoginAsync(model)));
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> CreateAsync(CreateUserModel model)
     {
         return Ok(ApiResult<CreateUserResponseModel>.Success(
-            await _userService.CreateAsync(model)));
+            await _service.CreateAsync(model)));
     }
 
     [RequirePermission(SystemPermissions.Authorize)]
@@ -39,6 +39,6 @@ public class AuthController : ApiController
     public async Task<IActionResult> GetMeAsync()
     {
         return Ok(ApiResult<UserResponseModel>.Success(
-            await _userService.GetMeAsync()));
+            await _service.GetMeAsync()));
     }
 }
