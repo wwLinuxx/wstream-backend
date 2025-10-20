@@ -52,7 +52,7 @@ public class CreateUserValidator : AbstractValidator<CreateUserModel>
 
         RuleFor(u => u.CountryId)
             .NotEmpty()
-            .WithMessage("Email address is not valid");
+            .WithMessage("Country is not valid");
     }
 
     private bool EmailAddressIsUnique(string email)
