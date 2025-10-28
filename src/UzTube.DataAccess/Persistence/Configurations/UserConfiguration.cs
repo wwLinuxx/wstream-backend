@@ -26,6 +26,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .HasMaxLength(100)
             .IsUnicode(false);
+
+        builder.HasData(GetSeedUser());
     }
 
     private static string Encrypt(string password, string salt)
