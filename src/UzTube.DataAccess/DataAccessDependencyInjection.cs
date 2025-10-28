@@ -93,6 +93,7 @@ public static class DataAccessDependencyInjection
                 var match = enumPermissions.First(e => (int)e == p.Id);
                 p.Name = match.ToString();
                 p.Description = $"{match} - Permission";
+                p.UpdatedOn = DateTime.UtcNow;
                 return p;
             })
             .ToList();
