@@ -124,7 +124,7 @@ public static class DataAccessDependencyInjection
                 Id = rootRoleId,
                 Name = "Root",
                 Description = "Root",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.UtcNow
             });
 
         if (!await context.Roles.AnyAsync(r => r.Id == adminRoleId))
@@ -133,7 +133,7 @@ public static class DataAccessDependencyInjection
                 Id = adminRoleId,
                 Name = "Admin",
                 Description = "Admin",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.UtcNow
             });
 
         if (!await context.Roles.AnyAsync(r => r.Id == moderatorRoleId))
@@ -142,7 +142,7 @@ public static class DataAccessDependencyInjection
                 Id = moderatorRoleId,
                 Name = "Moderator",
                 Description = "Moderator",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.UtcNow
             });
 
         if (!await context.Roles.AnyAsync(r => r.Id == userRoleId))
@@ -151,7 +151,7 @@ public static class DataAccessDependencyInjection
                 Id = userRoleId,
                 Name = "User",
                 Description = "User",
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTime.UtcNow
             });
 
         await context.SaveChangesAsync();
