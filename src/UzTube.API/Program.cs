@@ -6,6 +6,7 @@ using UzTube.API.Middleware;
 using UzTube.Application;
 using UzTube.Application.Models.Validators;
 using UzTube.DataAccess;
+using UzTube.DataAccess.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +27,12 @@ builder.Services.AddMinio();
 
 var app = builder.Build();
 
-// await app.SeedRolesAndPermissionsAsync();
-// await app.SyncPermissionsAsync();
+var scope = app.Services.CreateScope();
+
+await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
+
+await app.SeedRolesAndPermissionsAsync();
+await app.SyncPermissionsAsync();
 
 app.UseSwagger();
 app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "wwstream"); });
