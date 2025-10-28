@@ -8,11 +8,7 @@ public class PostCategoryConfiguration : IEntityTypeConfiguration<PostCategory>
 {
     public void Configure(EntityTypeBuilder<PostCategory> builder)
     {
-        builder.HasKey(pc => new
-        {
-            pc.PostId,
-            pc.CategoryId
-        });
+        builder.HasKey(pc => pc.Id);
 
         builder.HasOne(pc => pc.Post)
             .WithMany(p => p.Categories)
