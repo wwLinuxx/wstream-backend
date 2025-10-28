@@ -1,17 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace UzTube.Application.Models.User;
 
-namespace UzTube.Models.DTO;
+public record LoginUserModel(
+    string Email,
+    string Password);
 
-public class LoginUserModel
-{
-    public string Email { get; set; }
-
-    public string Password { get; set; }
-}
-
-public class LoginResponseModel
-{
-    public string Email { get; set; }
-
-    public string Token { get; set; }
-}
+public record LoginResponseModel(
+    string Email,
+    string Token);

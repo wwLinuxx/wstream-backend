@@ -1,22 +1,12 @@
-﻿using UzTube.Application.Models;
+﻿namespace UzTube.Application.Models.User;
 
-namespace UzTube.Models.DTO;
+public record CreateUserModel(
+    string Email,
+    string Password,
+    string FirstName,
+    string LastName,
+    string PhoneNumber,
+    int Age,
+    Guid CountryId);
 
-public class CreateUserModel
-{
-    public string Email { get; set; }
- 
-    public string Password { get; set; }
-
-    public string FirstName { get; set; }
-
-    public string LastName { get; set; }
-
-    public string PhoneNumber { get; set; }
-
-    public int Age { get; set; }
-
-    public Guid CountryId { get; set; }
-}
-
-public class CreateUserResponseModel : BaseResponseModel { }
+public record CreateUserResponseModel : BaseResponseModel;

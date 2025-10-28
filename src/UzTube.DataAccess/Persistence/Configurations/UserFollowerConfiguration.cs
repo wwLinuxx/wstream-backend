@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -15,12 +15,12 @@ public class UserFollowerConfiguration : IEntityTypeConfiguration<UserFollower>
         });
 
         builder.HasOne(uf => uf.Follower)
-            .WithMany(f => f.UserFollowers)
+            .WithMany(f => f.Followers)
             .HasForeignKey(uf => uf.FollowerId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(uf => uf.Following)
-            .WithMany(f => f.UserFollowing)
+            .WithMany(f => f.Followings)
             .HasForeignKey(uf => uf.FollowingId)
             .OnDelete(DeleteBehavior.Cascade);
     }

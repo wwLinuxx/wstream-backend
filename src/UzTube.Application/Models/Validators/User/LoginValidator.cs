@@ -1,27 +1,25 @@
 ﻿using FluentValidation;
-using UzTube.DataAccess.Persistence;
-using UzTube.Models.DTO;
+using UzTube.Application.Models.User;
 
 namespace UzTube.Application.Models.Validators.User;
 
 public class LoginValidator : AbstractValidator<LoginUserModel>
 {
-    private readonly DatabaseContext _context;
-
-    public LoginValidator(DatabaseContext context)
+    public LoginValidator()
     {
-        _context = context;
-
         RuleFor(u => u.Email)
             .MinimumLength(UserValidatorConfiguration.MinimumEmailLength)
-            .WithMessage($"Email address should have minimum {UserValidatorConfiguration.MinimumEmailLength} characters")
+            .WithMessage(
+                $"Email address should have minimum {UserValidatorConfiguration.MinimumEmailLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumEmailLength)
-            .WithMessage($"Email address should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters"); 
+            .WithMessage(
+                $"Email address should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters.");
 
         RuleFor(u => u.Password)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
-            .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters")
+            .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-            .WithMessage($"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters");
+            .WithMessage(
+                $"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
     }
 }

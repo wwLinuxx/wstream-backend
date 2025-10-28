@@ -5,9 +5,6 @@ public static class UserValidatorConfiguration
     public const int MinimumEmailLength = 5;
     public const int MaximumEmailLength = 100;
 
-    public const int MinimumUsernameLength = 5;
-    public const int MaximumUsernameLength = 30;
-
     public const int MinimumPasswordLength = 6;
     public const int MaximumPasswordLength = 128;
 

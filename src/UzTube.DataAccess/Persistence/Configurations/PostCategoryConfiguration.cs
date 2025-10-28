@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -15,7 +15,7 @@ public class PostCategoryConfiguration : IEntityTypeConfiguration<PostCategory>
         });
 
         builder.HasOne(pc => pc.Post)
-            .WithMany(p => p.PostCategories)
+            .WithMany(p => p.Categories)
             .HasForeignKey(pc => pc.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 

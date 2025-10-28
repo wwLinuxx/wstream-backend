@@ -1,6 +1,6 @@
 ﻿namespace UzTube.Application.Models;
 
-public class BaseResponseModel
+public record BaseResponseModel
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 }

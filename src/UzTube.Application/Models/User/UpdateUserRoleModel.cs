@@ -1,14 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using UzTube.Application.Models;
-using UzTube.Attributes;
+﻿namespace UzTube.Application.Models.User;
 
-namespace UzTube.Models.DTO;
-
-public class UpdateUserRoleModel
+public record UpdateUserRoleModel
 {
-    [Required]
-    [NotZero]
-    public ISet<int> RoleIds { get; set; }
+    public ISet<Guid> Roles { get; init; } = null!;
 }
 
-public class UpdateUserRoleResponseModel : BaseResponseModel { }
+public record UpdateUserRoleResponseModel : BaseResponseModel;

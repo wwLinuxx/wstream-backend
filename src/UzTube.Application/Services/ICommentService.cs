@@ -5,5 +5,5 @@ namespace UzTube.Application.Services;
 
 public interface ICommentService
 {
-    Task<PaginatedList<CommentListResponseModel>> GetCommentsList(PageOption option);
+    Task<PaginatedList<CommentResponseModel>> GetCommentsList(PageOption option);
 }

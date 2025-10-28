@@ -1,13 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using UzTube.Entities;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence;
 
-public class DatabaseContext : DbContext
+public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options)
 {
-    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
-    
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }

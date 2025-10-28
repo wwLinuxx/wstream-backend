@@ -1,42 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
-using UzTube.Core.Common;
+﻿using UzTube.Core.Common;
 
-namespace UzTube.Entities;
+namespace UzTube.Core.Entities;
 
 public class User : BaseEntity
 {
-    //public string Username { get; set; }
-
-    public string Email { get; set; }
-
-    public string PasswordHash { get; set; }
-    
-    public string Salt { get; set; }
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+    public string Email { get; set; } = null!;
+    public string PasswordHash { get; set; } = null!;
+    public string Salt { get; set; } = null!;
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;
+    public DateTime? UpdatedOn { get; set; }
+    public DateTime? DeletedOn { get; set; }
 
-    public DateTime? DeletedAt { get; set; }
-
-    public ICollection<UserRole> UserRoles { get; set; }
-
-    public UserProfile UserProfile { get; set; }
-
-    public ICollection<UserFollower> UserFollowers { get; set; }
-    public ICollection<UserFollower> UserFollowing { get; set; }
-
-    public ICollection<Post> UserPosts { get; set; }
-
-    public ICollection<PostView> PostViews { get; set; }
-
-    public ICollection<PostLike> PostLikes { get; set; }
-
-    public ICollection<PostComment> PostComments { get; set; }
-    
-    public ICollection<PostCommentLike> PostCommentLikes { get; set; }
-
-    public ICollection<UserPlaylist> UserPlaylists { get; set; }
-
-    public ICollection<PostRating> PostRatings { get; set; }
+    public UserProfile Profile { get; set; } = null!;
+    public ICollection<UserFollower> Followers { get; set; } = [];
+    public ICollection<UserFollower> Followings { get; set; } = [];
+    public ICollection<Post> Posts { get; set; } = [];
+    public ICollection<PostView> Views { get; set; } = [];
+    public ICollection<PostLike> Likes { get; set; } = [];
+    public ICollection<PostComment> Comments { get; set; } = [];
+    public ICollection<PostCommentLike> CommentLikes { get; set; } = [];
+    public ICollection<UserPlaylist> Playlists { get; set; } = [];
+    public ICollection<PostRating> Ratings { get; set; } = [];
+    public ICollection<UserRole> Roles { get; set; } = [];
 }

@@ -2,7 +2,7 @@
 
 public interface IClaimService
 {
-    string GetUserId();
+    Guid GetUserId();
 
     string GetClaim(string key);
 }

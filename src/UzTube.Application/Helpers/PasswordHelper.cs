@@ -8,18 +8,18 @@ public class PasswordHelper : IPasswordHelper
 {
     public string Encrypt(string password, string salt)
     {
-        using Rfc2898DeriveBytes algorithm = new Rfc2898DeriveBytes(
-            password: password,
-            salt: Encoding.UTF8.GetBytes(salt),
-            iterations: 8192,
-            hashAlgorithm: HashAlgorithmName.SHA256);
+        using var algorithm = new Rfc2898DeriveBytes(
+            password,
+            Encoding.UTF8.GetBytes(salt),
+            8192,
+            HashAlgorithmName.SHA256);
 
         return Convert.ToBase64String(algorithm.GetBytes(50));
     }
 
     public string GenerateSalt()
     {
-        return Guid.NewGuid().ToString()[..16];
+        return Guid.NewGuid().ToString();
     }
 
     public bool Verify(string passwordHash, string password, string salt)

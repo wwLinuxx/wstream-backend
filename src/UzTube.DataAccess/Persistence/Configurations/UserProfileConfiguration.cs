@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -11,7 +11,7 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
         builder.HasKey(up => up.UserId);
 
         builder.HasOne(up => up.User)
-            .WithOne(u => u.UserProfile)
+            .WithOne(u => u.Profile)
             .HasForeignKey<UserProfile>(u => u.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 

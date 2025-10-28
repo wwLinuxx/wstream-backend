@@ -1,10 +1,6 @@
 ﻿namespace UzTube.Application.Models.FileStorage;
 
-public class FileStorageOptions
-{
-    public string BaseUrl { get; set; } = null!;
-
-    public string Thumbnails { get; set; } = null!;
-
-    public string Videos { get; set; } = null!;
-}
+public record FileStorageOptions(
+    string BaseUrl,
+    string Thumbnails,
+    string Videos);

@@ -2,89 +2,58 @@
 using UzTube.Application.Exeptions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
+using UzTube.Core.Entities;
 using UzTube.DataAccess.Persistence;
-using UzTube.Entities;
-using UzTube.Interfaces;
-using UzTube.Models.DTO;
+using UzTube.Shared.Services;
 
 namespace UzTube.Application.Services.Impl;
 
-public class PostService : IPostService
+public class PostService(
+    DatabaseContext context,
+    IClaimService claimService
+) : IPostService
 {
-    private readonly DatabaseContext _context;
-
-    public PostService(
-        DatabaseContext context)
+    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel model)
     {
-        _context = context;
-    }
+        var userId = claimService.GetUserId();
 
-    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel dto, Guid id) //TODO: Create Post Min.io ni o'rnatish
-    {
-        Post newPost = new Post
+        var newPost = new Post
         {
-            UserId = id,
-            Title = dto.Title,
-            Description = dto.Description,
-            Duration = "00:12", // TODO: video duration hisoblash
-            PhotoUrl = dto.ThumbnailFile,
-            VideoUrl = dto.VideoFile,
-            IsPrivate = dto.IsPrivate
+            UserId = userId,
+            Title = model.Title,
+            Description = model.Description,
+            ThumbnailUrl = model.ThumbnailUrl,
+            VideoUrl = model.VideoUrl,
+            Duration = "00:00:00" // TODO: Video file ni vaqtini hisoblididan qilish
         };
 
-        await _context.Posts.AddAsync(newPost);
-        await _context.SaveChangesAsync();
+        await context.Posts.AddAsync(newPost);
+        await context.SaveChangesAsync();
 
-        return new CreatePostResponseModel { Id = id };
-    }
-    
-    public async Task<List<PostResponseModel>> GetPostsAsync()
+        return new CreatePostResponseModel { Id = newPost.Id };
+    } //TODO: Create Post Min.io ni o'rnatish
+
+    public async Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option)
     {
-        List<PostResponseModel> posts = await _context.Posts
-            .Where(p => p.IsPrivate == false && p.IsDeleted == false)
-            //.OrderBy(p => p.Id)
+        IQueryable<Post> query = context.Posts;
+
+        if (!string.IsNullOrEmpty(option.Search))
+            query = query.Where(p => p.Title.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        var posts = await query
+            .Where(p => !p.IsPrivate)
+            .Skip((option.PageNumber - 1) * option.PageSize)
+            .Take(option.PageSize)
             .Select(p => new PostResponseModel
             {
                 Id = p.Id,
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.PhotoUrl,
+                PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
-                ViewsCount = p.ViewsCount,
-                LikesCount = p.LikesCount,
-                Rating = p.Rating,
-                IsPrivate = p.IsPrivate
-            })
-            .ToListAsync();
-
-        if (posts.Count == 0)
-            throw new NotFoundException("Post not found");
-
-        return posts;
-    }
-
-    public async Task<PaginatedList<PostListResonseModel>> GetListPostsAsync(PageOption option)
-    {
-        IQueryable<Post> query = _context.Posts;
-
-        if (!string.IsNullOrEmpty(option.Search))
-            query = query.Where(p => p.Title.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
-
-        List<PostListResonseModel> posts = await query
-            .Skip((option.PageNumber - 1) * option.PageSize)
-            .Take(option.PageSize)
-            .Select(p => new PostListResonseModel
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                PhotoUrl = p.PhotoUrl,
-                VideoUrl = p.VideoUrl,
-                Duration = p.Duration,
-                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                PostedOn = p.PostedOn.ToString("g"),
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -95,18 +64,14 @@ public class PostService : IPostService
         if (posts.Count == 0)
             throw new NotFoundException("Posts not found");
 
-        int postsCount = await _context.Posts.CountAsync();
+        var postsCount = await context.Posts.CountAsync();
 
-        return PaginatedList<PostListResonseModel>.Create(
-            posts,
-            postsCount,
-            option.PageNumber,
-            option.PageSize);
+        return PaginatedList<PostResponseModel>.Create(posts, postsCount, option.PageNumber, option.PageSize);
     }
 
     public async Task<PostResponseModel> GetPostByIdAsync(Guid id)
     {
-        PostResponseModel? post = await _context.Posts
+        var post = await context.Posts
             .Where(p => p.Id == id)
             .Select(p => new PostResponseModel
             {
@@ -114,10 +79,10 @@ public class PostService : IPostService
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.PhotoUrl,
+                PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                PostedOn = p.PostedOn.ToString("g"),
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -125,54 +90,54 @@ public class PostService : IPostService
             })
             .FirstOrDefaultAsync();
 
-        if (post == null)
-            throw new NotFoundException("Post not found");
-
-        return post;
+        return post ?? throw new NotFoundException("Post not found");
     }
 
-    public async Task<PostResponseModel> SearchPostByQueryAsync(Guid id)
+    public async Task<PostResponseModel> SearchPostByQueryAsync(string query)
     {
-        PostResponseModel? post = await _context.Posts
-            .Where(p => p.Id == id && p.IsPrivate == false)
-            .Select(p => new PostResponseModel
-            {
-                Id = id,
-                UserId = p.UserId,
-                Title = p.Title,
-                Description = p.Description,
-                PhotoUrl = p.PhotoUrl,
-                VideoUrl = p.VideoUrl,
-                Duration = p.Duration,
-                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
-                ViewsCount = p.ViewsCount,
-                LikesCount = p.LikesCount,
-                Rating = p.Rating,
-                IsPrivate = p.IsPrivate
-            })
-            .FirstOrDefaultAsync();
+        if (!string.IsNullOrEmpty(query))
+            query = query.Trim();
 
-        if (post == null)
-            throw new NotFoundException("Post not found");
-
-        return post;
-    }
-
-    public async Task<List<PostResponseModel>> GetUserPostsAsync(Guid id)
-    {
-        List<PostResponseModel> posts = await _context.Posts
-            .Where(p => p.UserId == id && p.IsDeleted == false)
-            .OrderBy(p => p.Id)
+        var post = await context.Posts
+            .Where(p => p.Title.Contains(query) && !p.IsPrivate)
             .Select(p => new PostResponseModel
             {
                 Id = p.Id,
-                UserId = id,
+                UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.PhotoUrl,
+                PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedAt = p.PostedAt.ToString("yyyy:MM:dd HH:mm:ss"),
+                PostedOn = p.PostedOn.ToString("yyyy:MM:dd HH:mm:ss"),
+                ViewsCount = p.ViewsCount,
+                LikesCount = p.LikesCount,
+                Rating = p.Rating,
+                IsPrivate = p.IsPrivate
+            })
+            .FirstOrDefaultAsync();
+
+        return post ?? throw new NotFoundException("Post not found");
+    }
+
+    public async Task<List<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option)
+    {
+        var query = context.Posts.AsQueryable();
+
+        var posts = await query
+            .Where(p => p.UserId == userId && !p.IsPrivate)
+            .Skip(option.PageSize * (option.PageNumber - 1))
+            .Take(option.PageSize)
+            .Select(p => new PostResponseModel
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Description = p.Description,
+                PhotoUrl = p.ThumbnailUrl,
+                VideoUrl = p.VideoUrl,
+                Duration = p.Duration,
+                PostedOn = p.PostedOn.ToString("g"),
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -180,57 +145,48 @@ public class PostService : IPostService
             })
             .ToListAsync();
 
-        if (posts.Count == 0)
-            throw new NotFoundException("Post not found");
-
-        return posts;
+        return posts.Count == 0 ? throw new NotFoundException("Post not found") : posts;
     }
 
-    public async Task<UpdatePostResponseModel> UpdatePostByIdAsync(Guid id, UpdatePostModel dto)
+    public async Task<UpdatePostResponseModel> UpdatePostByIdAsync(Guid id, UpdatePostModel model)
     {
-        Post? post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+        var post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id)
+                   ?? throw new NotFoundException("Post not found");
 
-        if (post == null)
-            throw new NotFoundException("Post not found");
+        post.Title = model.Title;
+        post.Description = model.Description;
+        post.ThumbnailUrl = model.ThumbnailUrl;
+        post.IsPrivate = model.IsPrivate;
 
-        post.Title = dto.Title;
-        post.Description = dto.Description;
-        post.PhotoUrl = dto.PhotoUrl;
-        post.IsPrivate = dto.IsPrivate;
-
-        _context.Posts.Update(post);
-        await _context.SaveChangesAsync();
+        context.Posts.Update(post);
+        await context.SaveChangesAsync();
 
         return new UpdatePostResponseModel { Id = post.Id };
     }
 
     public async Task<DeletePostResponseModel> DeletePostByIdAsync(Guid id)
     {
-        Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (post == null)
-            throw new NotFoundException("Post not found");
+        var post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
+                   ?? throw new NotFoundException("Post not found");
 
         post.IsDeleted = true;
-        post.DeletedAt = DateTime.UtcNow;
+        post.DeletedAt = DateTime.Now;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        return new DeletePostResponseModel { Result = "Success" };
+        return new DeletePostResponseModel("Success");
     }
 
-    public async Task<RestorePostResponseModel> RestorePostByIdAsync(Guid id)
+    public async Task<RestorePostResponseModel> RestorePostByIdAsync(Guid userId)
     {
-        Post? post = await _context.Posts.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (post == null)
-            throw new NotFoundException("Post not found");
+        var post = await context.Posts.FirstOrDefaultAsync(u => u.Id == userId)
+                   ?? throw new NotFoundException("Post not found");
 
         post.IsDeleted = false;
         post.DeletedAt = null;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        return new RestorePostResponseModel { Result = "Success" };
+        return new RestorePostResponseModel("Success");
     }
 }

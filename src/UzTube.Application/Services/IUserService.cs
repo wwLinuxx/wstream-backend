@@ -1,32 +1,19 @@
 ﻿using UzTube.Application.Models;
 using UzTube.Application.Models.User;
-using UzTube.Models.DTO;
 
-namespace UzTube.Interfaces;
+namespace UzTube.Application.Services;
 
 public interface IUserService
 {
-    Task<CreateUserResponseModel> CreateAsync(CreateUserModel dto);
-
-    Task<LoginResponseModel> LoginAsync(LoginUserModel dto);
-
+    Task<CreateUserResponseModel> CreateAsync(CreateUserModel model);
+    Task<LoginResponseModel> LoginAsync(LoginUserModel model);
     Task<UserResponseModel> GetMeAsync();
-
-    Task<List<UserResponseModel>> GetUsersAsync();
-
-    Task<PaginatedList<UserListResponseModel>> GetUsersListAsync(PageOption option);
-
+    Task<PaginatedList<UserResponseModel>> GetUsersAsync(PageOption option);
     Task<UserResponseModel> GetUserProfileByIdAsync(Guid id);
-
-    Task<UserResponseModel> SearchUserByQueryAsync(Guid id);
-
-    Task<UpdateUserProfileResponseModel> UpdateUserProfileByIdAsync(Guid id, UpdateUserProfileModel dto);
-
-    Task<UpdateUserPasswordResponseModel> UpdateUserPasswordByIdAsync(Guid id, UpdateUserPasswordModel dto);
-
-    Task<UpdateUserRoleResponseModel> UpdateUserRoleByIdAsync(Guid id, UpdateUserRoleModel dto);
-
-    Task<DeleteUserResonseModel> DeleteUserByIdAsync(Guid id);
-
+    Task<UserResponseModel> SearchUserByQueryAsync(string query);
+    Task<UpdateUserProfileResponseModel> UpdateUserProfileByIdAsync(Guid id, UpdateUserProfileModel model);
+    Task<UpdateUserPasswordResponseModel> UpdateUserPasswordByIdAsync(Guid id, UpdateUserPasswordModel model);
+    Task<UpdateUserRoleResponseModel> UpdateUserRoleByIdAsync(Guid id, UpdateUserRoleModel model);
+    Task<DeleteUserResponseModel> DeleteUserByIdAsync(Guid id);
     Task<RestoreUserResponseModel> RestoreUserByIdAsync(Guid id);
 }

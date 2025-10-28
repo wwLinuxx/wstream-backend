@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -16,12 +16,12 @@ public class PostViewConfiguration : IEntityTypeConfiguration<PostView>
         });
 
         builder.HasOne(pv => pv.User)
-            .WithMany(u => u.PostViews)
+            .WithMany(u => u.Views)
             .HasForeignKey(pv => pv.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(pv => pv.Post)
-            .WithMany(p => p.PostViews)
+            .WithMany(p => p.Views)
             .HasForeignKey(pv => pv.PostId)
             .OnDelete(DeleteBehavior.Cascade);
     }

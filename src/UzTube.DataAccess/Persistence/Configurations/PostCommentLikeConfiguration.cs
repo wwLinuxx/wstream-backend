@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -10,6 +10,7 @@ public class PostCommentLikeConfiguration : IEntityTypeConfiguration<PostComment
     {
         builder.HasKey(l => new
         {
+            l.Id,
             l.CommentId,
             l.UserId
         });

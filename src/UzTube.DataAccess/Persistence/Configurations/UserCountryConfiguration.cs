@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -10,11 +10,17 @@ public class UserCountryConfiguration : IEntityTypeConfiguration<UserCountry>
     {
         builder.HasKey(c => c.Id);
 
-        builder.HasIndex(c => c.Id)
-            .IsUnique(false);
+        builder.HasIndex(c => c.Code)
+            .IsUnique();
 
-        builder.Property(c => c.Id)
-            .HasMaxLength(50)
+        builder.Property(c => c.Code)
+            .HasMaxLength(2)
+            .HasMaxLength(3)
+            .IsUnicode(false);
+
+        builder.Property(c => c.FullName)
+            .HasMaxLength(3)
+            .HasMaxLength(25)
             .IsUnicode(false);
     }
 }

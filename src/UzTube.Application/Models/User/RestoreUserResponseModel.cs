@@ -1,3 +1,3 @@
 ﻿namespace UzTube.Application.Models.User;
 
-public class RestoreUserResponseModel : BaseResponseModel { }
+public record RestoreUserResponseModel : BaseResponseModel;

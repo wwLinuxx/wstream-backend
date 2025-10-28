@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
-using System.Text;
-using UzTube.Models;
+using UzTube.Application.Models.Minio;
 
 namespace UzTube.API;
 
@@ -13,14 +13,13 @@ public static class ApiDependencyInjection
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
         var secretKey = configuration.GetValue<string>("JwtConfigurations:SecretKey");
-
-        var key = Encoding.UTF8.GetBytes(secretKey);
+        var key = Encoding.UTF8.GetBytes(secretKey ?? throw new InvalidOperationException("SecretKey is empty."));
 
         services.AddAuthentication(s =>
-        {
-            s.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            s.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
+            {
+                s.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                s.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(s =>
             {
                 s.RequireHttpsMetadata = false;
@@ -69,21 +68,17 @@ public static class ApiDependencyInjection
     {
         services.AddSingleton<IMinioClient>(sp =>
         {
-            MinioOptions? minioSettings = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
+            var minioSettings = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
 
-            IMinioClient client = new MinioClient()
+            var client = new MinioClient()
                 .WithEndpoint(minioSettings.Endpoint)
                 .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey);
 
             // Agar SSL yoqilgan bo'lsa
-            if (minioSettings.UseSSL)
-            {
-                client = client.WithSSL();
-            }
+            if (minioSettings.UseSsl) client = client.WithSSL();
 
             return client.Build(); // MinioClient ni qurish
         });
-
     }
 
     public static void AddCors(this IApplicationBuilder app)

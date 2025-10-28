@@ -2,8 +2,8 @@
 using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
+using UzTube.Application.Models.Minio;
 using UzTube.Interfaces;
-using UzTube.Models;
 
 namespace UzTube.Application.Services.Impl;
 
@@ -24,16 +24,14 @@ public class MinioFileStorageService : IFileStorageService
         try
         {
             // Agar bucket (saqlash joyi) mavjud bo'lmasa, uni yaratamiz
-            bool found = await _minioClient.BucketExistsAsync(
+            var found = await _minioClient.BucketExistsAsync(
                 new BucketExistsArgs().WithBucket(bucketName)
             ).ConfigureAwait(false);
 
             if (!found)
-            {
                 await _minioClient.MakeBucketAsync(
                     new MakeBucketArgs().WithBucket(bucketName)
                 ).ConfigureAwait(false);
-            }
 
             // Faylni Minio'ga yuklash
             await _minioClient.PutObjectAsync(
@@ -71,7 +69,7 @@ public class MinioFileStorageService : IFileStorageService
                 new GetObjectArgs()
                     .WithBucket(bucketName)
                     .WithObject(objectName)
-                    .WithCallbackStream(async (stream) => // Fayl streamini memoryStream ga nusxalash
+                    .WithCallbackStream(async stream => // Fayl streamini memoryStream ga nusxalash
                     {
                         await stream.CopyToAsync(memoryStream);
                     })
@@ -102,10 +100,6 @@ public class MinioFileStorageService : IFileStorageService
         catch (MinioException e) when (e.Message.Contains("Object does not exist")) // Fayl topilmaganligini aniqlash
         {
             return false; // Fayl mavjud emas
-        }
-        catch (Exception) // Boshqa har qanday xato
-        {
-            throw;
         }
     }
 
@@ -146,16 +140,14 @@ public class MinioFileStorageService : IFileStorageService
     {
         try
         {
-            bool found = await _minioClient.BucketExistsAsync(
+            var found = await _minioClient.BucketExistsAsync(
                 new BucketExistsArgs().WithBucket(bucketName)
             ).ConfigureAwait(false);
 
             if (!found)
-            {
                 await _minioClient.MakeBucketAsync(
                     new MakeBucketArgs().WithBucket(bucketName)
                 ).ConfigureAwait(false);
-            }
         }
         catch (MinioException e)
         {

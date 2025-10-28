@@ -1,47 +1,45 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Filters;
 using UzTube.Application.Exeptions;
+using UzTube.Core.Enums;
 
-namespace UzTube.Attributes;
+namespace UzTube.API.Filters;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequirePermissionAttribute : Attribute, IAuthorizationFilter
 {
-    private readonly SystemPermissions[] _requiredPermissions;
+    private readonly SystemPermissions[] _permissions;
 
-    public RequirePermissionAttribute(params SystemPermissions[] permissions)
-    {
-        _requiredPermissions = permissions;
-    }
+    public RequirePermissionAttribute(params SystemPermissions[] permissions) =>
+        _permissions = permissions;
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
         var user = context.HttpContext.User;
 
-        if (user.Identity == null || !user.Identity.IsAuthenticated)
-            throw new UnauthorizedException("Unauthorized");
+        // 1️⃣ Foydalanuvchi tizimga kirmagan bo‘lsa
+        if (user.Identity is not { IsAuthenticated: true })
+            throw new UnauthorizedException("User is not authenticated");
 
-        if (_requiredPermissions.Contains(SystemPermissions.Authorize))
-            return;
-
+        // 2️⃣ Foydalanuvchi permissions claimi yo‘q bo‘lsa
         var permissionsJson = user.FindFirstValue("permissions");
-
         if (string.IsNullOrEmpty(permissionsJson))
-            throw new ForbiddenException("Forbidden");
+            throw new ForbiddenException("User has not permissions");
 
-        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-        List<string>? userPermissions = JsonSerializer.Deserialize<List<string>>(permissionsJson, jsonOptions);
+        // 3️⃣ JSONdan deserialize qilamiz
+        var userPermissions = JsonSerializer.Deserialize<List<string>>(permissionsJson,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
         if (userPermissions is null || userPermissions.Count == 0)
-            throw new ForbiddenException("Forbidden");
+            throw new ForbiddenException("No permissions assigned");
 
-        bool hasPermission = _requiredPermissions
+        // 4️⃣ Kerakli ruxsatlar mavjudligini tekshiramiz
+        var hasPermission = _permissions
             .Select(p => p.ToString())
-            .Any(rp => userPermissions.Contains(rp, StringComparer.OrdinalIgnoreCase));
+            .Any(required => userPermissions.Contains(required, StringComparer.OrdinalIgnoreCase));
 
         if (!hasPermission)
-            throw new ForbiddenException("Forbidden");
+            throw new ForbiddenException("Access denied");
     }
 }

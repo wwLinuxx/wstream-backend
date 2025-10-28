@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -15,12 +15,12 @@ public class PostLikeConfiguration : IEntityTypeConfiguration<PostLike>
         });
 
         builder.HasOne(l => l.Post)
-            .WithMany(p => p.PostLikes)
+            .WithMany(p => p.Likes)
             .HasForeignKey(l => l.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(l => l.User)
-            .WithMany(u => u.PostLikes)
+            .WithMany(u => u.Likes)
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
