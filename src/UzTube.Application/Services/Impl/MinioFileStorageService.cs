@@ -3,7 +3,6 @@ using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
 using UzTube.Application.Models.Minio;
-using UzTube.Interfaces;
 
 namespace UzTube.Application.Services.Impl;
 

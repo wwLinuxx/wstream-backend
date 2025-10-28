@@ -7,7 +7,6 @@ using UzTube.Application.Services;
 namespace UzTube.API.Controllers;
 
 public class PostController(
-    IHttpContextAccessor httpContextAccessor,
     IPostService postService
 ) : ApiController
 {

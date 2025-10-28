@@ -26,8 +26,8 @@ builder.Services.AddMinio();
 
 var app = builder.Build();
 
-await app.SeedRolesAndPermissionsAsync();
-await app.SyncPermissionsAsync();
+// await app.SeedRolesAndPermissionsAsync();
+// await app.SyncPermissionsAsync();
 
 app.UseSwagger();
 app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "wwstream"); });

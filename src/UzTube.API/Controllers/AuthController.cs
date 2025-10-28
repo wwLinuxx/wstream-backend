@@ -6,12 +6,9 @@ using UzTube.Application.Services;
 namespace UzTube.API.Controllers;
 
 public class AuthController(
-    IHttpContextAccessor httpContextAccessor,
     IUserService userService
 ) : ApiController
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(LoginUserModel model)
     {

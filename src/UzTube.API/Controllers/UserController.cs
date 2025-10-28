@@ -10,7 +10,6 @@ using UzTube.Core.Enums;
 namespace UzTube.API.Controllers;
 
 public class UserController(
-    IHttpContextAccessor httpContextAccessor,
     IUserService userService,
     IPostService postService
 ) : ApiController
