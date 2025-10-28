@@ -53,7 +53,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             Email = "wwstream@wwstream.uz",
             PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
             Salt = seedRootSalt,
-            CreatedOn = DateTime.Now
+            CreatedOn = DateTime.UtcNow
         };
 
         return seedRootUser;
