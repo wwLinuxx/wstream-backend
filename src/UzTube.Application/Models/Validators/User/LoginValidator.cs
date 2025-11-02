@@ -12,8 +12,9 @@ public class LoginValidator : AbstractValidator<LoginUserModel>
             .WithMessage(
                 $"Email address should have minimum {UserValidatorConfiguration.MinimumEmailLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumEmailLength)
-            .WithMessage(
-                $"Email address should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters.");
+            .WithMessage($"Email address should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters")
+            .EmailAddress()
+            .WithMessage("Email address is not valid"); 
 
         RuleFor(u => u.Password)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
