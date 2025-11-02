@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -8,10 +8,6 @@ public class PlaylistPostConfiguration : IEntityTypeConfiguration<PlaylistPost>
 {
     public void Configure(EntityTypeBuilder<PlaylistPost> builder)
     {
-        builder.HasKey(p => new
-        {
-            p.PlaylistId,
-            p.PostId
-        });
+        builder.HasKey(p => p.Id);
     }
 }

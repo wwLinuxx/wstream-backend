@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -11,7 +11,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.HasKey(p => p.Id);
 
         builder.HasOne(p => p.User)
-            .WithMany(u => u.UserPosts)
+            .WithMany(u => u.Posts)
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -27,7 +27,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .HasMaxLength(20)
             .IsUnicode(false);
 
-        builder.Property(p => p.PhotoUrl)
+        builder.Property(p => p.ThumbnailUrl)
             .HasMaxLength(1000)
             .IsUnicode(false);
 

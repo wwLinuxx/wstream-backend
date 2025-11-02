@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UzTube.Entities;
+using UzTube.Core.Common;
+using UzTube.Core.Entities;
+using User = UzTube.Core.Entities.User;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -23,5 +27,34 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .HasMaxLength(100)
             .IsUnicode(false);
+
+        builder.HasData(GetSeedUser());
+    }
+
+    private static string Encrypt(string password, string salt)
+    {
+        using Rfc2898DeriveBytes algorithm = new Rfc2898DeriveBytes(
+            password,
+            Encoding.UTF8.GetBytes(salt),
+            8192,
+            HashAlgorithmName.SHA256);
+
+        return Convert.ToBase64String(algorithm.GetBytes(50));
+    }
+
+    private static User GetSeedUser()
+    {
+        Guid seedRootId = SystemIds.User.Root;
+        string seedRootPassword = SystemPasswords.User.Root;
+        string seedRootSalt = SystemIds.Salt.Root;
+
+        return new User
+        {
+            Id = seedRootId,
+            Email = "uztube@uztube.uz",
+            PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
+            Salt = seedRootSalt,
+            CreatedOn = DateTime.UtcNow
+        };;
     }
 }

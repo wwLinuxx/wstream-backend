@@ -1,5 +1,5 @@
-﻿using UzTube.Application.Exeptions;
-using UzTube.Models;
+﻿using UzTube.Application.Exceptions;
+using UzTube.Application.Models;
 
 namespace UzTube.API.Middleware;
 
@@ -17,12 +17,12 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         }
     }
 
-    private Task HandleException(HttpContext context, Exception ex)
+    private async Task HandleException(HttpContext context, Exception ex)
     {
         logger.LogError(ex.Message);
 
-        int code = StatusCodes.Status500InternalServerError;
-        List<string> errors = new List<string>() { ex.Message };
+        var code = StatusCodes.Status500InternalServerError;
+        var errors = new List<string> { ex.Message };
 
         code = ex switch
         {
@@ -36,6 +36,6 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
         context.Response.StatusCode = code;
 
-        return context.Response.WriteAsJsonAsync(ApiResult<string>.Failure(errors));
+        await context.Response.WriteAsJsonAsync(ApiResult<string>.Failure(errors));
     }
 }

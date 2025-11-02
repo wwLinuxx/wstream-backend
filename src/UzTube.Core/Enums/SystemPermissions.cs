@@ -1,18 +1,76 @@
-﻿public enum SystemPermissions
+namespace UzTube.Core.Enums;
+
+public enum SystemPermissions
 {
-    //Admin
-    ViewUsers = 1,
-    ManageUser = 2,
-    ViewRoles = 3,
-    ManageRoles = 4,
-    ManagePosts = 5,
-    ViewPermissions = 6,
-    ViewAuditLogs = 7,
-
-    //Root
-    ManageSystem = 8,
+    #region User
+    UserCreate = 1,
     
-    //User 
-    Authorize = 9
+    UserView,
+    
+    UserAllView,
+    
+    UserUpdate,
+    
+    UserDelete,
+    #endregion
 
+    #region Role
+    RoleCreate,
+    
+    RoleView,
+    
+    RoleUpdate,
+    
+    RoleDelete,
+    #endregion
+
+    #region Follow
+    FollewCreate,
+    
+    FollowView,
+    
+    FollowUpdate,
+    
+    FollowDelete,
+    #endregion
+    
+    #region Post
+    PostCreate,
+    
+    PostView,
+    
+    PostUpdate,
+    
+    PostDelete,
+    #endregion
+
+    #region Comment
+    CommentCreate,
+    
+    CommentView,
+    
+    CommentUpdate,
+    
+    CommentDelete,
+    #endregion
+
+    #region Like
+    LikeCreate,
+    
+    LikeView,
+    
+    LikeUpdate,
+    
+    LikeDelete,
+    #endregion
+    
+    #region Category
+    CategoryCreate,
+    
+    CategoryView,
+
+    CategoryUpdate,
+    
+    CategoryDelete,
+    #endregion
 }

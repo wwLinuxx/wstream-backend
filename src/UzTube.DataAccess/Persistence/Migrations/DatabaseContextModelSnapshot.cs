@@ -22,7 +22,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("UzTube.Entities.Category", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,7 +40,136 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Permission", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CommentText")
+                        .IsRequired()
+                        .HasMaxLength(1500)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(1500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.CommentLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id", "CommentId", "UserId");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentLikes");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Country", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(25)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Countries");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Code = "UZ",
+                            FullName = "Uzbekistan"
+                        });
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Follower", b =>
+                {
+                    b.Property<Guid>("FollowingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("FollowedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("FollowingId", "FollowerId");
+
+                    b.HasIndex("FollowerId");
+
+                    b.ToTable("Followers");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Like", b =>
+                {
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("PostId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Permission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,7 +177,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -63,35 +192,64 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .IsUnicode(false)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PlaylistPost", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Playlist", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playlists");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.PlaylistPost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PlaylistId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.HasKey("Id");
 
-                    b.Property<Guid>("UserPlaylistId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PlaylistId", "PostId");
+                    b.HasIndex("PlaylistId");
 
                     b.HasIndex("PostId");
-
-                    b.HasIndex("UserPlaylistId");
 
                     b.ToTable("PlaylistsPosts");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Post", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Post", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,13 +279,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Property<int>("LikesCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("PhotoUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime>("PostedAt")
+                    b.Property<DateTime>("PostedOn")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Rating")
@@ -135,6 +287,12 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -161,102 +319,69 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostCategory", b =>
-                {
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PostId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("PostCategories");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.PostComment", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.PostCategory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(1500)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(1500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PostId")
+                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("PostId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PostComments");
+                    b.ToTable("PostCategories");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostCommentLike", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
                 {
-                    b.Property<Guid>("CommentId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<int?>("Age")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("CountryId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("LikedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("LastName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<Guid>("PostCommentId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
 
-                    b.HasKey("CommentId", "UserId");
+                    b.HasKey("UserId");
 
-                    b.HasIndex("PostCommentId");
+                    b.HasIndex("CountryId")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
 
-                    b.ToTable("PostCommentLikes");
+                    b.ToTable("Profiles", t =>
+                        {
+                            t.HasCheckConstraint("CK_UserProfile_Age_Min_7_Max_90", "\"Age\" BETWEEN 7 AND 90");
+                        });
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostLike", b =>
-                {
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LikedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("PostId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PostLikes");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.PostRating", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Rating", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -267,7 +392,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Rating")
+                    b.Property<int>("Rate")
                         .HasColumnType("integer");
 
                     b.HasKey("Id", "PostId", "UserId");
@@ -276,10 +401,129 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostRatings");
+                    b.ToTable("Ratings");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostView", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedOn = new DateTime(2025, 11, 1, 16, 59, 2, 321, DateTimeKind.Utc).AddTicks(2340),
+                            Email = "uztube@uztube.uz",
+                            IsDeleted = false,
+                            PasswordHash = "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=",
+                            Salt = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD"
+                        });
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.UserRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId", "RoleId")
+                        .IsUnique();
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.View", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -299,281 +543,19 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PostViews");
+                    b.ToTable("Views");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Role", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Salt")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserCountry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id");
-
-                    b.ToTable("UserCountries");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserFollower", b =>
-                {
-                    b.Property<Guid>("FollowingId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FollowerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("FollowedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("FollowingId", "FollowerId");
-
-                    b.HasIndex("FollowerId");
-
-                    b.ToTable("UserFollowers");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserPlaylist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserPlaylists");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserProfile", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Age")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CountryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("CountryId")
-                        .IsUnique();
-
-                    b.HasIndex("PhoneNumber")
-                        .IsUnique();
-
-                    b.ToTable("UserProfiles", t =>
-                        {
-                            t.HasCheckConstraint("CK_UserProfile_Age_Min_7_Max_90", "\"Age\" BETWEEN 7 AND 90");
-                        });
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserRole", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("UserRoles");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.PlaylistPost", b =>
-                {
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PlaylistPosts")
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.UserPlaylist", "UserPlaylist")
-                        .WithMany("PlaylistPosts")
-                        .HasForeignKey("UserPlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("UserPlaylist");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.Post", b =>
-                {
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("UserPosts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.PostCategory", b =>
-                {
-                    b.HasOne("UzTube.Entities.Category", "Category")
-                        .WithMany("PostCategories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PostCategories")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.PostComment", b =>
-                {
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PostComments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("PostComments")
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Comments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -583,16 +565,16 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostCommentLike", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.CommentLike", b =>
                 {
-                    b.HasOne("UzTube.Entities.PostComment", "PostComment")
-                        .WithMany("PostCommentLikes")
-                        .HasForeignKey("PostCommentId")
+                    b.HasOne("UzTube.Core.Entities.Comment", "PostComment")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("PostCommentLikes")
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("CommentLikes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -602,16 +584,35 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostLike", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Follower", b =>
                 {
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PostLikes")
+                    b.HasOne("UzTube.Core.Entities.User", "Follow")
+                        .WithMany("Followers")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UzTube.Core.Entities.User", "Following")
+                        .WithMany("Followings")
+                        .HasForeignKey("FollowingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Follow");
+
+                    b.Navigation("Following");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Like", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("Likes")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("PostLikes")
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Likes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -621,16 +622,93 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostRating", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Playlist", b =>
                 {
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PostRatings")
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Playlists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.PlaylistPost", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Playlist", "UserPlaylist")
+                        .WithMany("PlaylistPosts")
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("PlaylistPosts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("PostRatings")
+                    b.Navigation("Post");
+
+                    b.Navigation("UserPlaylist");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Post", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Posts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.PostCategory", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Category", "Category")
+                        .WithMany("PostCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("Categories")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Country", "Country")
+                        .WithOne("UserProfile")
+                        .HasForeignKey("UzTube.Core.Entities.Profile", "CountryId");
+
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithOne("Profile")
+                        .HasForeignKey("UzTube.Core.Entities.Profile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Rating", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("Ratings")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Ratings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -640,34 +718,15 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostView", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.RolePermission", b =>
                 {
-                    b.HasOne("UzTube.Entities.Post", "Post")
-                        .WithMany("PostViews")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("PostViews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.RolePermission", b =>
-                {
-                    b.HasOne("UzTube.Entities.Permission", "Permission")
+                    b.HasOne("UzTube.Core.Entities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.Role", "Role")
+                    b.HasOne("UzTube.Core.Entities.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -678,64 +737,16 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.UserFollower", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.UserRole", b =>
                 {
-                    b.HasOne("UzTube.Entities.User", "Follower")
-                        .WithMany("UserFollowers")
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UzTube.Entities.User", "Following")
-                        .WithMany("UserFollowing")
-                        .HasForeignKey("FollowingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Follower");
-
-                    b.Navigation("Following");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserPlaylist", b =>
-                {
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("UserPlaylists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserProfile", b =>
-                {
-                    b.HasOne("UzTube.Entities.UserCountry", "Country")
-                        .WithOne("UserProfile")
-                        .HasForeignKey("UzTube.Entities.UserProfile", "CountryId")
-                        .IsRequired();
-
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithOne("UserProfile")
-                        .HasForeignKey("UzTube.Entities.UserProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UzTube.Entities.UserRole", b =>
-                {
-                    b.HasOne("UzTube.Entities.Role", "Role")
+                    b.HasOne("UzTube.Core.Entities.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UzTube.Entities.User", "User")
-                        .WithMany("UserRoles")
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -745,78 +756,97 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Category", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.View", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Post", "Post")
+                        .WithMany("Views")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("Views")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Category", b =>
                 {
                     b.Navigation("PostCategories");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Permission", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
+                {
+                    b.Navigation("CommentLikes");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Country", b =>
+                {
+                    b.Navigation("UserProfile")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Post", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Playlist", b =>
                 {
                     b.Navigation("PlaylistPosts");
-
-                    b.Navigation("PostCategories");
-
-                    b.Navigation("PostComments");
-
-                    b.Navigation("PostLikes");
-
-                    b.Navigation("PostRatings");
-
-                    b.Navigation("PostViews");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.PostComment", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Post", b =>
                 {
-                    b.Navigation("PostCommentLikes");
+                    b.Navigation("Categories");
+
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+
+                    b.Navigation("PlaylistPosts");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("Views");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.Role", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.Role", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("UzTube.Entities.User", b =>
+            modelBuilder.Entity("UzTube.Core.Entities.User", b =>
                 {
-                    b.Navigation("PostCommentLikes");
+                    b.Navigation("CommentLikes");
 
-                    b.Navigation("PostComments");
+                    b.Navigation("Comments");
 
-                    b.Navigation("PostLikes");
+                    b.Navigation("Followers");
 
-                    b.Navigation("PostRatings");
+                    b.Navigation("Followings");
 
-                    b.Navigation("PostViews");
+                    b.Navigation("Likes");
 
-                    b.Navigation("UserFollowers");
+                    b.Navigation("Playlists");
 
-                    b.Navigation("UserFollowing");
+                    b.Navigation("Posts");
 
-                    b.Navigation("UserPlaylists");
-
-                    b.Navigation("UserPosts");
-
-                    b.Navigation("UserProfile")
+                    b.Navigation("Profile")
                         .IsRequired();
 
-                    b.Navigation("UserRoles");
-                });
+                    b.Navigation("Ratings");
 
-            modelBuilder.Entity("UzTube.Entities.UserCountry", b =>
-                {
-                    b.Navigation("UserProfile")
-                        .IsRequired();
-                });
+                    b.Navigation("Roles");
 
-            modelBuilder.Entity("UzTube.Entities.UserPlaylist", b =>
-                {
-                    b.Navigation("PlaylistPosts");
+                    b.Navigation("Views");
                 });
 #pragma warning restore 612, 618
         }

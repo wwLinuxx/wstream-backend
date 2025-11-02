@@ -1,10 +1,8 @@
 ﻿namespace UzTube.Application.Models;
 
-public class PageOption
+public record PageOption
 {
-    public int PageNumber { get; set; }
-
-    public int PageSize { get; set; }
-
-    public string Search { get; set; }
+    public int PageNumber { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+    public string Search { get; init; } = null!;
 }

@@ -1,4 +1,4 @@
-﻿namespace UzTube.Interfaces;
+﻿namespace UzTube.Application.Services;
 
 public interface IFileStorageService
 {
@@ -20,4 +20,3 @@ public interface IFileStorageService
     // Yangi bucket yaratish
     Task CreateBucketAsync(string bucketName);
 }
-

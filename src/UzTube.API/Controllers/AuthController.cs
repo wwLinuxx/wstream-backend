@@ -1,44 +1,34 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UzTube.API.Controllers;
-using UzTube.Attributes;
-using UzTube.Interfaces;
-using UzTube.Models;
-using UzTube.Models.DTO;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UzTube.Application.Models;
+using UzTube.Application.Models.User;
+using UzTube.Application.Services;
 
-namespace UzTube.Controllers;
+namespace UzTube.API.Controllers;
 
-public class AuthController : ApiController
+public class AuthController(
+    IUserService userService
+) : ApiController
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUserService _service;
-
-    public AuthController(
-        IHttpContextAccessor httpContextAccessor,
-        IUserService userService)
+    [HttpPost("register")]
+    public async Task<IActionResult> CreateAsync(CreateUserModel model)
     {
-        _httpContextAccessor = httpContextAccessor;
-        _service = userService;
+        return Ok(ApiResult<CreateUserResponseModel>.Success(
+            await userService.CreateAsync(model)));
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(LoginUserModel model)
     {
         return Ok(ApiResult<LoginResponseModel>.Success(
-            await _service.LoginAsync(model)));
+            await userService.LoginAsync(model)));
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> CreateAsync(CreateUserModel model)
-    {
-        return Ok(ApiResult<CreateUserResponseModel>.Success(
-            await _service.CreateAsync(model)));
-    }
-
-    [RequirePermission(SystemPermissions.Authorize)]
+    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetMeAsync()
     {
         return Ok(ApiResult<UserResponseModel>.Success(
-            await _service.GetMeAsync()));
+            await userService.GetMeAsync()));
     }
 }

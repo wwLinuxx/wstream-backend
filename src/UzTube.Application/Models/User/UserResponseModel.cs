@@ -1,23 +1,14 @@
-﻿using UzTube.Application.Models;
-using UzTube.Application.Models.Role;
+﻿namespace UzTube.Application.Models.User;
 
-namespace UzTube.Models.DTO;
-
-public class UserResponseModel : BaseResponseModel
+public record UserResponseModel : BaseResponseModel
 {
-    public string Email { get; set; }
-    
-    public string FirstName { get; set; }
-
-    public string LastName { get; set; }
-
-    public string PhoneNumber { get; set; }
-
-    public int Age { get; set; }
-
-    public string Country { get; set; }
-
-    public string CreatedAt { get; set; }
-
-    public List<RoleResponseModel> Roles { get; set; }
+    public string Email { get; init; } = null!;
+    public string? FirstName { get; init; }
+    public string? LastName { get; init; }
+    public string? PhoneNumber { get; init; }
+    public int? Age { get; init; }
+    public Guid? CountryId { get; init; }
+    public string CreatedOn { get; init; } = null!;
+    public string? UpdatedOn { get; init; }
+    public IReadOnlyCollection<string> Roles { get; init; } = [];
 }

@@ -1,12 +1,7 @@
-﻿namespace UzTube.Models;
+﻿namespace UzTube.Application.Models.Minio;
 
-public class MinioOptions
-{
-    public string Endpoint { get; set; }
-
-    public string AccessKey { get; set; }
-
-    public string SecretKey { get; set; }
-
-    public bool UseSSL { get; set; }
-}
+public record MinioOptions(
+    string Endpoint,
+    string AccessKey,
+    string SecretKey,
+    bool UseSsl);

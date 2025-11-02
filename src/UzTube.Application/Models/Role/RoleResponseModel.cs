@@ -1,8 +1,6 @@
 ﻿namespace UzTube.Application.Models.Role;
 
-public class RoleResponseModel
+public record RoleResponseModel : BaseResponseModel
 {
-    public int Id { get; set; }
-
-    public string Name { get; set; }
+    public string Name { get; init; } = null!;
 }

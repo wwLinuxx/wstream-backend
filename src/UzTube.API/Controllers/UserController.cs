@@ -1,112 +1,95 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using UzTube.API.Controllers;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using UzTube.API.Filters;
 using UzTube.Application.Models;
+using UzTube.Application.Models.Post;
 using UzTube.Application.Models.User;
-using UzTube.Attributes;
-using UzTube.Interfaces;
-using UzTube.Models;
-using UzTube.Models.DTO;
+using UzTube.Application.Services;
+using UzTube.Core.Enums;
 
-namespace UzTube.Controllers;
+namespace UzTube.API.Controllers;
 
-public class UserController : ApiController
+public class UserController(
+    IUserService userService,
+    IPostService postService
+) : ApiController
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUserService _userService;
-    private readonly IPostService _postService;
-
-    public UserController(
-        IHttpContextAccessor httpContextAccessor,
-        IUserService userService,
-        IPostService postService
-        )
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _userService = userService;
-        _postService = postService;
-    }
-
-    [RequirePermission(SystemPermissions.ViewUsers)]
-    [HttpGet]
-    public async Task<IActionResult> GetUsersAsync()
-    {
-        return Ok(ApiResult<List<UserResponseModel>>.Success(
-            await _userService.GetUsersAsync()));
-    }
-
-    [RequirePermission(SystemPermissions.ViewUsers)]
-    [HttpPost("get-users-list")]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
+    [HttpPost("get-users")]
     public async Task<IActionResult> GetListUsersAsync([FromBody] PageOption option)
     {
-        return Ok(ApiResult<PaginatedList<UserListResponseModel>>.Success(
-            await _userService.GetUsersListAsync(option)));
+        return Ok(ApiResult<PaginatedList<UserResponseModel>>.Success(
+            await userService.GetUsersAsync(option)));
     }
 
-    [UserOrAdmin]
+    // [UserOrAdmin]
     [HttpGet("{id:Guid}")]
     public async Task<IActionResult> GetUserProfileByIdAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<UserResponseModel>.Success(
-            await _userService.GetUserProfileByIdAsync(id)));
+            await userService.GetUserProfileByIdAsync(id)));
     }
 
     [HttpGet("search")]
-    public async Task<IActionResult> SearchUserByQueryAsync([FromQuery][Required] Guid id)
-        => Ok(ApiResult<UserResponseModel>.Success(
-            await _userService.SearchUserByQueryAsync(id)));
+    public async Task<IActionResult> SearchUserByQueryAsync([FromQuery] [Required] string query)
+    {
+        return Ok(ApiResult<UserResponseModel>.Success(
+            await userService.SearchUserByQueryAsync(query)));
+    }
 
-    [UserOrAdmin]
+    // [UserOrAdmin]
     [HttpPut("{id:Guid}")]
     public async Task<IActionResult> UpdateUserProfileByIdAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserProfileModel dto)
+        [FromBody] UpdateUserProfileModel model)
     {
         return Ok(ApiResult<UpdateUserProfileResponseModel>.Success(
-            await _userService.UpdateUserProfileByIdAsync(id, dto)));
+            await userService.UpdateUserProfileByIdAsync(id, model)));
     }
 
-    [UserOrAdmin]
+    // [UserOrAdmin]
     [HttpPut("{id:Guid}/password")]
     public async Task<IActionResult> UpdateUserPasswordByIdAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserPasswordModel dto)
+        [FromBody] UpdateUserPasswordModel model)
     {
         return Ok(ApiResult<UpdateUserPasswordResponseModel>.Success(
-            await _userService.UpdateUserPasswordByIdAsync(id, dto)));
+            await userService.UpdateUserPasswordByIdAsync(id, model)));
     }
 
-    [RequirePermission(SystemPermissions.ManageRoles)]
+    // [RequirePermission(SystemPermissions.ManageRoles)]
     [HttpPut("{id:Guid}/roles")]
     public async Task<IActionResult> UpdateUserRoleByIdAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserRoleModel dto)
+        [FromBody] UpdateUserRoleModel model)
     {
         return Ok(ApiResult<UpdateUserRoleResponseModel>.Success(
-            await _userService.UpdateUserRoleByIdAsync(id, dto)));
+            await userService.UpdateUserRoleByIdAsync(id, model)));
     }
 
-    [UserOrAdmin]
+    // [UserOrAdmin]
     [HttpGet("{id:Guid}/posts")]
-    public async Task<IActionResult> GetUserPostsAsync([FromRoute] Guid id)
+    public async Task<IActionResult> GetUserPostsAsync(
+        [FromRoute] Guid id,
+        [FromBody] PageOption option)
     {
         return Ok(ApiResult<List<PostResponseModel>>.Success(
-            await _postService.GetUserPostsAsync(id)));
+            await postService.GetUserPostsAsync(id, option)));
     }
 
-    [RequirePermission(SystemPermissions.ManageUser)]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] Guid id)
     {
-        return Ok(ApiResult<DeleteUserResonseModel>.Success(
-            await _userService.DeleteUserByIdAsync(id)));
+        return Ok(ApiResult<DeleteUserResponseModel>.Success(
+            await userService.DeleteUserByIdAsync(id)));
     }
 
-    [RequirePermission(SystemPermissions.ManageUser)]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPut("{id:Guid}/restore")]
     public async Task<IActionResult> RestoreUserByIdAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<RestoreUserResponseModel>.Success(
-            await _userService.RestoreUserByIdAsync(id)));
+            await userService.RestoreUserByIdAsync(id)));
     }
 }

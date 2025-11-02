@@ -1,12 +1,16 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 
 namespace UzTube.API.Middleware;
 
-public class PerformanceMiddleware(RequestDelegate next, ILogger<PerformanceMiddleware> logger)
+public class PerformanceMiddleware(
+    RequestDelegate next,
+    ILogger<PerformanceMiddleware> logger
+)
 {
     public async Task Invoke(HttpContext context)
     {
-        const int performanceTimeLog = 500;
+        const int warningThresholdMs = 500;
 
         var sw = new Stopwatch();
 
@@ -16,10 +20,27 @@ public class PerformanceMiddleware(RequestDelegate next, ILogger<PerformanceMidd
 
         sw.Stop();
 
-        if (sw.ElapsedMilliseconds > performanceTimeLog)
-            logger.LogWarning("Request {method} {path} it look about {elapsed} ms",
+        var elapsed = sw.ElapsedMilliseconds;
+        var statusCode = context.Response?.StatusCode;
+        var user = context.User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "Anonymous";
+
+        if (sw.ElapsedMilliseconds > warningThresholdMs)
+            logger.LogWarning(
+                "[PERFORMANCE] {Method} {Path} | {StatusCode} | {User} | {Elapsed} ms",
                 context.Request?.Method,
                 context.Request?.Path.Value,
-                sw.ElapsedMilliseconds);
+                statusCode,
+                user,
+                elapsed
+            );
+        else
+            logger.LogInformation(
+                "[PERFORMANCE] {Method} {Path} | {StatusCode} | {User} | {Elapsed} ms",
+                context.Request?.Method,
+                context.Request?.Path.Value,
+                statusCode,
+                user,
+                elapsed
+            );
     }
 }

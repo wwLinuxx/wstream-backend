@@ -1,24 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace UzTube.Shared.Services.Impl;
 
-public class ClaimService : IClaimService
+public class ClaimService(IHttpContextAccessor httpContextAccessor) : IClaimService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public ClaimService(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    public string GetUserId()
-    {
-        return GetClaim(ClaimTypes.NameIdentifier);
-    }
+    public Guid GetUserId()
+        => Guid.Parse(GetClaim(ClaimTypes.NameIdentifier));
 
     public string GetClaim(string key)
-    {
-        return _httpContextAccessor.HttpContext?.User?.FindFirst(key)?.Value;
-    }
+        => httpContextAccessor.HttpContext?.User?.FindFirst(key)?.Value ?? string.Empty;
 }

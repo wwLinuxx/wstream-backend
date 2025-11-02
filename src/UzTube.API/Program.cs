@@ -1,20 +1,20 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Serilog;
 using UzTube.API;
 using UzTube.API.Filters;
 using UzTube.API.Middleware;
 using UzTube.Application;
-using UzTube.Application.Extensions;
 using UzTube.Application.Models.Validators;
-using UzTube.Application.Models.Validators.User;
 using UzTube.DataAccess;
-using UzTube.Models.DTO;
+using UzTube.DataAccess.Persistence;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(
-    config => config.Filters.Add(typeof(ValidateModelAttribute))
-);
+builder.Host.AddSerilog();
+
+builder.Services.AddControllers(config =>
+    config.Filters.Add(typeof(ValidateModelAttribute)));
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(IValidationMarker));
@@ -28,13 +28,17 @@ builder.Services.AddSwagger();
 builder.Services.AddJwt(builder.Configuration);
 builder.Services.AddMinio();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
+using IServiceScope scope = app.Services.CreateScope();
+
+await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
+
+await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
-await app.SeedDefaultRolesAsync();
 
 app.UseSwagger();
-app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube"); });
+app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "UZTUBE"); });
 
 app.UseHttpsRedirection();
 
