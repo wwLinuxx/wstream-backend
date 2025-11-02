@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UzTube.Core.Common;
 using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class UserCountryConfiguration : IEntityTypeConfiguration<UserCountry>
+public class CountryConfiguration : IEntityTypeConfiguration<Country>
 {
-    public void Configure(EntityTypeBuilder<UserCountry> builder)
+    public void Configure(EntityTypeBuilder<Country> builder)
     {
         builder.HasKey(c => c.Id);
 
@@ -22,5 +23,12 @@ public class UserCountryConfiguration : IEntityTypeConfiguration<UserCountry>
             .HasMaxLength(3)
             .HasMaxLength(25)
             .IsUnicode(false);
+
+        builder.HasData(new Country
+        {
+            Id = SystemIds.Country.Uzbekistan,
+            Code = "UZ",
+            FullName = "Uzbekistan"
+        });
     }
 }

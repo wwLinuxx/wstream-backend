@@ -29,30 +29,32 @@ public static class DataAccessDependencyInjection
 
     public static async Task SeedRolesAndPermissionsAsync(this IApplicationBuilder app)
     {
-        var scope = app.ApplicationServices.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-        
+        using IServiceScope scope = app.ApplicationServices.CreateScope();
+        DatabaseContext context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+
         ArgumentNullException.ThrowIfNull(context);
-        
+
         await SeedRolesAsync(context);
         await AssignRootRoleToRootUserAsync(context);
         await GrantAllPermissionsToRootRoleAsync(context);
     }
-    
+
     public static async Task SyncPermissionsAsync(this IApplicationBuilder app)
     {
-        var scope = app.ApplicationServices.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-        var logger = scope.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger("PermissionSync");
+        using IServiceScope scope = app.ApplicationServices.CreateScope();
+        DatabaseContext context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+        ILogger? logger = scope.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger("PermissionSync");
 
-        var dbPermissions = await context.Permissions.AsNoTracking().ToListAsync();
-        var enumPermissions = Enum.GetValues<SystemPermissions>().ToList();
+        logger?.LogInformation("[PERMISSION SYNC] Checking for new permissions...");
 
-        var dbPermissionIds = dbPermissions.Select(p => p.Id).ToHashSet();
-        var enumPermissionIds = enumPermissions.Select(e => (int)e).ToHashSet();
+        List<Permission> dbPermissions = await context.Permissions.AsNoTracking().ToListAsync();
+        List<SystemPermissions> enumPermissions = Enum.GetValues<SystemPermissions>().ToList();
+
+        HashSet<int> dbPermissionIds = dbPermissions.Select(p => p.Id).ToHashSet();
+        HashSet<int> enumPermissionIds = enumPermissions.Select(e => (int)e).ToHashSet();
 
         // Enumda bor, DBda yo‘q — qo‘shamiz
-        var toAdd = enumPermissions
+        List<Permission> toAdd = enumPermissions
             .Where(ep => !dbPermissionIds.Contains((int)ep))
             .Select(e => new Permission
             {
@@ -65,32 +67,32 @@ public static class DataAccessDependencyInjection
         if (toAdd.Count > 0)
         {
             await context.Permissions.AddRangeAsync(toAdd);
-            
-            logger?.LogInformation("Added {Count} new permissions: {Permissions}",
+
+            logger?.LogInformation("[PERMISSION SYNC] Added {Count} new permissions: {Permissions}",
                 toAdd.Count, string.Join(", ", toAdd.Select(p => p.Name)));
         }
 
         // DBda bor, Enumda yo‘q — o‘chiramiz
-        var toRemove = dbPermissions
+        List<Permission> toRemove = dbPermissions
             .Where(p => !enumPermissionIds.Contains(p.Id))
             .ToList();
 
         if (toRemove.Count > 0)
         {
             context.Permissions.RemoveRange(toRemove);
-            
-            logger?.LogWarning("Removed {Count} permissions: {Permissions}",
+
+            logger?.LogWarning("[PERMISSION SYNC] Removed {Count} permissions: {Permissions}",
                 toRemove.Count, string.Join(", ", toRemove.Select(p => p.Name)));
         }
 
         // Nom yoki description farq qilsa — yangilaymiz
-        var toUpdate = dbPermissions
+        List<Permission> toUpdate = dbPermissions
             .Where(p =>
                 enumPermissionIds.Contains(p.Id) &&
                 enumPermissions.Any(e => (int)e == p.Id && p.Name != e.ToString()))
             .Select(p =>
             {
-                var match = enumPermissions.First(e => (int)e == p.Id);
+                SystemPermissions match = enumPermissions.First(e => (int)e == p.Id);
                 p.Name = match.ToString();
                 p.Description = $"{match} - Permission";
                 p.UpdatedOn = DateTime.UtcNow;
@@ -109,7 +111,7 @@ public static class DataAccessDependencyInjection
         if (toAdd.Count > 0 || toRemove.Count > 0 || toUpdate.Count > 0)
             await context.SaveChangesAsync();
         else
-            logger?.LogInformation("All permissions are already in sync.");
+            logger?.LogInformation("[PERMISSION SYNC] All permissions are already in sync.");
     }
 
     private static async Task SeedRolesAsync(DatabaseContext context)

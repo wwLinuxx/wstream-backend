@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class PostCommentConfiguration : IEntityTypeConfiguration<PostComment>
+public class CommentConfiguration : IEntityTypeConfiguration<Comment>
 {
-    public void Configure(EntityTypeBuilder<PostComment> builder)
+    public void Configure(EntityTypeBuilder<Comment> builder)
     {
         builder.HasKey(c => c.Id);
 
@@ -20,7 +20,7 @@ public class PostCommentConfiguration : IEntityTypeConfiguration<PostComment>
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(c => c.Comment)
+        builder.Property(c => c.CommentText)
             .HasMaxLength(1500)
             .IsUnicode(false);
     }

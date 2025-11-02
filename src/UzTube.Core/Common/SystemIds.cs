@@ -29,7 +29,7 @@ public static class SystemIds
         ///     Moderator role ID.
         /// </summary>
         public static readonly Guid Moderator = Guid.Parse("33333333-3333-3333-3333-333333333333");
-        
+
         /// <summary>
         ///     Regular user role ID.
         /// </summary>
@@ -44,11 +44,8 @@ public static class SystemIds
         public const string Root = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD";
     }
 
-    public static class Password
+    public static class Country
     {
-        /// <summary>
-        ///     The root (super) salt ID.
-        /// </summary>
-        public const string Root = "qwe1112233";
+        public static readonly Guid Uzbekistan = Guid.Parse("11111111-1111-1111-1111-111111111111");
     }
 }

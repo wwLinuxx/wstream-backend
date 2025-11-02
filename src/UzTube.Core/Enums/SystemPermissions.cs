@@ -1,16 +1,76 @@
-﻿namespace UzTube.Core.Enums;
+namespace UzTube.Core.Enums;
 
 public enum SystemPermissions
 {
-    UploadVideo = 1,
-    EditVideo = 2,
-    DeleteVideo = 3,
-    AddComment = 4,
-    DeleteComment = 5,
-    LikeVideo = 6,
-    DislikeVideo = 7,
-    ViewVideo = 8,
-    ManageUsers = 9,
-    ManageVideos = 10,
-    AccessAdminPanel = 11
+    #region User
+    UserCreate = 1,
+    
+    UserView,
+    
+    UserAllView,
+    
+    UserUpdate,
+    
+    UserDelete,
+    #endregion
+
+    #region Role
+    RoleCreate,
+    
+    RoleView,
+    
+    RoleUpdate,
+    
+    RoleDelete,
+    #endregion
+
+    #region Follow
+    FollewCreate,
+    
+    FollowView,
+    
+    FollowUpdate,
+    
+    FollowDelete,
+    #endregion
+    
+    #region Post
+    PostCreate,
+    
+    PostView,
+    
+    PostUpdate,
+    
+    PostDelete,
+    #endregion
+
+    #region Comment
+    CommentCreate,
+    
+    CommentView,
+    
+    CommentUpdate,
+    
+    CommentDelete,
+    #endregion
+
+    #region Like
+    LikeCreate,
+    
+    LikeView,
+    
+    LikeUpdate,
+    
+    LikeDelete,
+    #endregion
+    
+    #region Category
+    CategoryCreate,
+    
+    CategoryView,
+
+    CategoryUpdate,
+    
+    CategoryDelete,
+    #endregion
 }

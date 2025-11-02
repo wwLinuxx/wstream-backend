@@ -58,11 +58,11 @@ public class CreateUserValidator : AbstractValidator<CreateUserModel>
 
     private bool EmailAddressIsUnique(string email)
     {
-        return _context.Users.Any(u => u.Email == email);
+        return _context.Users.Any(u => u.Email != email);
     }
 
     private bool PhoneNumberIsUnique(string phoneNumber)
     {
-        return _context.Users.Any(u => u.Profile.PhoneNumber == phoneNumber);
+        return _context.Users.Any(u => u.Profile.PhoneNumber != phoneNumber);
     }
 }

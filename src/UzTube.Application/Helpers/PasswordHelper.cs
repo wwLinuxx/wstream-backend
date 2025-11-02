@@ -17,13 +17,9 @@ public class PasswordHelper : IPasswordHelper
         return Convert.ToBase64String(algorithm.GetBytes(50));
     }
 
-    public string GenerateSalt()
-    {
-        return Guid.NewGuid().ToString();
-    }
+    public string GenerateSalt() =>
+        Guid.NewGuid().ToString();
 
-    public bool Verify(string passwordHash, string password, string salt)
-    {
-        return passwordHash == Encrypt(password, salt);
-    }
+    public bool Verify(string passwordHash, string password, string salt) =>
+        passwordHash == Encrypt(password, salt);
 }

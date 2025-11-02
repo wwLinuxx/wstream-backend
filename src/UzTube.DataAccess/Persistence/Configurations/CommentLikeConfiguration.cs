@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class PostCommentLikeConfiguration : IEntityTypeConfiguration<PostCommentLike>
+public class CommentLikeConfiguration : IEntityTypeConfiguration<CommentLike>
 {
-    public void Configure(EntityTypeBuilder<PostCommentLike> builder)
+    public void Configure(EntityTypeBuilder<CommentLike> builder)
     {
         builder.HasKey(l => new
         {

@@ -4,23 +4,24 @@ namespace UzTube.Core.Entities;
 
 public class User : BaseEntity
 {
+    // TODO: Need delete SaftDelete and change to HistoryTable
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
     public string Salt { get; set; } = null!;
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
+    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
     public DateTime? UpdatedOn { get; set; }
     public DateTime? DeletedOn { get; set; }
 
-    public UserProfile Profile { get; set; } = null!;
-    public ICollection<UserFollower> Followers { get; set; } = [];
-    public ICollection<UserFollower> Followings { get; set; } = [];
+    public Profile Profile { get; set; } = null!;
+    public ICollection<Follower> Followers { get; set; } = [];
+    public ICollection<Follower> Followings { get; set; } = [];
     public ICollection<Post> Posts { get; set; } = [];
-    public ICollection<PostView> Views { get; set; } = [];
-    public ICollection<PostLike> Likes { get; set; } = [];
-    public ICollection<PostComment> Comments { get; set; } = [];
-    public ICollection<PostCommentLike> CommentLikes { get; set; } = [];
-    public ICollection<UserPlaylist> Playlists { get; set; } = [];
-    public ICollection<PostRating> Ratings { get; set; } = [];
+    public ICollection<View> Views { get; set; } = [];
+    public ICollection<Like> Likes { get; set; } = [];
+    public ICollection<Comment> Comments { get; set; } = [];
+    public ICollection<CommentLike> CommentLikes { get; set; } = [];
+    public ICollection<Playlist> Playlists { get; set; } = [];
+    public ICollection<Rating> Ratings { get; set; } = [];
     public ICollection<UserRole> Roles { get; set; } = [];
 }

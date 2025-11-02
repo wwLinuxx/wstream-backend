@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class UserPlaylistConfiguration : IEntityTypeConfiguration<UserPlaylist>
+public class PlaylistConfiguration : IEntityTypeConfiguration<Playlist>
 {
-    public void Configure(EntityTypeBuilder<UserPlaylist> builder)
+    public void Configure(EntityTypeBuilder<Playlist> builder)
     {
         builder.HasKey(c => c.Id);
 

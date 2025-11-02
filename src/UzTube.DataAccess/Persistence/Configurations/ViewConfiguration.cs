@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class PostViewConfiguration : IEntityTypeConfiguration<PostView>
+public class ViewConfiguration : IEntityTypeConfiguration<View>
 {
-    public void Configure(EntityTypeBuilder<PostView> builder)
+    public void Configure(EntityTypeBuilder<View> builder)
     {
         builder.HasKey(pv => new
         {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UzTube.Application.Exeptions;
+using UzTube.Application.Exceptions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
 using UzTube.Core.Entities;
@@ -166,6 +166,7 @@ public class PostService(
 
     public async Task<DeletePostResponseModel> DeletePostByIdAsync(Guid id)
     {
+        // TODO: When delete post need copy to HistoryTable
         var post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
                    ?? throw new NotFoundException("Post not found");
 

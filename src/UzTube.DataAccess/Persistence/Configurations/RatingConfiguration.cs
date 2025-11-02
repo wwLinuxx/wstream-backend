@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class PostRatingConfiguration : IEntityTypeConfiguration<PostRating>
+public class RatingConfiguration : IEntityTypeConfiguration<Rating>
 {
-    public void Configure(EntityTypeBuilder<PostRating> builder)
+    public void Configure(EntityTypeBuilder<Rating> builder)
     {
         builder.HasKey(r => new
         {

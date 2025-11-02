@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UzTube.Application.Exeptions;
+using UzTube.Application.Exceptions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Comment;
 using UzTube.Core.Entities;
@@ -11,7 +11,7 @@ public class CommentService(DatabaseContext context) : ICommentService
 {
     public async Task<PaginatedList<CommentResponseModel>> GetCommentsList(PageOption option)
     {
-        IQueryable<PostComment> query = context.PostComments;
+        IQueryable<Comment> query = context.Comments;
 
         var comments = await query
             .Skip(option.PageSize * (option.PageNumber - 1))
@@ -19,7 +19,7 @@ public class CommentService(DatabaseContext context) : ICommentService
             .Select(c => new CommentResponseModel
             {
                 Id = c.Id,
-                CommentText = c.Comment,
+                CommentText = c.CommentText,
                 CreatedAt = c.CreatedAt.ToString("g")
             })
             .ToListAsync();
@@ -27,7 +27,7 @@ public class CommentService(DatabaseContext context) : ICommentService
         if (comments.Count > 0)
             throw new NotFoundException("Comments not found");
 
-        var commentsCount = context.PostComments.Count();
+        var commentsCount = context.Comments.Count();
 
         return PaginatedList<CommentResponseModel>.Create(comments, commentsCount, option.PageNumber, option.PageSize);
     }

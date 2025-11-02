@@ -4,9 +4,9 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class UserFollowerConfiguration : IEntityTypeConfiguration<UserFollower>
+public class FollowerConfiguration : IEntityTypeConfiguration<Follower>
 {
-    public void Configure(EntityTypeBuilder<UserFollower> builder)
+    public void Configure(EntityTypeBuilder<Follower> builder)
     {
         builder.HasKey(uf => new
         {
@@ -14,7 +14,7 @@ public class UserFollowerConfiguration : IEntityTypeConfiguration<UserFollower>
             uf.FollowerId
         });
 
-        builder.HasOne(uf => uf.Follower)
+        builder.HasOne(uf => uf.Follow)
             .WithMany(f => f.Followers)
             .HasForeignKey(uf => uf.FollowerId)
             .OnDelete(DeleteBehavior.Cascade);

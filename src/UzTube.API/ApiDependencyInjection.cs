@@ -4,12 +4,21 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
+using Serilog;
 using UzTube.Application.Models.Minio;
 
 namespace UzTube.API;
 
 public static class ApiDependencyInjection
 {
+    public static void AddSerilog(this ConfigureHostBuilder hosts)
+    {
+        hosts.UseSerilog((context, loggerConfiguration) =>
+        {
+            loggerConfiguration.ReadFrom.Configuration(context.Configuration);
+        });
+    }
+    
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
         var secretKey = configuration.GetValue<string>("JwtConfigurations:SecretKey");

@@ -14,7 +14,7 @@ public class UserController(
     IPostService postService
 ) : ApiController
 {
-    [RequirePermission(SystemPermissions.ManageUsers)]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPost("get-users")]
     public async Task<IActionResult> GetListUsersAsync([FromBody] PageOption option)
     {
@@ -77,7 +77,7 @@ public class UserController(
             await postService.GetUserPostsAsync(id, option)));
     }
 
-    [RequirePermission(SystemPermissions.ManageUsers)]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] Guid id)
     {
@@ -85,7 +85,7 @@ public class UserController(
             await userService.DeleteUserByIdAsync(id)));
     }
 
-    [RequirePermission(SystemPermissions.ManageUsers)]
+    // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPut("{id:Guid}/restore")]
     public async Task<IActionResult> RestoreUserByIdAsync([FromRoute] Guid id)
     {

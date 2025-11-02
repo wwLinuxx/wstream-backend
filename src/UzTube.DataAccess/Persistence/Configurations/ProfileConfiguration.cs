@@ -4,15 +4,15 @@ using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
+public class ProfileConfiguration : IEntityTypeConfiguration<Profile>
 {
-    public void Configure(EntityTypeBuilder<UserProfile> builder)
+    public void Configure(EntityTypeBuilder<Profile> builder)
     {
         builder.HasKey(up => up.UserId);
 
         builder.HasOne(up => up.User)
             .WithOne(u => u.Profile)
-            .HasForeignKey<UserProfile>(u => u.UserId)
+            .HasForeignKey<Profile>(u => u.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(up => up.FirstName)
@@ -30,7 +30,7 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 
         builder.HasOne(up => up.Country)
             .WithOne(c => c.UserProfile)
-            .HasForeignKey<UserProfile>(up => up.CountryId)
+            .HasForeignKey<Profile>(up => up.CountryId)
             .OnDelete(DeleteBehavior.ClientSetNull);
     }
 }

@@ -1,4 +1,4 @@
-﻿using UzTube.Application.Exeptions;
+﻿using UzTube.Application.Exceptions;
 using UzTube.Application.Models;
 
 namespace UzTube.API.Middleware;
@@ -17,7 +17,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         }
     }
 
-    private Task HandleException(HttpContext context, Exception ex)
+    private async Task HandleException(HttpContext context, Exception ex)
     {
         logger.LogError(ex.Message);
 
@@ -36,6 +36,6 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
         context.Response.StatusCode = code;
 
-        return context.Response.WriteAsJsonAsync(ApiResult<string>.Failure(errors));
+        await context.Response.WriteAsJsonAsync(ApiResult<string>.Failure(errors));
     }
 }

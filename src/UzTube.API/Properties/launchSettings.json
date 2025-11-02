@@ -9,26 +9,16 @@
     }
   },
   "profiles": {
-    "API": {
+    "UZTUBE_API_HTTPS": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:7183",
+      "applicationUrl": "https://127.0.0.1:4444",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    //"API-https": {
-    //  "commandName": "API",
-    //  "dotnetRunMessages": true,
-    //  "launchBrowser": true,
-    //  "launchUrl": "swagger",
-    //  "applicationUrl": "https://localhost:7183;http://localhost:5020",
-    //  "environmentVariables": {
-    //    "ASPNETCORE_ENVIRONMENT": "Development"
-    //  }
-    //},
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,

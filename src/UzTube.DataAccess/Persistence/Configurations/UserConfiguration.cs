@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UzTube.Core.Common;
 using UzTube.Core.Entities;
+using User = UzTube.Core.Entities.User;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
@@ -32,30 +33,28 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
     private static string Encrypt(string password, string salt)
     {
-        using var algorithm = new Rfc2898DeriveBytes(
+        using Rfc2898DeriveBytes algorithm = new Rfc2898DeriveBytes(
             password,
             Encoding.UTF8.GetBytes(salt),
-            1000,
+            8192,
             HashAlgorithmName.SHA256);
 
-        return Convert.ToBase64String(algorithm.GetBytes(32));
+        return Convert.ToBase64String(algorithm.GetBytes(50));
     }
 
     private static User GetSeedUser()
     {
-        var seedRootId = SystemIds.User.Root;
-        var seedRootPassword = SystemIds.Password.Root;
-        var seedRootSalt = SystemIds.Salt.Root;
+        Guid seedRootId = SystemIds.User.Root;
+        string seedRootPassword = SystemPasswords.User.Root;
+        string seedRootSalt = SystemIds.Salt.Root;
 
-        var seedRootUser = new User
+        return new User
         {
             Id = seedRootId,
-            Email = "wwstream@wwstream.uz",
+            Email = "uztube@uztube.uz",
             PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
             Salt = seedRootSalt,
             CreatedOn = DateTime.UtcNow
-        };
-
-        return seedRootUser;
+        };;
     }
 }

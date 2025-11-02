@@ -19,7 +19,7 @@ public record ApiResult<T>
 
     public static ApiResult<T> Success(T result)
     {
-        return new ApiResult<T>(true, result, Array.Empty<string>());
+        return new ApiResult<T>(true, result, []);
     }
 
     public static ApiResult<T> Failure(IEnumerable<string> errors)
