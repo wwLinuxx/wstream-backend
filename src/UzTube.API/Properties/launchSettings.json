@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "UZTUBE_API_HTTPS": {
+    "UzTube-API": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
