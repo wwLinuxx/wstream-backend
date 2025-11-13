@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Docker/">
     <File Path="docker-compose.yaml" />
+    <File Path="Dockerfile" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/UzTube.API/UzTube.API.csproj" />
