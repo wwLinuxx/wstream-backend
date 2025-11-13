@@ -5,7 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
 using Serilog;
-using UzTube.Application.Models.Minio;
+using UzTube.Application.Common.Minio;
+using UzTube.Application.Helpers.GenerateJwt;
 
 namespace UzTube.API;
 
@@ -13,16 +14,14 @@ public static class ApiDependencyInjection
 {
     public static void AddSerilog(this ConfigureHostBuilder hosts)
     {
-        hosts.UseSerilog((context, loggerConfiguration) =>
-        {
-            loggerConfiguration.ReadFrom.Configuration(context.Configuration);
-        });
+        hosts.UseSerilog((context, loggerConfiguration) => { loggerConfiguration.ReadFrom.Configuration(context.Configuration); });
     }
-    
+
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
-        var secretKey = configuration.GetValue<string>("JwtConfigurations:SecretKey");
-        var key = Encoding.UTF8.GetBytes(secretKey ?? throw new InvalidOperationException("SecretKey is empty."));
+        JwtSettings? jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+        byte[] key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
 
         services.AddAuthentication(s =>
             {
@@ -37,8 +36,10 @@ public static class ApiDependencyInjection
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience
                 };
             });
     }
@@ -77,9 +78,9 @@ public static class ApiDependencyInjection
     {
         services.AddSingleton<IMinioClient>(sp =>
         {
-            var minioSettings = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
+            MinioSettings minioSettings = sp.GetRequiredService<IOptions<MinioSettings>>().Value;
 
-            var client = new MinioClient()
+            IMinioClient? client = new MinioClient()
                 .WithEndpoint(minioSettings.Endpoint)
                 .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey);
 

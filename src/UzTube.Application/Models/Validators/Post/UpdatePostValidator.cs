@@ -3,7 +3,7 @@ using UzTube.Application.Models.Post;
 
 namespace UzTube.Application.Models.Validators.Post;
 
-public class UpdatePostValidator : AbstractValidator<UpdatePostModel>
+public class UpdatePostValidator : AbstractValidator<UpdatePostRequest>
 {
     public UpdatePostValidator()
     {

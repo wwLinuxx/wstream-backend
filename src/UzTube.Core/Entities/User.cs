@@ -1,10 +1,12 @@
 ﻿using UzTube.Core.Common;
+using UzTube.Core.Enums;
 
 namespace UzTube.Core.Entities;
 
 public class User : BaseEntity
 {
     // TODO: Need delete SaftDelete and change to HistoryTable
+    public UserStatus Status { get; set; } = UserStatus.Inactive;
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
     public string Salt { get; set; } = null!;
@@ -23,5 +25,6 @@ public class User : BaseEntity
     public ICollection<CommentLike> CommentLikes { get; set; } = [];
     public ICollection<Playlist> Playlists { get; set; } = [];
     public ICollection<Rating> Ratings { get; set; } = [];
+    public ICollection<OtpCode> OtpCodes { get; set; } = [];
     public ICollection<UserRole> Roles { get; set; } = [];
 }

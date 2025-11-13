@@ -8,6 +8,7 @@ public class ViewConfiguration : IEntityTypeConfiguration<View>
 {
     public void Configure(EntityTypeBuilder<View> builder)
     {
+        // TODO: Need refactor HasKey
         builder.HasKey(pv => new
         {
             pv.Id,

@@ -5,15 +5,13 @@ namespace UzTube.Application.Services;
 
 public interface IUserService
 {
-    Task<CreateUserResponseModel> CreateAsync(CreateUserModel model);
-    Task<LoginResponseModel> LoginAsync(LoginUserModel model);
     Task<UserResponseModel> GetMeAsync();
+    Task<UserResponseModel> GetUserAsync(Guid id);
     Task<PaginatedList<UserResponseModel>> GetUsersAsync(PageOption option);
-    Task<UserResponseModel> GetUserProfileByIdAsync(Guid id);
-    Task<UserResponseModel> SearchUserByQueryAsync(string query);
-    Task<UpdateUserProfileResponseModel> UpdateUserProfileByIdAsync(Guid id, UpdateUserProfileModel model);
-    Task<UpdateUserPasswordResponseModel> UpdateUserPasswordByIdAsync(Guid id, UpdateUserPasswordModel model);
-    Task<UpdateUserRoleResponseModel> UpdateUserRoleByIdAsync(Guid id, UpdateUserRoleModel model);
-    Task<DeleteUserResponseModel> DeleteUserByIdAsync(Guid id);
-    Task<RestoreUserResponseModel> RestoreUserByIdAsync(Guid id);
+    Task<UserResponseModel> SearchUserAsync(string query);
+    Task<UpdateUserProfileResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request);
+    Task<UpdateUserPasswordResponseModel> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request);
+    Task<UpdateUserRoleResponseModel> UpdateUserRolesAsync(Guid id, UpdateUserRolesRequest request);
+    Task<DeleteUserResponseModel> DeleteUserAsync(Guid id);
+    Task<RestoreUserResponseModel> RestoreUserAsync(Guid id);
 }

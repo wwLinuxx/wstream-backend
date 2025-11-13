@@ -4,7 +4,7 @@ using UzTube.DataAccess.Persistence;
 
 namespace UzTube.Application.Models.Validators.User;
 
-public class CreateUserValidator : AbstractValidator<CreateUserModel>
+public class CreateUserValidator : AbstractValidator<CreateUserRequest>
 {
     private readonly DatabaseContext _context;
 

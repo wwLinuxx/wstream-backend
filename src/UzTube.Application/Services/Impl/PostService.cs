@@ -13,17 +13,17 @@ public class PostService(
     IClaimService claimService
 ) : IPostService
 {
-    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel model)
+    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel request)
     {
-        var userId = claimService.GetUserId();
+        Guid userId = claimService.GetUserId();
 
-        var newPost = new Post
+        Post newPost = new Post
         {
             UserId = userId,
-            Title = model.Title,
-            Description = model.Description,
-            ThumbnailUrl = model.ThumbnailUrl,
-            VideoUrl = model.VideoUrl,
+            Title = request.Title,
+            Description = request.Description,
+            ThumbnailUrl = request.ThumbnailUrl,
+            VideoUrl = request.VideoUrl,
             Duration = "00:00:00" // TODO: Video file ni vaqtini hisoblididan qilish
         };
 
@@ -33,6 +33,30 @@ public class PostService(
         return new CreatePostResponseModel { Id = newPost.Id };
     } //TODO: Create Post Min.io ni o'rnatish
 
+    public async Task<PostResponseModel> GetPostAsync(Guid id)
+    {
+        PostResponseModel? post = await context.Posts
+            .Where(p => p.Id == id)
+            .Select(p => new PostResponseModel
+            {
+                Id = id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Description = p.Description,
+                PhotoUrl = p.ThumbnailUrl,
+                VideoUrl = p.VideoUrl,
+                Duration = p.Duration,
+                PostedOn = p.PostedOn,
+                ViewsCount = p.ViewsCount,
+                LikesCount = p.LikesCount,
+                Rating = p.Rating,
+                IsPrivate = p.IsPrivate
+            })
+            .FirstOrDefaultAsync();
+
+        return post ?? throw new NotFoundException("Post not found");
+    }
+
     public async Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option)
     {
         IQueryable<Post> query = context.Posts;
@@ -40,7 +64,7 @@ public class PostService(
         if (!string.IsNullOrEmpty(option.Search))
             query = query.Where(p => p.Title.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
 
-        var posts = await query
+        List<PostResponseModel> posts = await query
             .Where(p => !p.IsPrivate)
             .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
@@ -53,7 +77,7 @@ public class PostService(
                 PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedOn = p.PostedOn.ToString("g"),
+                PostedOn = p.PostedOn,
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -64,41 +88,17 @@ public class PostService(
         if (posts.Count == 0)
             throw new NotFoundException("Posts not found");
 
-        var postsCount = await context.Posts.CountAsync();
+        int postsCount = await context.Posts.CountAsync();
 
         return PaginatedList<PostResponseModel>.Create(posts, postsCount, option.PageNumber, option.PageSize);
     }
 
-    public async Task<PostResponseModel> GetPostByIdAsync(Guid id)
-    {
-        var post = await context.Posts
-            .Where(p => p.Id == id)
-            .Select(p => new PostResponseModel
-            {
-                Id = id,
-                UserId = p.UserId,
-                Title = p.Title,
-                Description = p.Description,
-                PhotoUrl = p.ThumbnailUrl,
-                VideoUrl = p.VideoUrl,
-                Duration = p.Duration,
-                PostedOn = p.PostedOn.ToString("g"),
-                ViewsCount = p.ViewsCount,
-                LikesCount = p.LikesCount,
-                Rating = p.Rating,
-                IsPrivate = p.IsPrivate
-            })
-            .FirstOrDefaultAsync();
-
-        return post ?? throw new NotFoundException("Post not found");
-    }
-
-    public async Task<PostResponseModel> SearchPostByQueryAsync(string query)
+    public async Task<PostResponseModel> SearchPostAsync(string query)
     {
         if (!string.IsNullOrEmpty(query))
             query = query.Trim();
 
-        var post = await context.Posts
+        PostResponseModel? post = await context.Posts
             .Where(p => p.Title.Contains(query) && !p.IsPrivate)
             .Select(p => new PostResponseModel
             {
@@ -109,7 +109,7 @@ public class PostService(
                 PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedOn = p.PostedOn.ToString("yyyy:MM:dd HH:mm:ss"),
+                PostedOn = p.PostedOn,
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -122,9 +122,9 @@ public class PostService(
 
     public async Task<List<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option)
     {
-        var query = context.Posts.AsQueryable();
+        IQueryable<Post> query = context.Posts.AsQueryable();
 
-        var posts = await query
+        List<PostResponseModel> posts = await query
             .Where(p => p.UserId == userId && !p.IsPrivate)
             .Skip(option.PageSize * (option.PageNumber - 1))
             .Take(option.PageSize)
@@ -137,7 +137,7 @@ public class PostService(
                 PhotoUrl = p.ThumbnailUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
-                PostedOn = p.PostedOn.ToString("g"),
+                PostedOn = p.PostedOn,
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
@@ -148,15 +148,15 @@ public class PostService(
         return posts.Count == 0 ? throw new NotFoundException("Post not found") : posts;
     }
 
-    public async Task<UpdatePostResponseModel> UpdatePostByIdAsync(Guid id, UpdatePostModel model)
+    public async Task<UpdatePostResponseModel> UpdatePostAsync(Guid id, UpdatePostRequest request)
     {
-        var post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id)
-                   ?? throw new NotFoundException("Post not found");
+        Post post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id)
+                    ?? throw new NotFoundException("Post not found");
 
-        post.Title = model.Title;
-        post.Description = model.Description;
-        post.ThumbnailUrl = model.ThumbnailUrl;
-        post.IsPrivate = model.IsPrivate;
+        post.Title = request.Title;
+        post.Description = request.Description;
+        post.ThumbnailUrl = request.ThumbnailUrl;
+        post.IsPrivate = request.IsPrivate;
 
         context.Posts.Update(post);
         await context.SaveChangesAsync();
@@ -164,11 +164,11 @@ public class PostService(
         return new UpdatePostResponseModel { Id = post.Id };
     }
 
-    public async Task<DeletePostResponseModel> DeletePostByIdAsync(Guid id)
+    public async Task<DeletePostResponseModel> DeletePostAsync(Guid id)
     {
         // TODO: When delete post need copy to HistoryTable
-        var post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
-                   ?? throw new NotFoundException("Post not found");
+        Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
+                    ?? throw new NotFoundException("Post not found");
 
         post.IsDeleted = true;
         post.DeletedAt = DateTime.Now;
@@ -178,10 +178,10 @@ public class PostService(
         return new DeletePostResponseModel("Success");
     }
 
-    public async Task<RestorePostResponseModel> RestorePostByIdAsync(Guid userId)
+    public async Task<RestorePostResponseModel> RestorePostAsync(Guid userId)
     {
-        var post = await context.Posts.FirstOrDefaultAsync(u => u.Id == userId)
-                   ?? throw new NotFoundException("Post not found");
+        Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == userId)
+                    ?? throw new NotFoundException("Post not found");
 
         post.IsDeleted = false;
         post.DeletedAt = null;

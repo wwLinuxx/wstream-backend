@@ -3,5 +3,5 @@
 public record CommentResponseModel : BaseResponseModel
 {
     public string CommentText { get; set; } = null!;
-    public string CreatedAt { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
 }

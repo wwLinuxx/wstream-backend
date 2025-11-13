@@ -1,18 +1,23 @@
 ﻿using System.Diagnostics;
 using System.Security.Claims;
+using Microsoft.Extensions.Options;
+using UzTube.Application.Common.Performance;
 
 namespace UzTube.API.Middleware;
 
 public class PerformanceMiddleware(
     RequestDelegate next,
+    IOptions<PerformanceSettings> performanceSettings,
     ILogger<PerformanceMiddleware> logger
 )
 {
+    private readonly PerformanceSettings _performanceSettings = performanceSettings.Value;
+
     public async Task Invoke(HttpContext context)
     {
-        const int warningThresholdMs = 500;
-
-        var sw = new Stopwatch();
+        int warningThresholdMs = _performanceSettings.MaxRequestTiming;
+    
+        Stopwatch sw = new Stopwatch();
 
         sw.Start();
 
@@ -20,24 +25,24 @@ public class PerformanceMiddleware(
 
         sw.Stop();
 
-        var elapsed = sw.ElapsedMilliseconds;
-        var statusCode = context.Response?.StatusCode;
-        var user = context.User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "Anonymous";
+        long elapsed = sw.ElapsedMilliseconds;
+        int? statusCode = context.Response?.StatusCode;
+        string user = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "Anonymous";
 
         if (sw.ElapsedMilliseconds > warningThresholdMs)
             logger.LogWarning(
                 "[PERFORMANCE] {Method} {Path} | {StatusCode} | {User} | {Elapsed} ms",
-                context.Request?.Method,
-                context.Request?.Path.Value,
+                context.Request.Method,
+                context.Request.Path.Value,
                 statusCode,
                 user,
                 elapsed
             );
-        else
+        else 
             logger.LogInformation(
                 "[PERFORMANCE] {Method} {Path} | {StatusCode} | {User} | {Elapsed} ms",
-                context.Request?.Method,
-                context.Request?.Path.Value,
+                context.Request.Method,
+                context.Request.Path.Value,
                 statusCode,
                 user,
                 elapsed

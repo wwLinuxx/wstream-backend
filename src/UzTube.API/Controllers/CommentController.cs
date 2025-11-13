@@ -5,12 +5,14 @@ using UzTube.Application.Services;
 
 namespace UzTube.API.Controllers;
 
-public class CommentController(ICommentService commentService) : ApiController
+[ApiController]
+[Route("api/comments")]
+public class CommentController(ICommentService commentService) : ControllerBase
 {
     [HttpPost("get-comments-list")]
-    public async Task<IActionResult> GetCommentsList(PageOption option)
+    public async Task<IActionResult> GetComments(PageOption option)
     {
         return Ok(ApiResult<PaginatedList<CommentResponseModel>>.Success(
-            await commentService.GetCommentsList(option)));
+            await commentService.GetCommentsAsync(option)));
     }
 }

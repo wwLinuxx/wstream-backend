@@ -9,6 +9,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<OtpCode> OtpCodes { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Follower> Followers { get; set; }
@@ -21,10 +22,10 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<CategoryTranslate> CategoryTranslates { get; set; }
     public DbSet<PostCategory> PostCategories { get; set; }
     public DbSet<PlaylistPost> PlaylistsPosts { get; set; }
     public DbSet<Rating> Ratings { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -8,7 +8,8 @@ public record PostResponseModel : BaseResponseModel
     public string PhotoUrl { get; init; } = null!;
     public string VideoUrl { get; init; } = null!;
     public string Duration { get; init; } = null!;
-    public string PostedOn { get; init; } = null!;
+    public DateTime PostedOn { get; init; }
+    public DateTime UpdatedOn { get; init; }
     public int ViewsCount { get; init; }
     public int LikesCount { get; init; }
     public int Rating { get; init; }

@@ -3,7 +3,7 @@ using UzTube.Application.Models.User;
 
 namespace UzTube.Application.Models.Validators.User;
 
-public class UpdateUserProfileValidator : AbstractValidator<UpdateUserProfileModel>
+public class UpdateUserProfileValidator : AbstractValidator<UpdateUserRequest>
 {
     public UpdateUserProfileValidator()
     {

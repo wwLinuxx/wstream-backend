@@ -28,9 +28,15 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -38,6 +44,35 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.CategoryTranslate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ColumnName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TranslateText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("CategoryTranslates");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
@@ -167,6 +202,29 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.OtpCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("GeneratedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OtpCodes");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Permission", b =>
@@ -479,6 +537,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("timestamp with time zone");
 
@@ -493,11 +554,12 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2025, 11, 1, 16, 59, 2, 321, DateTimeKind.Utc).AddTicks(2340),
+                            CreatedOn = new DateTime(2025, 11, 8, 17, 56, 26, 641, DateTimeKind.Utc).AddTicks(8630),
                             Email = "uztube@uztube.uz",
                             IsDeleted = false,
                             PasswordHash = "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=",
-                            Salt = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD"
+                            Salt = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD",
+                            Status = 3
                         });
                 });
 
@@ -544,6 +606,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Views");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.CategoryTranslate", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Category", "Owner")
+                        .WithMany("Translates")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
@@ -618,6 +691,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.OtpCode", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("OtpCodes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -778,6 +862,8 @@ namespace UzTube.DataAccess.Persistence.Migrations
             modelBuilder.Entity("UzTube.Core.Entities.Category", b =>
                 {
                     b.Navigation("PostCategories");
+
+                    b.Navigation("Translates");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
@@ -834,6 +920,8 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Followings");
 
                     b.Navigation("Likes");
+
+                    b.Navigation("OtpCodes");
 
                     b.Navigation("Playlists");
 

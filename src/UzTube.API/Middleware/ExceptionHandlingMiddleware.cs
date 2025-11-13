@@ -21,8 +21,8 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
     {
         logger.LogError(ex.Message);
 
-        var code = StatusCodes.Status500InternalServerError;
-        var errors = new List<string> { ex.Message };
+        int code = StatusCodes.Status500InternalServerError;
+        List<string> errors = new List<string> { ex.Message };
 
         code = ex switch
         {

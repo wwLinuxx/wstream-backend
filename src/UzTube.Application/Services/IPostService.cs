@@ -5,12 +5,12 @@ namespace UzTube.Application.Services;
 
 public interface IPostService
 {
-    Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel model);
+    Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel request);
+    Task<PostResponseModel> GetPostAsync(Guid id);
     Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option);
-    Task<PostResponseModel> GetPostByIdAsync(Guid id);
-    Task<PostResponseModel> SearchPostByQueryAsync(string query);
+    Task<PostResponseModel> SearchPostAsync(string query);
     Task<List<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option);
-    Task<UpdatePostResponseModel> UpdatePostByIdAsync(Guid id, UpdatePostModel model);
-    Task<DeletePostResponseModel> DeletePostByIdAsync(Guid id);
-    Task<RestorePostResponseModel> RestorePostByIdAsync(Guid userId);
+    Task<UpdatePostResponseModel> UpdatePostAsync(Guid id, UpdatePostRequest request);
+    Task<DeletePostResponseModel> DeletePostAsync(Guid id);
+    Task<RestorePostResponseModel> RestorePostAsync(Guid userId);
 }

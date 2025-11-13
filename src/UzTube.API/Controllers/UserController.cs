@@ -9,62 +9,64 @@ using UzTube.Core.Enums;
 
 namespace UzTube.API.Controllers;
 
+[ApiController]
+[Route("api/users")]
 public class UserController(
     IUserService userService,
     IPostService postService
-) : ApiController
+) : ControllerBase
 {
+    // [UserOrAdmin]
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetUserAsync([FromRoute] Guid id)
+    {
+        return Ok(ApiResult<UserResponseModel>.Success(
+            await userService.GetUserAsync(id)));
+    }
+
     // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPost("get-users")]
-    public async Task<IActionResult> GetListUsersAsync([FromBody] PageOption option)
+    public async Task<IActionResult> GetUsersAsync([FromBody] PageOption option)
     {
         return Ok(ApiResult<PaginatedList<UserResponseModel>>.Success(
             await userService.GetUsersAsync(option)));
     }
-
-    // [UserOrAdmin]
-    [HttpGet("{id:Guid}")]
-    public async Task<IActionResult> GetUserProfileByIdAsync([FromRoute] Guid id)
-    {
-        return Ok(ApiResult<UserResponseModel>.Success(
-            await userService.GetUserProfileByIdAsync(id)));
-    }
-
+    
     [HttpGet("search")]
-    public async Task<IActionResult> SearchUserByQueryAsync([FromQuery] [Required] string query)
+    public async Task<IActionResult> SearchUserAsync([FromQuery] [Required] string query)
     {
         return Ok(ApiResult<UserResponseModel>.Success(
-            await userService.SearchUserByQueryAsync(query)));
+            await userService.SearchUserAsync(query)));
     }
 
     // [UserOrAdmin]
     [HttpPut("{id:Guid}")]
-    public async Task<IActionResult> UpdateUserProfileByIdAsync(
+    public async Task<IActionResult> UpdateUserAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserProfileModel model)
+        [FromBody] UpdateUserRequest model)
     {
         return Ok(ApiResult<UpdateUserProfileResponseModel>.Success(
-            await userService.UpdateUserProfileByIdAsync(id, model)));
+            await userService.UpdateUserProfileAsync(id, model)));
     }
 
     // [UserOrAdmin]
     [HttpPut("{id:Guid}/password")]
-    public async Task<IActionResult> UpdateUserPasswordByIdAsync(
+    public async Task<IActionResult> UpdateUserPasswordAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserPasswordModel model)
+        [FromBody] UpdateUserPasswordRequest request)
     {
         return Ok(ApiResult<UpdateUserPasswordResponseModel>.Success(
-            await userService.UpdateUserPasswordByIdAsync(id, model)));
+            await userService.UpdateUserPasswordAsync(id, request)));
     }
 
     // [RequirePermission(SystemPermissions.ManageRoles)]
     [HttpPut("{id:Guid}/roles")]
-    public async Task<IActionResult> UpdateUserRoleByIdAsync(
+    public async Task<IActionResult> UpdateUserRolesAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserRoleModel model)
+        [FromBody] UpdateUserRolesRequest model)
     {
         return Ok(ApiResult<UpdateUserRoleResponseModel>.Success(
-            await userService.UpdateUserRoleByIdAsync(id, model)));
+            await userService.UpdateUserRolesAsync(id, model)));
     }
 
     // [UserOrAdmin]
@@ -79,17 +81,17 @@ public class UserController(
 
     // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpDelete("{id:Guid}")]
-    public async Task<IActionResult> DeleteUserByIdAsync([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteUserAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<DeleteUserResponseModel>.Success(
-            await userService.DeleteUserByIdAsync(id)));
+            await userService.DeleteUserAsync(id)));
     }
 
     // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPut("{id:Guid}/restore")]
-    public async Task<IActionResult> RestoreUserByIdAsync([FromRoute] Guid id)
+    public async Task<IActionResult> RestoreUserAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<RestoreUserResponseModel>.Success(
-            await userService.RestoreUserByIdAsync(id)));
+            await userService.RestoreUserAsync(id)));
     }
 }

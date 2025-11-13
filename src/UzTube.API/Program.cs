@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Serilog;
+using Microsoft.AspNetCore.Http.HttpResults;
 using UzTube.API;
+using UzTube.API.Extensions;
 using UzTube.API.Filters;
 using UzTube.API.Middleware;
 using UzTube.Application;
@@ -16,13 +17,15 @@ builder.Host.AddSerilog();
 builder.Services.AddControllers(config =>
     config.Filters.Add(typeof(ValidateModelAttribute)));
 
+builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(IValidationMarker));
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDataAccess(builder.Configuration);
-builder.Services.AddApplication();
+builder.Services.AddApplication(builder.Configuration);
 
 builder.Services.AddSwagger();
 builder.Services.AddJwt(builder.Configuration);
@@ -51,5 +54,7 @@ app.UseMiddleware<PerformanceMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
+
+app.AddMappedExtensions();
 
 app.Run();

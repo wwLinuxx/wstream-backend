@@ -3,7 +3,7 @@ using UzTube.Application.Models.User;
 
 namespace UzTube.Application.Models.Validators.User;
 
-public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordModel>
+public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordRequest>
 {
     public UpdateUserPasswordValidator()
     {

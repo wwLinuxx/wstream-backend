@@ -3,7 +3,7 @@ using UzTube.Application.Models.User;
 
 namespace UzTube.Application.Models.Validators.User;
 
-public class LoginValidator : AbstractValidator<LoginUserModel>
+public class LoginValidator : AbstractValidator<LoginUserRequest>
 {
     public LoginValidator()
     {

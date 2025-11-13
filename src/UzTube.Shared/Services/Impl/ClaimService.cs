@@ -1,13 +1,34 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using UzTube.Core.Common;
+using UzTube.Core.Enums;
 
 namespace UzTube.Shared.Services.Impl;
 
 public class ClaimService(IHttpContextAccessor httpContextAccessor) : IClaimService
 {
     public Guid GetUserId()
-        => Guid.Parse(GetClaim(ClaimTypes.NameIdentifier));
+    {
+        return Guid.Parse(GetClaim(CustomClaimNames.Id));
+    }
+
+    public SystemLanguages GetUserLanguage()
+    {
+        string userLanguage = httpContextAccessor.HttpContext?.Request.Headers["Language"].ToString() ?? string.Empty;
+
+        SystemLanguages userLanguageIndex = userLanguage switch
+        {
+            "uz" => SystemLanguages.Uzbek,
+            "ru" => SystemLanguages.Russian,
+            "eng" => SystemLanguages.English,
+            "kz" => SystemLanguages.Kazakh,
+            _ => SystemLanguages.Uzbek
+        };
+
+        return userLanguageIndex;
+    }
 
     public string GetClaim(string key)
-        => httpContextAccessor.HttpContext?.User?.FindFirst(key)?.Value ?? string.Empty;
+    {
+        return httpContextAccessor.HttpContext?.User?.FindFirst(key)?.Value ?? string.Empty;
+    }
 }

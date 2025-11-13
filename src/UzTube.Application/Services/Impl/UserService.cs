@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using UzTube.Application.Exceptions;
-using UzTube.Application.Helpers;
 using UzTube.Application.Helpers.Interfaces;
 using UzTube.Application.Models;
 using UzTube.Application.Models.User;
@@ -13,53 +11,10 @@ namespace UzTube.Application.Services.Impl;
 
 public class UserService(
     DatabaseContext context,
-    IPermissionService permissionService,
     IClaimService claimService,
-    IConfiguration configuration,
-    IPasswordHelper passwordHelper
+    IPasswordHasher passwordHasher
 ) : IUserService
 {
-    public async Task<CreateUserResponseModel> CreateAsync(CreateUserModel model)
-    {
-        string salt = passwordHelper.GenerateSalt();
-        string passwordHash = passwordHelper.Encrypt(model.Password, salt);
-
-        User newUser = new User
-        {
-            Email = model.Email,
-            PasswordHash = passwordHash,
-            Salt = salt,
-            Profile = new Profile
-            {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Age = model.Age,
-                PhoneNumber = model.PhoneNumber,
-                CountryId = model.CountryId
-            }
-        };
-
-        await context.Users.AddAsync(newUser);
-        await context.SaveChangesAsync();
-
-        return new CreateUserResponseModel { Id = newUser.Id };
-    }
-
-    public async Task<LoginResponseModel> LoginAsync(LoginUserModel model)
-    {
-        User user = await context.Users.FirstOrDefaultAsync(u => u.Email == model.Email)
-                    ?? throw new BadRequestException("User not found");
-
-        if (!passwordHelper.Verify(user.PasswordHash, model.Password, user.Salt))
-            throw new BadRequestException("Email or Password not correct");
-
-        List<string> permissions = await permissionService.GetUserPermissions(user.Id);
-
-        string token = JwtHelper.GenerateToken(user, permissions, configuration);
-
-        return new LoginResponseModel(user.Email, token);
-    }
-
     public async Task<UserResponseModel> GetMeAsync()
     {
         Guid userId = claimService.GetUserId();
@@ -75,8 +30,28 @@ public class UserService(
                 PhoneNumber = u.Profile.PhoneNumber,
                 Age = u.Profile.Age,
                 CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn.ToString("g"),
+                CreatedOn = u.CreatedOn,
                 Roles = u.Roles.Select(ur => ur.Role.Name).ToArray()
+            })
+            .FirstOrDefaultAsync();
+
+        return user ?? throw new NotFoundException("User not found");
+    }
+
+    public async Task<UserResponseModel> GetUserAsync(Guid id)
+    {
+        UserResponseModel? user = await context.Users
+            .Where(u => u.Id == id)
+            .Select(u => new UserResponseModel
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.Profile.FirstName,
+                LastName = u.Profile.LastName,
+                PhoneNumber = u.Profile.PhoneNumber,
+                Age = u.Profile.Age,
+                CountryId = u.Profile.CountryId,
+                CreatedOn = u.CreatedOn
             })
             .FirstOrDefaultAsync();
 
@@ -86,7 +61,7 @@ public class UserService(
     public async Task<PaginatedList<UserResponseModel>> GetUsersAsync(PageOption option)
     {
         // TODO: When called API GET need hide root user
-        
+
         IQueryable<User> query = context.Users;
 
         if (!string.IsNullOrEmpty(option.Search))
@@ -104,7 +79,7 @@ public class UserService(
                 PhoneNumber = u.Profile.PhoneNumber,
                 Age = u.Profile.Age,
                 CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn.ToString("g")
+                CreatedOn = u.CreatedOn
             })
             .ToListAsync();
 
@@ -116,27 +91,7 @@ public class UserService(
         return PaginatedList<UserResponseModel>.Create(users, pagesCount, option.PageNumber, option.PageSize);
     }
 
-    public async Task<UserResponseModel> GetUserProfileByIdAsync(Guid id)
-    {
-        UserResponseModel? user = await context.Users
-            .Where(u => u.Id == id)
-            .Select(u => new UserResponseModel
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn.ToString("g")
-            })
-            .FirstOrDefaultAsync();
-
-        return user ?? throw new NotFoundException("User not found");
-    }
-
-    public async Task<UserResponseModel> SearchUserByQueryAsync(string query)
+    public async Task<UserResponseModel> SearchUserAsync(string query)
     {
         if (!string.IsNullOrEmpty(query))
             query = query.Trim();
@@ -153,14 +108,14 @@ public class UserService(
                 PhoneNumber = u.Profile.PhoneNumber,
                 Age = u.Profile.Age,
                 CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn.ToString("g")
+                CreatedOn = u.CreatedOn
             })
             .FirstOrDefaultAsync();
 
         return user ?? throw new NotFoundException("User not found");
     }
 
-    public async Task<UpdateUserProfileResponseModel> UpdateUserProfileByIdAsync(Guid id, UpdateUserProfileModel model)
+    public async Task<UpdateUserProfileResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request)
     {
         User? user = await context.Users
                          .Include(u => u.Profile)
@@ -168,11 +123,11 @@ public class UserService(
                          .FirstOrDefaultAsync(u => u.Id == id)
                      ?? throw new NotFoundException("User not found");
 
-        user.Profile.FirstName = model.FirstName;
-        user.Profile.LastName = model.LastName;
-        user.Profile.PhoneNumber = model.PhoneNumber;
-        user.Profile.Age = model.Age;
-        user.Profile.CountryId = model.CountryId;
+        user.Profile.FirstName = request.FirstName;
+        user.Profile.LastName = request.LastName;
+        user.Profile.PhoneNumber = request.PhoneNumber;
+        user.Profile.Age = request.Age;
+        user.Profile.CountryId = request.CountryId;
 
         user.UpdatedOn = DateTime.Now;
 
@@ -182,19 +137,19 @@ public class UserService(
         return new UpdateUserProfileResponseModel { Id = user.Id };
     }
 
-    public async Task<UpdateUserPasswordResponseModel> UpdateUserPasswordByIdAsync(Guid id, UpdateUserPasswordModel model)
+    public async Task<UpdateUserPasswordResponseModel> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request)
     {
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)
                     ?? throw new NotFoundException("User not found");
 
-        if (!passwordHelper.Verify(user.PasswordHash, model.OldPassword, user.Salt))
+        if (!passwordHasher.Verify(user.PasswordHash, request.OldPassword, user.Salt))
             throw new BadRequestException("Old Password not correct");
 
-        if (model.NewPassword != model.ConfirmPassword)
+        if (request.NewPassword != request.ConfirmPassword)
             throw new BadRequestException("NewPassword and ConfirmPassword not equal");
 
-        string newSalt = passwordHelper.GenerateSalt();
-        string newHashedPassword = passwordHelper.Encrypt(model.NewPassword, newSalt);
+        string newSalt = passwordHasher.GenerateSalt();
+        string newHashedPassword = passwordHasher.Encrypt(request.NewPassword, newSalt);
 
         user.Salt = newSalt;
         user.PasswordHash = newHashedPassword;
@@ -205,14 +160,14 @@ public class UserService(
         return new UpdateUserPasswordResponseModel { Id = id };
     }
 
-    public async Task<UpdateUserRoleResponseModel> UpdateUserRoleByIdAsync(Guid id, UpdateUserRoleModel model)
+    public async Task<UpdateUserRoleResponseModel> UpdateUserRolesAsync(Guid id, UpdateUserRolesRequest request)
     {
         User user = await context.Users
                         .Include(u => u.Roles)
                         .FirstOrDefaultAsync(u => u.Id == id)
                     ?? throw new NotFoundException("User not found");
 
-        user.Roles = model.Roles
+        user.Roles = request.Roles
             .Select(rid => new UserRole
             {
                 RoleId = rid
@@ -225,7 +180,7 @@ public class UserService(
         return new UpdateUserRoleResponseModel { Id = id };
     }
 
-    public async Task<DeleteUserResponseModel> DeleteUserByIdAsync(Guid id)
+    public async Task<DeleteUserResponseModel> DeleteUserAsync(Guid id)
     {
         // TODO: When delete user copy User and user's any posts to HistoryTable
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)
@@ -239,7 +194,7 @@ public class UserService(
         return new DeleteUserResponseModel("Success");
     }
 
-    public async Task<RestoreUserResponseModel> RestoreUserByIdAsync(Guid id)
+    public async Task<RestoreUserResponseModel> RestoreUserAsync(Guid id)
     {
         // TODO: When restore user copy user and user's any posts from HistoryTable
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)

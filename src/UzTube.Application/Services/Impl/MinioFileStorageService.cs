@@ -2,17 +2,17 @@
 using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
-using UzTube.Application.Models.Minio;
+using UzTube.Application.Common.Minio;
 
 namespace UzTube.Application.Services.Impl;
 
 public class MinioFileStorageService : IFileStorageService
 {
     private readonly IMinioClient _minioClient;
-    private readonly MinioOptions _minioSettings;
+    private readonly MinioSettings _minioSettings;
 
     // Dependency Injection orqali IMinioClient va MinioSettings ni qabul qiladi
-    public MinioFileStorageService(IMinioClient minioClient, IOptions<MinioOptions> minioSettings)
+    public MinioFileStorageService(IMinioClient minioClient, IOptions<MinioSettings> minioSettings)
     {
         _minioClient = minioClient;
         _minioSettings = minioSettings.Value;

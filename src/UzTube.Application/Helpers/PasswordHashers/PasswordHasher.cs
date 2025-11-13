@@ -1,0 +1,25 @@
+﻿using System.Security.Cryptography;
+using System.Text;
+using UzTube.Application.Helpers.Interfaces;
+
+namespace UzTube.Application.Helpers;
+
+public class PasswordHasher : IPasswordHasher
+{
+    public string Encrypt(string password, string salt)
+    {
+        using var algorithm = new Rfc2898DeriveBytes(
+            password,
+            Encoding.UTF8.GetBytes(salt),
+            8192,
+            HashAlgorithmName.SHA256);
+
+        return Convert.ToBase64String(algorithm.GetBytes(50));
+    }
+
+    public string GenerateSalt() =>
+        Guid.NewGuid().ToString();
+
+    public bool Verify(string passwordHash, string password, string salt) =>
+        passwordHash == Encrypt(password, salt);
+}

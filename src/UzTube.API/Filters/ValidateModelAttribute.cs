@@ -11,7 +11,7 @@ public class ValidateModelAttribute : Attribute, IAsyncResultFilter
     {
         if (!context.ModelState.IsValid)
         {
-            var errors = context.ModelState.Values
+            IEnumerable<string> errors = context.ModelState.Values
                 .SelectMany(modelState => modelState.Errors)
                 .Select(modelError => modelError.ErrorMessage);
 

@@ -8,7 +8,7 @@ public record UserResponseModel : BaseResponseModel
     public string? PhoneNumber { get; init; }
     public int? Age { get; init; }
     public Guid? CountryId { get; init; }
-    public string CreatedOn { get; init; } = null!;
-    public string? UpdatedOn { get; init; }
+    public DateTime CreatedOn { get; init; }
+    public DateTime? UpdatedOn { get; init; }
     public IReadOnlyCollection<string> Roles { get; init; } = [];
 }
