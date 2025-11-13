@@ -1,0 +1,44 @@
+services:
+  # UzTube API Application
+  uztube_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: uztube:dev
+    container_name: uztube_api
+    environment:
+      - ASPNETCORE_URLS=http://+:4444
+      - ASPNETCORE_ENVIRONMENT=${ASPNET_ENVIRONMENT:-Development}
+      - ConnectionStrings__DefaultConnection=Server=uztube_database;Database=UzTube;User Id=wwlinux;Password=${DB_PASSWORD:-qwe1112233};
+      - JwtSettings__SecretKey=${JWT_SECRET:-ww1b3220-1fa3-40b6-a4ec-3684d89f29ww}
+      - JwtSettings__Issuer=${JWT_ISSUER:-uztube.uz}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-uztube.uz}
+      - SmtpSettings__Username=${EMAIL_USERNAME:-wwlinuxoff@gmail.com}
+      - SmtpSettings__Password=${EMAIL_PASSWORD:-mvui kjvx vlwl urhg}
+    ports:
+      - "4444:4444"
+    networks:
+      - uztube_network
+    restart: unless-stopped
+  
+  # PostgreSQL Database
+  uztube_database:
+    image: postgres:latest
+    container_name: uztube_database
+    environment:
+      POSTGRES_DB: UzTube
+      POSTGRES_USER: wwlinux
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-qwe1112233}
+    ports:
+      - "5432:5432"
+    volumes:
+      - uztube_database:/var/lib/postgresql
+    networks:
+      - uztube_network
+
+volumes:
+  uztube_database:
+
+networks:
+  uztube_network:
+    driver: bridge
