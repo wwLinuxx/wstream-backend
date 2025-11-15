@@ -15,8 +15,10 @@ services:
       - JwtSettings__Audience=${JWT_AUDIENCE:-uztube.uz}
       - SmtpSettings__Username=${EMAIL_USERNAME:-wwlinuxoff@gmail.com}
       - SmtpSettings__Password=${EMAIL_PASSWORD:-mvui kjvx vlwl urhg}
-    ports:
-      - "4444:4444"
+    expose:
+      - "4444"
+    depends_on:
+      - uztube_database
     networks:
       - uztube_network
     restart: unless-stopped
@@ -35,6 +37,21 @@ services:
       - uztube_database:/var/lib/postgresql
     networks:
       - uztube_network
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  uztube_nginx:
+    image: nginx:latest
+    container_name: uztube_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - uztube_api
+    networks:
+      - uztube_network
+    restart: unless-stopped
 
 volumes:
   uztube_database:
