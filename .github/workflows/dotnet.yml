@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repo
@@ -16,15 +16,3 @@ jobs:
       - name: Build Docker images (local test)
         run: |
           docker compose up -d --build
-
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /var/www/uztube/backend/UzTube
-            git pull origin main
-            docker compose down
-            docker compose up -d --build
