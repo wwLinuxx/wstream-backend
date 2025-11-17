@@ -53,6 +53,10 @@ services:
       - uztube_network
     restart: unless-stopped
 
+volumes:
+  uztube_database:
+    name: uztube_database
+    
 networks:
   uztube_network:
     driver: bridge
