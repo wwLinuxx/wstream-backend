@@ -23,7 +23,7 @@ jobs:
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USERNAME }}
-          key: ${{ secrets.DEV_SSH_KEY }}
+          password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
           script: |
             cd /var/www/wwlinux/projects/uztube/uztube-backend
@@ -33,4 +33,3 @@ jobs:
             docker compose up -d --build
             
             echo "Deployment completed!"
-            
