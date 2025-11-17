@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: UzTube
     if: github.ref == 'refs/heads/dev'
     name: Build and Deploy to Development
     
@@ -26,10 +27,17 @@ jobs:
           password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
           script: |
+            echo ">>> ENTER PROJECT DIRECTORY"
             cd /var/www/wwlinux/projects/uztube/uztube-backend
-            
+
+            echo ">>> REPONI UPDATE (git pull)"
+            git reset --hard HEAD
+            git pull origin dev
+
+            echo ">>> DOCKER CONTAINERS STOP"
             docker compose down || true
-            
+
+            echo ">>> DOCKER IMAGE REBUILD + START"
             docker compose up -d --build
-            
-            echo "Deployment completed!"
+
+            echo ">>> DEPLOYMENT COMPLETED!"
