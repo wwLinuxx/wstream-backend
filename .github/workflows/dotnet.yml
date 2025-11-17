@@ -24,7 +24,7 @@ jobs:
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USERNAME }}
-          password: ${{ secrets.DEV_PASSWORD }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.DEV_PORT }}
           script: |
             echo ">>> ENTER PROJECT DIRECTORY"
