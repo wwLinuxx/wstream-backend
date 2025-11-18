@@ -7,15 +7,15 @@ services:
     image: uztube:dev
     container_name: uztube_api
     environment:
-      - ASPNETCORE_URLS=http://+:4444
-      - ASPNETCORE_ENVIRONMENT=${ASPNET_ENVIRONMENT:-Development}
-      - ConnectionStrings__DefaultConnection=Server=uztube_database;Database=UzTube;User Id=wwlinux;Password=${DB_PASSWORD:-qwe1112233};
-      - JwtSettings__SecretKey=${JWT_SECRET:-ww1b3220-1fa3-40b6-a4ec-3684d89f29ww}
-      - JwtSettings__Issuer=${JWT_ISSUER:-uztube.uz}
-      - JwtSettings__Audience=${JWT_AUDIENCE:-uztube.uz}
-      - SmtpSettings__Username=${EMAIL_USERNAME:-wwlinuxoff@gmail.com}
-      - SmtpSettings__Password=${EMAIL_PASSWORD:-mvui kjvx vlwl urhg}
-      - Serilog__WriteTo__Args__ServerUrl=${SEQ_URL:-http://wwlinux.uz:5341}
+      - ASPNETCORE_URLS = ${ASPNETCORE_URLS}
+      - ASPNETCORE_ENVIRONMENT = ${ASPNET_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection = Server=uztube_database;Database=${DB};User Id=${DB_LOGIN};Password=${DB_PASSWORD};
+      - JwtSettings__SecretKey= ${JWT_SECRET}
+      - JwtSettings__Issuer = ${JWT_ISSUER}
+      - JwtSettings__Audience= ${JWT_AUDIENCE}
+      - SmtpSettings__Username = ${EMAIL_USERNAME}
+      - SmtpSettings__Password = ${EMAIL_PASSWORD}
+      - Serilog__WriteTo__Args__ServerUrl = ${SEQ_URL}
     expose:
       - "4444"
     depends_on:
