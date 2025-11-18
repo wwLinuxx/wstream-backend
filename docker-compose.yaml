@@ -15,6 +15,7 @@ services:
       - JwtSettings__Audience=${JWT_AUDIENCE:-uztube.uz}
       - SmtpSettings__Username=${EMAIL_USERNAME:-wwlinuxoff@gmail.com}
       - SmtpSettings__Password=${EMAIL_PASSWORD:-mvui kjvx vlwl urhg}
+      - Serilog__WriteTo__Args__ServerUrl=${SEQ_URL:-http://wwlinux.uz:5341}
     expose:
       - "4444"
     depends_on:
