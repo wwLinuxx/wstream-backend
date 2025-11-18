@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Http.HttpResults;
 using UzTube.API;
 using UzTube.API.Extensions;
 using UzTube.API.Filters;
@@ -41,7 +40,12 @@ await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
 app.UseSwagger();
-app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "UZTUBE"); });
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube v1.0");
+    c.RoutePrefix = "api";
+});
+
 
 app.UseHttpsRedirection();
 
