@@ -7,20 +7,26 @@ services:
     image: uztube:dev
     container_name: uztube_api
     environment:
+      # ASPNETCORE 
       - ASPNETCORE_URLS=${ASPNETCORE_URLS}
       - ASPNETCORE_ENVIRONMENT=${ASPNET_ENVIRONMENT}
+      # DATABASE
       - ConnectionStrings__DefaultConnection=Server=uztube_database;Database=${DB};User Id=${DB_USER};Password=${DB_PASSWORD};
+      # JWT 
       - JwtSettings__SecretKey=${JWT_SECRET}
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
+      # SMTP 
       - SmtpSettings__Username=${EMAIL_USERNAME}
       - SmtpSettings__Password=${EMAIL_PASSWORD}
-      - Serilog__WriteTo__Args__Name=${LOG_WRITE_TO}
-      - Serilog__WriteTo__Args__serverUrl=${SEQ_URL}
+      # SERILOG
+      - Serilog__WriteTo__1__Name=${LOG_WRITE_TO}
+      - Serilog__WriteTo__1__Args__serverUrl=${SEQ_URL}
     expose:
       - "4444"
     depends_on:
       - uztube_database
+      - uztube_logs
     networks:
       - uztube_network
     restart: unless-stopped
