@@ -28,7 +28,7 @@ jobs:
           port: ${{ secrets.DEV_PORT }}
           script: |
             echo ">>> ENTER PROJECT DIRECTORY"
-            cd /var/www/wwlinux/projects/uztube/uztube-backend
+            cd /home/wwlinux/projects/uztube/uztube-backend
 
             echo ">>> REPONI UPDATE (git pull)"
             git reset --hard HEAD
