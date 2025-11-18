@@ -22,6 +22,23 @@ services:
     networks:
       - uztube_network
     restart: unless-stopped
+    
+  # Serilog (Seq)
+  uztube_logs:
+    image: seq:latest
+    container_name: uztube_logs
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINUSERNAME: admin
+      SEQ_FIRSTRUN_ADMINPASSWORD: 123
+    ports:
+      - "5341:5341" # Seq ingestion port
+      - "80:80"   # Seq UI port (optional, adjust if needed)
+    volumes:
+      - uztube_logs:/data # Persistent storage for Seq data
+    networks:
+      - uztube_network
+    restart: unless-stopped
   
   # PostgreSQL Database
   uztube_database:
@@ -56,6 +73,8 @@ services:
 volumes:
   uztube_database:
     name: uztube_database
+  uztube_logs:
+    name: uztube_logs
     
 networks:
   uztube_network:
