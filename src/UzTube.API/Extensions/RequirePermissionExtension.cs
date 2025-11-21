@@ -18,6 +18,9 @@ public static class RequirePermissionExtension
             if (user.Identity is not { IsAuthenticated: true })
                 throw new UnauthorizedException("User is not authenticated");
 
+            if (permissions.Length == 0)
+                return await next(context);
+            
             string? permissionsJson = user.FindFirstValue("permissions");
 
             if (string.IsNullOrEmpty(permissionsJson))
@@ -28,9 +31,6 @@ public static class RequirePermissionExtension
 
             if (userPermissions is null || userPermissions.Count == 0)
                 throw new ForbiddenException("No permissions assigned");
-
-            if (permissions.Length == 0)
-                return await next(context);
 
             bool hasPermission = permissions
                 .Select(p => p.ToString())
