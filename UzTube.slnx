@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/workflows/">
+    <File Path=".github/workflows/dev-deploy.yml" />
+  </Folder>
   <Folder Name="/docker/">
     <File Path="docker-compose.yaml" />
     <File Path="Dockerfile" />

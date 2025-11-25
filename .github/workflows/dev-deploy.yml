@@ -1,4 +1,4 @@
-name: CI/CD Deploy
+name: CI/CD Deploy Development Server
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Deploy to Digital Ocean Development Server
+      - name: Deploy to UzTube Development Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_HOST }}
@@ -28,7 +28,7 @@ jobs:
           port: ${{ secrets.DEV_PORT }}
           script: |
             echo ">>> ENTER PROJECT DIRECTORY"
-            cd /home/wwlinux/projects/uztube/uztube-backend
+            cd /home/wwlinux/projects/uztube/development/uztube-backend
 
             echo ">>> REPONI UPDATE (git pull)"
             git reset --hard HEAD
