@@ -3,10 +3,6 @@
     <File Path="docker-compose.yaml" />
     <File Path="Dockerfile" />
   </Folder>
-  <Folder Name="/nginx/">
-    <File Path="nginx/nginx.conf" />
-  </Folder>
-  <Folder Name="/nginx/sites-enabled/" />
   <Folder Name="/src/">
     <Project Path="src/UzTube.API/UzTube.API.csproj" />
     <Project Path="src/UzTube.Application/UzTube.Application.csproj" />
