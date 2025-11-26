@@ -50,7 +50,7 @@ jobs:
             docker builder prune -f
 
             echo ">>> BUILDING NEW IMAGE AND STARTING CONTAINERS"
-            docker compose build
+            docker compose build --no-cache
             docker compose up -d
 
             echo ">>> CLEANING UNUSED DOCKER RESOURCES"
