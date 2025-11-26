@@ -1,5 +1,5 @@
 upstream uztube_api_servers {
-    server 127.0.0.1:4444;
+    server uztube_api:4444;
 }
 
 # HTTP to HTTPS redirect

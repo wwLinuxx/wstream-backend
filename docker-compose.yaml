@@ -120,6 +120,8 @@ services:
       - ./nginx/ssl/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
       # LOG
       - uztube_nginx-logs:/var/log/nginx
+      # PROJECT
+      - /home/wwlinux/projects:/home/wwlinux/projects:ro
     depends_on:
       - uztube_api
     networks:
