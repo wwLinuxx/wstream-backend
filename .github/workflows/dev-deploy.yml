@@ -57,5 +57,3 @@ jobs:
             docker system prune -f --volumes
 
             echo ">>> DEPLOYMENT COMPLETED SUCCESSFULLY!"
-            echo ">>> Currently running containers:"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
