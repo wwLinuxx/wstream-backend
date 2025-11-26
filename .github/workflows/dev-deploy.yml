@@ -27,17 +27,35 @@ jobs:
           password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
           script: |
-            echo ">>> ENTER PROJECT DIRECTORY"
+            echo ">>> ENTERING PROJECT DIRECTORY"
             cd /home/wwlinux/projects/uztube/development/uztube-backend
 
-            echo ">>> REPONI UPDATE (git pull)"
+            echo ">>> CLEANING GIT - Removing all local changes"
+            git clean -fd
             git reset --hard HEAD
+            
+            echo ">>> PULLING LATEST CODE FROM DEV BRANCH"
+            git fetch origin
+            git checkout dev
             git pull origin dev
 
-            echo ">>> DOCKER CONTAINERS STOP"
-            docker compose down || true
+            echo ">>> STOPPING AND REMOVING DOCKER CONTAINERS"
+            docker compose down --remove-orphans
 
-            echo ">>> DOCKER IMAGE REBUILD + START"
-            docker compose up -d --build
+            echo ">>> REMOVING OLD DOCKER IMAGES"
+            docker rmi uztube_api:dev || true
+            docker image prune -f
 
-            echo ">>> DEPLOYMENT COMPLETED!"
+            echo ">>> CLEANING DOCKER BUILD CACHE"
+            docker builder prune -f
+
+            echo ">>> BUILDING NEW IMAGE AND STARTING CONTAINERS"
+            docker compose build --no-cache
+            docker compose up -d
+
+            echo ">>> CLEANING UNUSED DOCKER RESOURCES"
+            docker system prune -f --volumes
+
+            echo ">>> DEPLOYMENT COMPLETED SUCCESSFULLY!"
+            echo ">>> Currently running containers:"
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
