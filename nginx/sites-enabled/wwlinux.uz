@@ -17,7 +17,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     
     #root /home/wwlinux/projects/uztube/production/uztube-frontend;
-    root /home/wwlinux/projects/wwlinux#;
+    root /home/wwlinux/projects/wwlinux;
     index index.html;
     
     # Static content
