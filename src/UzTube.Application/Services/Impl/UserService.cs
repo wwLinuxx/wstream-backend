@@ -65,7 +65,7 @@ public class UserService(
         IQueryable<User> query = context.Users;
 
         if (!string.IsNullOrEmpty(option.Search))
-            query = query.Where(u => u.Email.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
+            query = query.Where(u => u.Email.Contains(option.Search.Trim()));
 
         List<UserResponseModel> users = await query
             .Skip((option.PageNumber - 1) * option.PageSize)
