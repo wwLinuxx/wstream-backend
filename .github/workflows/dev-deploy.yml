@@ -16,9 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Deploy to UzTube Development Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -30,30 +27,21 @@ jobs:
             echo ">>> ENTERING PROJECT DIRECTORY"
             cd /home/wwlinux/projects/uztube/development/uztube-backend
 
-            echo ">>> CLEANING GIT - Removing all local changes"
+            echo ">>> CLEANING GIT"
             git clean -fd
             git reset --hard HEAD
-            
-            echo ">>> PULLING LATEST CODE FROM DEV BRANCH"
             git fetch origin
             git checkout dev
             git pull origin dev
 
-            echo ">>> STOPPING AND REMOVING DOCKER CONTAINERS"
+            echo ">>> STOPPING DOCKER CONTAINERS"
             docker compose down --remove-orphans
 
-            echo ">>> REMOVING OLD DOCKER IMAGES"
-            docker rmi uztube_api:dev || true
-            docker image prune -f
-
-            echo ">>> CLEANING DOCKER BUILD CACHE"
-            docker builder prune -f
-
-            echo ">>> BUILDING NEW IMAGE AND STARTING CONTAINERS"
-            docker compose build --no-cache
+            echo ">>> BUILDING AND STARTING DOCKER"
+            docker compose build
             docker compose up -d
 
-            echo ">>> CLEANING UNUSED DOCKER RESOURCES"
-            docker system prune -f --volumes
+            echo ">>> CLEANING UNUSED IMAGES"
+            docker image prune -f
 
             echo ">>> DEPLOYMENT COMPLETED SUCCESSFULLY!"
