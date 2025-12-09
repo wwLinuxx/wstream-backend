@@ -12,15 +12,15 @@ using UzTube.DataAccess.Persistence;
 namespace UzTube.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20251106103619_Add_Table_OtpCode")]
-    partial class Add_Table_OtpCode
+    [Migration("20251209183334_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -31,9 +31,15 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -41,6 +47,35 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.CategoryTranslate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ColumnName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TranslateText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("CategoryTranslates");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
@@ -368,7 +403,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
                 {
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.Property<int?>("Age")
@@ -522,7 +557,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2025, 11, 6, 10, 36, 18, 592, DateTimeKind.Utc).AddTicks(1780),
+                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "uztube@uztube.uz",
                             IsDeleted = false,
                             PasswordHash = "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=",
@@ -574,6 +609,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Views");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.CategoryTranslate", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Category", "Owner")
+                        .WithMany("Translates")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>
@@ -819,6 +865,8 @@ namespace UzTube.DataAccess.Persistence.Migrations
             modelBuilder.Entity("UzTube.Core.Entities.Category", b =>
                 {
                     b.Navigation("PostCategories");
+
+                    b.Navigation("Translates");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Comment", b =>

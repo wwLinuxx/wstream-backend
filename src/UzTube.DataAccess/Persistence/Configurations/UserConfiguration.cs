@@ -53,7 +53,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             Email = "uztube@uztube.uz",
             PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
             Salt = seedRootSalt,
-            CreatedOn = DateTime.UtcNow
+            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         }; ;
     }
 }

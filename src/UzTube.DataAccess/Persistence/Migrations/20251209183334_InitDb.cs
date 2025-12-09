@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -6,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace UzTube.DataAccess.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDB : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +17,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,6 +75,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     Email = table.Column<string>(type: "character varying(100)", unicode: false, maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     Salt = table.Column<string>(type: "text", nullable: false),
@@ -83,6 +87,27 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CategoryTranslates",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LanguageId = table.Column<int>(type: "integer", nullable: false),
+                    ColumnName = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
+                    TranslateText = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryTranslates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CategoryTranslates_Categories_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -131,6 +156,26 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     table.ForeignKey(
                         name: "FK_Followers_Users_FollowingId",
                         column: x => x.FollowingId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OtpCodes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    GeneratedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OtpCodes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OtpCodes_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -430,14 +475,19 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedOn", "DeletedOn", "Email", "IsDeleted", "PasswordHash", "Salt", "UpdatedOn" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2025, 11, 1, 16, 59, 2, 321, DateTimeKind.Utc).AddTicks(2340), null, "uztube@uztube.uz", false, "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=", "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD", null });
+                columns: new[] { "Id", "CreatedOn", "DeletedOn", "Email", "IsDeleted", "PasswordHash", "Salt", "Status", "UpdatedOn" },
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "uztube@uztube.uz", false, "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=", "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD", 3, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_Name",
                 table: "Categories",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CategoryTranslates_OwnerId",
+                table: "CategoryTranslates",
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CommentLikes_CommentId",
@@ -473,6 +523,11 @@ namespace UzTube.DataAccess.Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Likes_UserId",
                 table: "Likes",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OtpCodes_UserId",
+                table: "OtpCodes",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -564,6 +619,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "CategoryTranslates");
+
+            migrationBuilder.DropTable(
                 name: "CommentLikes");
 
             migrationBuilder.DropTable(
@@ -571,6 +629,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Likes");
+
+            migrationBuilder.DropTable(
+                name: "OtpCodes");
 
             migrationBuilder.DropTable(
                 name: "PlaylistsPosts");

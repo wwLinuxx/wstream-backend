@@ -17,7 +17,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -400,7 +400,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
                 {
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.Property<int?>("Age")
@@ -554,7 +554,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2025, 11, 8, 17, 56, 26, 641, DateTimeKind.Utc).AddTicks(8630),
+                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "uztube@uztube.uz",
                             IsDeleted = false,
                             PasswordHash = "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=",

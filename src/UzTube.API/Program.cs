@@ -2,6 +2,7 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Scalar.AspNetCore;
 using UzTube.API;
 using UzTube.API.Extensions;
 using UzTube.API.Filters;
@@ -28,7 +29,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDataAccess(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
-builder.Services.AddSwagger();
+builder.Services.AddScalar();
 builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.Configure<KestrelServerOptions>(options =>
@@ -51,14 +52,10 @@ await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
 await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "UzTube v1.0");
-    c.RoutePrefix = "api";
-});
 
-// HTTPS redirection faqat production'da
+if (app.Environment.IsDevelopment())
+    app.UseScalar();
+
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 
