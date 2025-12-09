@@ -1,34 +1,28 @@
 ﻿using Minio;
 using Minio.DataModel.Args;
+using UzTube.Application.Exceptions;
 
 namespace UzTube.Application.Services.Impl;
 
-public class MinioFileStorageService(
-    IMinioClient minioClient
-) : IFileStorageService
+public class MinioFileStorageService(IMinioClient minioClient) : IFileStorageService
 {
-    public async Task<string> UploadFileAsync(string folderName, string fileName, Stream fileStream, string contentType, long fileSize = -1)
+    public async Task<string> UploadFileAsync(
+        string folderName,
+        string fileName,
+        Stream fileStream,
+        string contentType,
+        long fileSize = -1)
     {
-        string bucketName = folderName.ToLower();
+        folderName = folderName.ToLower();
+        fileName = fileName.ToLower();
 
-        bool found = await minioClient.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(bucketName)
-        );
-
-        if (!found)
-        {
-            await minioClient.MakeBucketAsync(
-                new MakeBucketArgs().WithBucket(bucketName)
-            );
-        }
-
-        long size = fileSize > 0 ? fileSize : (fileStream.CanSeek ? fileStream.Length : -1);
+        await EnsureFolderExistsAsync(folderName);
 
         PutObjectArgs? putObjectArgs = new PutObjectArgs()
-            .WithBucket(bucketName)
-            .WithObject(fileName.ToLower())
+            .WithBucket(folderName)
+            .WithObject(fileName)
             .WithStreamData(fileStream)
-            .WithObjectSize(size)
+            .WithObjectSize(GetFileSize(fileSize, fileStream))
             .WithContentType(contentType);
 
         await minioClient.PutObjectAsync(putObjectArgs);
@@ -38,22 +32,22 @@ public class MinioFileStorageService(
 
     public async Task StreamFileAsync(string folderName, string fileName, Stream outputStream)
     {
-        TaskCompletionSource<bool>? tcs = new TaskCompletionSource<bool>();
+        folderName = folderName.ToLower();
+        fileName = fileName.ToLower();
+
+        await EnsureFileExistsAsync(folderName, fileName);
+
+        TaskCompletionSource<bool>? tcs = new();
         Exception? exception = null;
 
         GetObjectArgs? getObjectArgs = new GetObjectArgs()
-            .WithBucket(folderName.ToLower())
-            .WithObject(fileName.ToLower())
+            .WithBucket(folderName)
+            .WithObject(fileName)
             .WithCallbackStream(cs =>
             {
                 try
                 {
-                    byte[] buffer = new byte[81920]; // 80KB buffer
-                    int bytesRead;
-                    while ((bytesRead = cs.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        outputStream.Write(buffer, 0, bytesRead);
-                    }
+                    cs.CopyTo(outputStream);
                     tcs.SetResult(true);
                 }
                 catch (Exception ex)
@@ -66,49 +60,57 @@ public class MinioFileStorageService(
         await minioClient.GetObjectAsync(getObjectArgs);
         await tcs.Task;
 
-        if (exception != null)
+        if (exception is not null)
             throw exception;
     }
 
-    public async Task<bool> FileExistsAsync(string bucketName, string objectName)
+    public async Task DeleteFileAsync(string folderName, string fileName)
     {
-        // StatObjectAsync fayl haqida ma'lumotni oladi, agar mavjud bo'lmasa xato tashlaydi
-        await minioClient.StatObjectAsync(
-            new StatObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectName)
-        ).ConfigureAwait(false);
+        folderName = folderName.ToLower();
+        fileName = fileName.ToLower();
 
-        return true; // Fayl mavjud
+        await EnsureFileExistsAsync(folderName, fileName);
+
+        RemoveObjectArgs? removeArgs = new RemoveObjectArgs()
+            .WithBucket(folderName)
+            .WithObject(fileName);
+
+        await minioClient.RemoveObjectAsync(removeArgs);
     }
 
-    public async Task<bool> RemoveFileAsync(string bucketName, string objectName)
+    private async Task EnsureFolderExistsAsync(string folderName)
     {
-        await minioClient.RemoveObjectAsync(
-            new RemoveObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectName)
-        ).ConfigureAwait(false);
+        bool exists = await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(folderName));
 
-        return true;
-    }
-
-    public async Task<bool> BucketExistsAsync(string bucketName)
-    {
-        return await minioClient.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(bucketName)
-        ).ConfigureAwait(false);
-    }
-
-    public async Task CreateBucketAsync(string bucketName)
-    {
-        bool found = await minioClient.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(bucketName)
-        ).ConfigureAwait(false);
-
-        if (!found)
+        if (!exists)
+        {
             await minioClient.MakeBucketAsync(
-                new MakeBucketArgs().WithBucket(bucketName)
-            ).ConfigureAwait(false);
+                new MakeBucketArgs().WithBucket(folderName));
+        }
     }
+
+    private async Task EnsureFileExistsAsync(string folderName, string fileName)
+    {
+        bool bucketExists = await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(folderName));
+
+        if (!bucketExists)
+            throw new NotFoundException($"Folder '{folderName}' not found");
+
+        try
+        {
+            await minioClient.StatObjectAsync(
+                new StatObjectArgs()
+                    .WithBucket(folderName)
+                    .WithObject(fileName));
+        }
+        catch (Minio.Exceptions.ObjectNotFoundException)
+        {
+            throw new NotFoundException($"File '{fileName}' not found");
+        }
+    }
+
+    private static long GetFileSize(long fileSize, Stream fileStream)
+        => fileSize > 0 ? fileSize : (fileStream.CanSeek ? fileStream.Length : -1);
 }

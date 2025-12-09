@@ -19,21 +19,10 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
     private async Task HandleException(HttpContext context, Exception ex)
     {
-        logger.LogError(ex, "An error occurred: {Message}", ex.Message);
+        logger.LogError(ex.Message);
 
         int code = StatusCodes.Status500InternalServerError;
         List<string> errors = new List<string> { ex.Message };
-
-        // Development mode'da to'liq ma'lumot berish
-        if (ex.StackTrace != null)
-        {
-            errors.Add($"StackTrace: {ex.StackTrace}");
-        }
-
-        if (ex.InnerException != null)
-        {
-            errors.Add($"Inner Exception: {ex.InnerException.Message}");
-        }
 
         code = ex switch
         {

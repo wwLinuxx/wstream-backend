@@ -221,6 +221,8 @@ public class PostService(
         Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
                     ?? throw new NotFoundException("Post not found");
 
+        await fileStorageService.DeleteFileAsync(VideoFolder, post.VideoUrl);
+
         post.IsDeleted = true;
         post.DeletedAt = DateTime.Now;
 
