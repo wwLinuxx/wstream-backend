@@ -28,7 +28,7 @@ services:
       - MinioSettings__AccessKey=${MINIO_ACCESS_KEY}
       - MinioSettings__SecretKey=${MINIO_SECRET_KEY}
       - MinioSettings__UseSSL=false
-    ports:
+    expose:
       - "4444:${API_CONTAINER_PORT}"
     depends_on:
       - uztube-database
