@@ -92,8 +92,7 @@ public static class ApiDependencyInjection
             options
                 .WithTitle("UzTube API")
                 .WithTheme(ScalarTheme.Default)
-                .WithEndpointPrefix("/api/{documentName}")
-                .WithBaseServerUrl("https://api.wwlinux.uz");
+                .WithEndpointPrefix("/api/{documentName}");
         });
     }
 

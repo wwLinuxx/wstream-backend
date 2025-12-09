@@ -53,9 +53,9 @@ await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
 await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
-app.UseScalar();
-
 app.UseCorsPolicy();
+
+app.UseScalar();
 
 app.UseAuthentication();
 app.UseAuthorization();
