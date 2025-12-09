@@ -29,6 +29,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDataAccess(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
+builder.Services.AddCorsPolicy();
 builder.Services.AddScalar();
 builder.Services.AddJwt(builder.Configuration);
 
@@ -52,14 +53,9 @@ await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
 await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
+app.UseScalar();
 
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
-    app.UseScalar();
-
-if (!app.Environment.IsDevelopment())
-    app.UseHttpsRedirection();
-
-app.AddCors();
+app.UseCorsPolicy();
 
 app.UseAuthentication();
 app.UseAuthorization();

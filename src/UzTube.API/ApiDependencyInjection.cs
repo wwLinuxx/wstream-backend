@@ -18,43 +18,22 @@ public static class ApiDependencyInjection
         });
     }
 
-    public static void AddCors(this IApplicationBuilder app)
+    public static void AddCorsPolicy(this IServiceCollection services)
     {
-        app.UseCors(corsPolicyBuilder =>
-            corsPolicyBuilder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-        );
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
     }
 
-    public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
+    public static void UseCorsPolicy(this IApplicationBuilder app)
     {
-        JwtSettings? jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
-            ?? throw new InvalidOperationException("JwtSettings not configured");
-
-        byte[] key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
-
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.RequireHttpsMetadata = false;
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-        });
+        app.UseCors();
     }
 
     public static void AddScalar(this IServiceCollection services)
@@ -113,6 +92,36 @@ public static class ApiDependencyInjection
             options.WithTitle("UzTube API")
                    .WithTheme(ScalarTheme.Default)
                    .WithEndpointPrefix("/api/{documentName}");
+        });
+    }
+
+    public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
+    {
+        JwtSettings? jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+            ?? throw new InvalidOperationException("JwtSettings not configured");
+
+        byte[] key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
         });
     }
 }
