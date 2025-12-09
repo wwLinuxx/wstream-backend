@@ -89,10 +89,11 @@ public static class ApiDependencyInjection
         app.MapOpenApi();
         app.MapScalarApiReference(options =>
         {
-            options.WithTitle("UzTube API")
-                   .WithTheme(ScalarTheme.Default)
-                   .WithEndpointPrefix("/api/{documentName}")
-                   .WithBaseServerUrl("https://api.wwlinux.uz");
+            options
+                .WithTitle("UzTube API")
+                .WithTheme(ScalarTheme.Default)
+                .WithEndpointPrefix("/api/{documentName}")
+                .WithBaseServerUrl("https://api.wwlinux.uz");
         });
     }
 
