@@ -49,6 +49,12 @@ public static class ApiDependencyInjection
                     Description = "UzTube API"
                 };
 
+                document.Servers =
+                [
+                    new() { Url = "https://api.wwlinux.uz", Description = "Production Server (HTTPS)" },
+                    new() { Url = "http://api.wwlinux.uz", Description = "Production Server (HTTP - auto redirects to HTTPS)" }
+                ];
+
                 document.Components ??= new OpenApiComponents();
 
                 if (document.Components.SecuritySchemes == null)
