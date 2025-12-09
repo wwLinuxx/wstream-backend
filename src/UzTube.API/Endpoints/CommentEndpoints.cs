@@ -17,7 +17,7 @@ public static class CommentEndpoints
             .RequirePermission(SystemPermissions.CommentCreate);
 
         endpoints.MapGet("{commentId:guid}", GetCommentAsync);
-        
+
         endpoints.MapPost("get-comments", GetCommentsAsync)
             .RequirePermission(SystemPermissions.CommentView);
 
@@ -40,7 +40,7 @@ public static class CommentEndpoints
         return Results.Ok(ApiResult<CommentResponseModel>.Success(
             await commentService.GetCommentAsync(commentId)));
     }
-    
+
     private static async Task<IResult> GetCommentsAsync(
         [FromBody] PageOption option,
         [FromServices] ICommentService commentService)

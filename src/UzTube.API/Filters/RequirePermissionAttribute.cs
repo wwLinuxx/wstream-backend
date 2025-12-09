@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Filters;
 using UzTube.Application.Exceptions;
 using UzTube.Core.Enums;
 

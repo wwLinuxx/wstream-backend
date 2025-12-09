@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
-using UzTube.API.Filters;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
 using UzTube.Application.Models.User;
 using UzTube.Application.Services;
-using UzTube.Core.Enums;
 
 namespace UzTube.API.Controllers;
 
@@ -31,9 +29,9 @@ public class UserController(
         return Ok(ApiResult<PaginatedList<UserResponseModel>>.Success(
             await userService.GetUsersAsync(option)));
     }
-    
+
     [HttpGet("search")]
-    public async Task<IActionResult> SearchUserAsync([FromQuery] [Required] string query)
+    public async Task<IActionResult> SearchUserAsync([FromQuery][Required] string query)
     {
         return Ok(ApiResult<UserResponseModel>.Success(
             await userService.SearchUserAsync(query)));

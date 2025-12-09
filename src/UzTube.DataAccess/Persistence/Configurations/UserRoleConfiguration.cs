@@ -11,10 +11,10 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
         builder.HasKey(ur => ur.Id);
 
         builder.HasIndex(ur => new
-            {
-                ur.UserId,
-                ur.RoleId
-            })
+        {
+            ur.UserId,
+            ur.RoleId
+        })
             .IsUnique();
 
         builder.HasOne(ur => ur.User)

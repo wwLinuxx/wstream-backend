@@ -1,158 +1,114 @@
-﻿using Microsoft.Extensions.Options;
-using Minio;
+﻿using Minio;
 using Minio.DataModel.Args;
-using Minio.Exceptions;
-using UzTube.Application.Common.Minio;
 
 namespace UzTube.Application.Services.Impl;
 
-public class MinioFileStorageService : IFileStorageService
+public class MinioFileStorageService(
+    IMinioClient minioClient
+) : IFileStorageService
 {
-    private readonly IMinioClient _minioClient;
-    private readonly MinioSettings _minioSettings;
-
-    // Dependency Injection orqali IMinioClient va MinioSettings ni qabul qiladi
-    public MinioFileStorageService(IMinioClient minioClient, IOptions<MinioSettings> minioSettings)
+    public async Task<string> UploadFileAsync(string folderName, string fileName, Stream fileStream, string contentType, long fileSize = -1)
     {
-        _minioClient = minioClient;
-        _minioSettings = minioSettings.Value;
+        string bucketName = folderName.ToLower();
+
+        bool found = await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(bucketName)
+        );
+
+        if (!found)
+        {
+            await minioClient.MakeBucketAsync(
+                new MakeBucketArgs().WithBucket(bucketName)
+            );
+        }
+
+        long size = fileSize > 0 ? fileSize : (fileStream.CanSeek ? fileStream.Length : -1);
+
+        PutObjectArgs? putObjectArgs = new PutObjectArgs()
+            .WithBucket(bucketName)
+            .WithObject(fileName.ToLower())
+            .WithStreamData(fileStream)
+            .WithObjectSize(size)
+            .WithContentType(contentType);
+
+        await minioClient.PutObjectAsync(putObjectArgs);
+
+        return fileName;
     }
 
-    public async Task<string> UploadFileAsync(string bucketName, string objectName, Stream data, string contentType)
+    public async Task StreamFileAsync(string folderName, string fileName, Stream outputStream)
     {
-        try
-        {
-            // Agar bucket (saqlash joyi) mavjud bo'lmasa, uni yaratamiz
-            var found = await _minioClient.BucketExistsAsync(
-                new BucketExistsArgs().WithBucket(bucketName)
-            ).ConfigureAwait(false);
+        TaskCompletionSource<bool>? tcs = new TaskCompletionSource<bool>();
+        Exception? exception = null;
 
-            if (!found)
-                await _minioClient.MakeBucketAsync(
-                    new MakeBucketArgs().WithBucket(bucketName)
-                ).ConfigureAwait(false);
-
-            // Faylni Minio'ga yuklash
-            await _minioClient.PutObjectAsync(
-                new PutObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(objectName)
-                    .WithStreamData(data) // Yuklanayotgan fayl stream'i
-                    .WithObjectSize(data.Length) // Faylning hajmi
-                    .WithContentType(contentType) // Faylning turi (masalan, "image/jpeg")
-            ).ConfigureAwait(false);
-
-            // Yuklangan faylga to'g'ridan-to'g'ri kirish URL'ini qaytarish
-            // Bu URL Minio serverining manzili va bucket/object nomini o'z ichiga oladi.
-            // Masalan: http://localhost:9000/my-bucket/my-image.jpg
-            return $"http://{_minioSettings.Endpoint}/{bucketName}/{objectName}";
-        }
-        catch (MinioException e) // Minio'dan kelgan xatoliklarni qayd etish
-        {
-            Console.WriteLine($"[Minio] Upload Error: {e.Message}");
-            throw; // Xatolikni yuqoriga uzatamiz
-        }
-        catch (Exception e) // Boshqa umumiy xatoliklarni qayd etish
-        {
-            Console.WriteLine($"[General] Error during upload: {e.Message}");
-            throw;
-        }
-    }
-
-    public async Task<Stream> DownloadFileAsync(string bucketName, string objectName)
-    {
-        try
-        {
-            var memoryStream = new MemoryStream();
-            await _minioClient.GetObjectAsync(
-                new GetObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(objectName)
-                    .WithCallbackStream(async stream => // Fayl streamini memoryStream ga nusxalash
+        GetObjectArgs? getObjectArgs = new GetObjectArgs()
+            .WithBucket(folderName.ToLower())
+            .WithObject(fileName.ToLower())
+            .WithCallbackStream(cs =>
+            {
+                try
+                {
+                    byte[] buffer = new byte[81920]; // 80KB buffer
+                    int bytesRead;
+                    while ((bytesRead = cs.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        await stream.CopyToAsync(memoryStream);
-                    })
-            ).ConfigureAwait(false);
+                        outputStream.Write(buffer, 0, bytesRead);
+                    }
+                    tcs.SetResult(true);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                    tcs.SetResult(false);
+                }
+            });
 
-            memoryStream.Position = 0; // Streamni boshiga qaytarish, chunki undan o'qish mumkin bo'lishi uchun
-            return memoryStream;
-        }
-        catch (MinioException e)
-        {
-            Console.WriteLine($"[Minio] Download Error: {e.Message}");
-            throw;
-        }
+        await minioClient.GetObjectAsync(getObjectArgs);
+        await tcs.Task;
+
+        if (exception != null)
+            throw exception;
     }
 
     public async Task<bool> FileExistsAsync(string bucketName, string objectName)
     {
-        try
-        {
-            // StatObjectAsync fayl haqida ma'lumotni oladi, agar mavjud bo'lmasa xato tashlaydi
-            await _minioClient.StatObjectAsync(
-                new StatObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(objectName)
-            ).ConfigureAwait(false);
-            return true; // Fayl mavjud
-        }
-        catch (MinioException e) when (e.Message.Contains("Object does not exist")) // Fayl topilmaganligini aniqlash
-        {
-            return false; // Fayl mavjud emas
-        }
+        // StatObjectAsync fayl haqida ma'lumotni oladi, agar mavjud bo'lmasa xato tashlaydi
+        await minioClient.StatObjectAsync(
+            new StatObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectName)
+        ).ConfigureAwait(false);
+
+        return true; // Fayl mavjud
     }
 
     public async Task<bool> RemoveFileAsync(string bucketName, string objectName)
     {
-        try
-        {
-            await _minioClient.RemoveObjectAsync(
-                new RemoveObjectArgs()
-                    .WithBucket(bucketName)
-                    .WithObject(objectName)
-            ).ConfigureAwait(false);
-            return true;
-        }
-        catch (MinioException e)
-        {
-            Console.WriteLine($"[Minio] Remove Error: {e.Message}");
-            throw;
-        }
+        await minioClient.RemoveObjectAsync(
+            new RemoveObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectName)
+        ).ConfigureAwait(false);
+
+        return true;
     }
 
     public async Task<bool> BucketExistsAsync(string bucketName)
     {
-        try
-        {
-            return await _minioClient.BucketExistsAsync(
-                new BucketExistsArgs().WithBucket(bucketName)
-            ).ConfigureAwait(false);
-        }
-        catch (MinioException e)
-        {
-            Console.WriteLine($"[Minio] Bucket Check Error: {e.Message}");
-            throw;
-        }
+        return await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(bucketName)
+        ).ConfigureAwait(false);
     }
 
     public async Task CreateBucketAsync(string bucketName)
     {
-        try
-        {
-            var found = await _minioClient.BucketExistsAsync(
-                new BucketExistsArgs().WithBucket(bucketName)
-            ).ConfigureAwait(false);
+        bool found = await minioClient.BucketExistsAsync(
+            new BucketExistsArgs().WithBucket(bucketName)
+        ).ConfigureAwait(false);
 
-            if (!found)
-                await _minioClient.MakeBucketAsync(
-                    new MakeBucketArgs().WithBucket(bucketName)
-                ).ConfigureAwait(false);
-        }
-        catch (MinioException e)
-        {
-            Console.WriteLine($"[Minio] Create Bucket Error: {e.Message}");
-            throw;
-        }
+        if (!found)
+            await minioClient.MakeBucketAsync(
+                new MakeBucketArgs().WithBucket(bucketName)
+            ).ConfigureAwait(false);
     }
 }
-

@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using UzTube.API;
 using UzTube.API.Extensions;
 using UzTube.API.Filters;
@@ -28,7 +30,17 @@ builder.Services.AddApplication(builder.Configuration);
 
 builder.Services.AddSwagger();
 builder.Services.AddJwt(builder.Configuration);
-builder.Services.AddMinio();
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 10L * 1024 * 1024 * 1024;
+    options.AllowSynchronousIO = true;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024;
+});
 
 WebApplication app = builder.Build();
 
@@ -46,8 +58,9 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "api";
 });
 
-
-app.UseHttpsRedirection();
+// HTTPS redirection faqat production'da
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.AddCors();
 

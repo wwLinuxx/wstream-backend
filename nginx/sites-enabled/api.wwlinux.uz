@@ -1,5 +1,5 @@
 upstream uztube_api_servers {
-    server uztube_api:4444;
+    server uztube-api:4444;
 }
 
 # HTTP to HTTPS redirect
@@ -34,6 +34,6 @@ server {
     }
     
     # Error logging
-    error_log /var/log/nginx/admin.proeduedge-error.log crit;
-    access_log /var/log/nginx/admin.proeduedge-access.log;
+    error_log /var/log/nginx/api.wwlinux.uz-error.log crit;
+    access_log /var/log/nginx/api.wwlinux.uz-access.log;
 }

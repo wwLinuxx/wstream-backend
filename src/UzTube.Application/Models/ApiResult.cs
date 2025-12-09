@@ -26,4 +26,9 @@ public record ApiResult<T>
     {
         return new ApiResult<T>(false, default!, errors);
     }
+
+    public static ApiResult<T> Failure(string error)
+    {
+        return new ApiResult<T>(false, default!, [error]);
+    }
 }

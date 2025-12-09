@@ -9,7 +9,7 @@ public class CategoryTranslateConfiguration : IEntityTypeConfiguration<CategoryT
     public void Configure(EntityTypeBuilder<CategoryTranslate> builder)
     {
         builder.HasKey(ct => ct.Id);
-        
+
         builder.HasOne(ct => ct.Owner)
             .WithMany(c => c.Translates)
             .HasForeignKey(ct => ct.OwnerId)

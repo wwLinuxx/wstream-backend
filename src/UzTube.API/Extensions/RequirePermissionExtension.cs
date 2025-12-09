@@ -20,7 +20,7 @@ public static class RequirePermissionExtension
 
             if (permissions.Length == 0)
                 return await next(context);
-            
+
             string? permissionsJson = user.FindFirstValue("permissions");
 
             if (string.IsNullOrEmpty(permissionsJson))

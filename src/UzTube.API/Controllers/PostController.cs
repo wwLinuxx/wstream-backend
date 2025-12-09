@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
 using UzTube.Application.Services;
@@ -12,20 +12,37 @@ public class PostController(
     IPostService postService
 ) : ControllerBase
 {
+    [HttpPost("upload-video")]
+    [RequestSizeLimit(10L * 1024 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024)]
+    public async Task<IActionResult> UploadVideoFileAsync(IFormFile file)
+    {
+        return Ok(ApiResult<UploadVideoFileResponseModel>.Success(
+            await postService.UploadVideoFileAsync(file)));
+    }
+
+    [HttpGet("stream-video")]
+    public async Task<IActionResult> StreamVideoFileAsync([FromQuery] string folder, [FromQuery] string file)
+    {
+        await postService.StreamVideoFileAsync(folder, file, Response);
+
+        return new EmptyResult();
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePostAsync([FromForm] CreatePostModel model)
     {
         return Ok(ApiResult<CreatePostResponseModel>.Success(
             await postService.CreatePostAsync(model)));
     }
-    
+
     [HttpGet("{id:Guid}")]
     public async Task<IActionResult> GetPostAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<PostResponseModel>.Success(
             await postService.GetPostAsync(id)));
     }
-    
+
     [HttpPost("get-posts")]
     public async Task<IActionResult> GetPostsAsync([FromBody] PageOption option)
     {
@@ -34,7 +51,7 @@ public class PostController(
     }
 
     [HttpGet("search")]
-    public async Task<IActionResult> SearchPostByQueryAsync([FromQuery] [Required] string query)
+    public async Task<IActionResult> SearchPostByQueryAsync([FromQuery][Required] string query)
     {
         return Ok(ApiResult<PostResponseModel>.Success(
             await postService.SearchPostAsync(query)));

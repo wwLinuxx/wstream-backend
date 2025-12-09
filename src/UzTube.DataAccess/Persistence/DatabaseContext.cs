@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using UzTube.Core.Entities;
 
 namespace UzTube.DataAccess.Persistence;

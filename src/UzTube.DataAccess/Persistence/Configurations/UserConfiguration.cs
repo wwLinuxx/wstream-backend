@@ -1,9 +1,8 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Security.Cryptography;
+using System.Text;
 using UzTube.Core.Common;
-using UzTube.Core.Entities;
 using User = UzTube.Core.Entities.User;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
@@ -55,6 +54,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
             Salt = seedRootSalt,
             CreatedOn = DateTime.UtcNow
-        };;
+        }; ;
     }
 }

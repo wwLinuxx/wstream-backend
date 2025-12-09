@@ -1,13 +1,13 @@
 services:
   # UzTube API
-  uztube_api:
+  uztube-api:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: uztube_api:dev
-    container_name: uztube_api
+      dockerfile: src/UzTube.API/Dockerfile
+    image: uztube-api:dev
+    container_name: uztube-api
     environment:
-      # ASPNETCORE 
+    # ASPNETCORE 
       - ASPNETCORE_URLS=${ASPNETCORE_URLS}
       - ASPNETCORE_ENVIRONMENT=${ASPNET_ENVIRONMENT}
       # DATABASE
@@ -23,25 +23,25 @@ services:
       - Serilog__WriteTo__1__Name=${LOG_WRITE_TO}
       - Serilog__WriteTo__1__Args__serverUrl=${SEQ_URL}:${SEQ_PORT}
       # MINIO
-      - MinioSettings__Endpoint=${MINIO_SERVER}:${MINIO_PORT}
+      - MinioSettings__Endpoint=${MINIO_SERVER}
+      - MinioSettings__Port=${MINIO_PORT}
       - MinioSettings__AccessKey=${MINIO_ACCESS_KEY}
       - MinioSettings__SecretKey=${MINIO_SECRET_KEY}
-      - MinioSettings__BucketName=quations
       - MinioSettings__UseSSL=false
-    expose:
-      - "${API_CONTAINER_PORT}"
+    ports:
+      - "4444:${API_CONTAINER_PORT}"
     depends_on:
-      - uztube_database
-      - uztube_logs
-      - uztube_filemanager
+      - uztube-database
+      - uztube-logs
+      - uztube-filemanager
     networks:
-      - uztube_network
+      - uztube-network
     restart: unless-stopped
   
   # PostgreSQL
-  uztube_database:
+  uztube-database:
     image: postgres:latest
-    container_name: uztube_database
+    container_name: uztube-database
     environment:
       POSTGRES_DB: ${DB}
       POSTGRES_USER: ${DB_USER}
@@ -49,20 +49,20 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - uztube_database:/var/lib/postgresql
-    #    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
+      - uztube-database:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
-      - uztube_network
+      - uztube-network
     restart: unless-stopped
     
   # SEQ
-  uztube_logs:
+  uztube-logs:
     image: datalust/seq:latest
-    container_name: uztube_logs
+    container_name: uztube-logs
     environment:
       ACCEPT_EULA: Y
       SEQ_FIRSTRUN_ADMINUSERNAME: ${SEQ_FIRSTRUN_ADMINUSERNAME}
@@ -71,44 +71,38 @@ services:
       - "${SEQ_PORT}:5341"
       - "${SEQ_URL_PORT}:80"
     volumes:
-      - uztube_logs:/data
+      - uztube-logs:/data
     networks:
-      - uztube_network
+      - uztube-network
     restart: unless-stopped
     
   # MinIO
-  uztube_filemanager:
-    image: minio/minio:latest
-    container_name: uztube_filemanager
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-    ports:
-      - "${MINIO_PORT}:9000"
-      - "${MINIO_URL_PORT}:9001"
-    volumes:
-      - uztube_filemanager:/data
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-    networks:
-      - uztube_network
-    restart: unless-stopped
+  uztube-filemanager:
+     image: minio/minio:latest
+     container_name: uztube-filemanager
+     command: server --console-address ":9001" /data/
+     environment:
+       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+     ports:
+       - "${MINIO_URL_PORT}:9001"
+       - "${MINIO_PORT}:9000"
+     volumes:
+       - uztube-filemanager:/data
+     networks:
+       - uztube-network
+     restart: unless-stopped
       
   # Nginx
-  uztube_nginx:
+  uztube-nginx:
     image: nginx:latest
-    container_name: uztube_nginx
+    container_name: uztube-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
       # CONF
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/sites-enabled/default:/etc/nginx/sites-enabled/default:ro
       - ./nginx/sites-enabled/wwlinux.uz:/etc/nginx/sites-enabled/wwlinux.uz:ro
       - ./nginx/sites-enabled/dev.wwlinux.uz:/etc/nginx/sites-enabled/dev.wwlinux.uz:ro
       - ./nginx/sites-enabled/api.wwlinux.uz:/etc/nginx/sites-enabled/api.wwlinux.uz:ro
@@ -119,25 +113,25 @@ services:
       - ./nginx/ssl/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
       - ./nginx/ssl/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
       # LOG
-      - uztube_nginx-logs:/var/log/nginx
+      - uztube-nginx-logs:/var/log/nginx
       # PROJECT
       - /home/wwlinux/projects:/home/wwlinux/projects:ro
     depends_on:
-      - uztube_api
+      - uztube-api
     networks:
-      - uztube_network
+      - uztube-network
     restart: unless-stopped
 
 volumes:
-  uztube_database:
-    name: uztube_database
-  uztube_logs:
-    name: uztube_logs
-  uztube_nginx-logs:
-    name: uztube_nginx-logs
-  uztube_filemanager:
-    name: uztube_filemanager
+  uztube-database:
+    name: uztube-database
+  uztube-logs:
+    name: uztube-logs
+  uztube-nginx-logs:
+    name: uztube-nginx-logs
+  uztube-filemanager:
+    name: uztube-filemanager
     
 networks:
-  uztube_network:
+  uztube-network:
     driver: bridge
