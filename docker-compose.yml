@@ -29,7 +29,7 @@ services:
       - MinioSettings__SecretKey=${MINIO_SECRET_KEY}
       - MinioSettings__UseSSL=false
     expose:
-      - "4444:${API_CONTAINER_PORT}"
+      - "${API_CONTAINER_PORT}"
     depends_on:
       - uztube-database
       - uztube-logs

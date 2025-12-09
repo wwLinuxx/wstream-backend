@@ -53,7 +53,7 @@ await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseScalar();
 
 if (!app.Environment.IsDevelopment())

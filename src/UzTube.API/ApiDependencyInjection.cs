@@ -67,7 +67,7 @@ public static class ApiDependencyInjection
                 {
                     Title = "UzTube API",
                     Version = "v1",
-                    Description = "UzTube Video Streaming API"
+                    Description = "UzTube API"
                 };
 
                 document.Components ??= new OpenApiComponents();
