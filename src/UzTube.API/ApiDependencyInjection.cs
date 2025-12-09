@@ -64,10 +64,10 @@ public static class ApiDependencyInjection
 
                 document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
                 {
-                    Description = "JWT token kiriting",
+                    Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer YOUR_TOKEN')",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
+                    Type = SecuritySchemeType.ApiKey,
                     Scheme = "bearer",
                     BearerFormat = "JWT"
                 };
