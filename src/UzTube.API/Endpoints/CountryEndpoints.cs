@@ -11,7 +11,7 @@ public static class CountryEndpoints
     {
         RouteGroupBuilder endpoints = app.MapGroup("api/countries");
 
-        endpoints.MapPost(string.Empty, GetCountriesAsync);
+        endpoints.MapPost("get-countries", GetCountriesAsync);
 
         return app;
     }
