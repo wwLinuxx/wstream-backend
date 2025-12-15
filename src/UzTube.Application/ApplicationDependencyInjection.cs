@@ -36,6 +36,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IClaimService, ClaimService>();
