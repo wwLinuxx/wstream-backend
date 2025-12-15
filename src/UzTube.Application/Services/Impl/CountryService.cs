@@ -26,7 +26,7 @@ public class CountryService(
             })
             .ToListAsync();
 
-        if (countries.Count > 0)
+        if (countries.Count == 0)
             throw new NotFoundException("Countries not found");
 
         int countriesCount = context.Countries.Count();
