@@ -564,7 +564,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 name: "IX_Profiles_CountryId",
                 table: "Profiles",
                 column: "CountryId",
-                unique: true);
+                unique: false);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Profiles_PhoneNumber",
