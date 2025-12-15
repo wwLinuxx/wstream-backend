@@ -63,7 +63,7 @@ public class CommentService(
             })
             .ToListAsync();
 
-        if (comments.Count > 0)
+        if (comments.Count == 0)
             throw new NotFoundException("Comments not found");
 
         int commentsCount = context.Comments.Count();
