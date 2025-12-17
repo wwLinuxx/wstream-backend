@@ -73,4 +73,14 @@ public enum SystemPermissions
 
     CategoryDelete,
     #endregion
+
+    #region Country
+    CountryCreate,
+
+    CountryView,
+
+    CountryUpdate,
+
+    CountryDelete
+    #endregion
 }

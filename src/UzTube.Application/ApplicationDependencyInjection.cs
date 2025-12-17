@@ -66,5 +66,4 @@ public static class ApplicationDependencyInjection
             return client.Build();
         });
     }
-
 }
