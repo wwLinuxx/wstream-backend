@@ -20,12 +20,24 @@ public class PostService(
 
     private static readonly Dictionary<string, string> ContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
-        // Video
-        [".mp4"] = "video/mp4",
-        [".webm"] = "video/webm",
-        [".mkv"] = "video/x-matroska",
-        [".avi"] = "video/x-msvideo",
-        [".mov"] = "video/quicktime"
+        // Widely supported by browsers (native support)
+        [".mp4"] = "video/mp4",                // Best compatibility (H.264/AAC)
+        [".m4v"] = "video/mp4",
+        [".mp4v"] = "video/mp4",
+
+        [".webm"] = "video/webm",               // Modern browsers (VP8/VP9/AV1)
+
+        [".ogv"] = "video/ogg",                // Theora (older but supported)
+
+        [".mpeg"] = "video/mpeg",
+        [".mpg"] = "video/mpeg",
+
+        // Transport streams / segments (used in streaming workflows)
+        [".ts"] = "video/mp2t",               // used in HLS segments sometimes
+
+        // Streaming manifests (often require a player like hls.js or dash.js)
+        [".m3u8"] = "application/vnd.apple.mpegurl", // HLS playlist
+        [".mpd"] = "application/dash+xml"          // MPEG-DASH manifest
     };
 
     private static readonly HashSet<string> AllowedVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
