@@ -7,7 +7,7 @@ namespace UzTube.Application.Services;
 public interface IPostService
 {
     Task<UploadVideoFileResponseModel> UploadVideoFileAsync(IFormFile file);
-    Task StreamVideoFileAsync(string folder, string file, HttpResponse response);
+    Task StreamVideoFileAsync(string file, HttpResponse response);
     Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel request);
     Task<PostResponseModel> GetPostAsync(Guid id);
     Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option);

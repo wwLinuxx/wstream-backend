@@ -53,9 +53,12 @@ public class PostService(
         return new UploadVideoFileResponseModel { FileUrl = fileName };
     }
 
-    public async Task StreamVideoFileAsync(string folderName, string fileName, HttpResponse response)
+    public async Task StreamVideoFileAsync(string fileName, HttpResponse response)
     {
-        ValidateStreamRequest(folderName, fileName);
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new BadRequestException("File name is required");
+
+        string folderName = "videos";
 
         response.ContentType = GetContentType(fileName);
         response.Headers.Append("Accept-Ranges", "bytes");
@@ -259,15 +262,6 @@ public class PostService(
 
         if (file.Length > MaxVideoSize)
             throw new BadRequestException($"File size exceeds {MaxVideoSize / (1024 * 1024 * 1024)}GB limit");
-    }
-
-    private static void ValidateStreamRequest(string folderName, string fileName)
-    {
-        if (string.IsNullOrWhiteSpace(folderName))
-            throw new BadRequestException("Folder name is required");
-
-        if (string.IsNullOrWhiteSpace(fileName))
-            throw new BadRequestException("File name is required");
     }
 
     private static string GetContentType(string fileName)

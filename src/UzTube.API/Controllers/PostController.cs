@@ -22,9 +22,9 @@ public class PostController(
     }
 
     [HttpGet("stream-video")]
-    public async Task<IActionResult> StreamVideoFileAsync([FromQuery] string folderName, [FromQuery] string fileName)
+    public async Task<IActionResult> StreamVideoFileAsync([FromQuery] string fileName)
     {
-        await postService.StreamVideoFileAsync(folderName, fileName, Response);
+        await postService.StreamVideoFileAsync(fileName, Response);
 
         return new EmptyResult();
     }
