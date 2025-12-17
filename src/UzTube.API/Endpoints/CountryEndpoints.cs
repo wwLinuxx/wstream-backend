@@ -13,8 +13,8 @@ public static class CountryEndpoints
     {
         RouteGroupBuilder endpoints = app.MapGroup("api/countries");
 
-        endpoints.MapPost("get-countries", GetCountriesAsync)
-            .RequirePermission(SystemPermissions.CategoryView);
+        endpoints.MapPost("get-countries", GetCountriesAsync);
+            //.RequirePermission(SystemPermissions.CategoryView);
 
         return app;
     }
