@@ -17,8 +17,6 @@ public class LoginValidator : AbstractValidator<LoginUserRequest>
             .Matches(@"[a-z]")
                 .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
             .Matches(@"\d")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.")
-            .Matches(@"[^\w\d\s]")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordCharacterLength} characters.");
+                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
     }
 }

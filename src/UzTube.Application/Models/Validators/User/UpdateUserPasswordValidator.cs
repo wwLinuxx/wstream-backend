@@ -17,9 +17,7 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordR
             .Matches(@"[a-z]")
                 .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
             .Matches(@"\d")
-                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.")
-            .Matches(@"[^\w\d\s]")
-                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordCharacterLength} characters.");
+                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
 
         RuleFor(u => u.NewPassword)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
@@ -31,8 +29,6 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordR
             .Matches(@"[a-z]")
                 .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
             .Matches(@"\d")
-                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.")
-            .Matches(@"[^\w\d\s]")
-                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordCharacterLength} characters.");
+                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
     }
 }

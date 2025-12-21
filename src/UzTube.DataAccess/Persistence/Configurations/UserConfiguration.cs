@@ -30,7 +30,7 @@ public class UserConfiguration(
 
         builder.Property(u => u.PasswordHash)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(128);
 
         builder.HasOne(u => u.Country)
             .WithMany(c => c.Users)

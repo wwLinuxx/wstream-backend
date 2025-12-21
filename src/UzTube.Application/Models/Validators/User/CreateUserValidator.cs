@@ -28,7 +28,7 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
             .MaximumLength(20)
                 .WithMessage($"Username should have maximum {UserValidatorConfiguration.MaximumUsernameLength} characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
-                .WithMessage("Username should have letter, number and _");
+                .WithMessage("Username can only contain letters, numbers, and underscores.");
 
         RuleFor(u => u.Password)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
@@ -40,9 +40,7 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
             .Matches(@"[a-z]")
                 .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
             .Matches(@"\d")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.")
-            .Matches(@"[^\w\d\s]")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordCharacterLength} characters.");
+                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
 
         RuleFor(u => u.CountryId)
             .NotEmpty()
