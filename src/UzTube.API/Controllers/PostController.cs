@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using UzTube.API.Filters;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
 using UzTube.Application.Services;
+using UzTube.Core.Enums;
 
 namespace UzTube.API.Controllers;
 
@@ -13,6 +15,7 @@ public class PostController(
 ) : ControllerBase
 {
     [HttpPost("upload-video")]
+    [RequirePermission(SystemPermissions.PostCreate)]
     [RequestSizeLimit(10L * 1024 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024)]
     public async Task<IActionResult> UploadVideoFileAsync(IFormFile file)
