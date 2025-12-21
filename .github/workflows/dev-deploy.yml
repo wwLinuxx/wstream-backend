@@ -1,4 +1,4 @@
-name: CI/CD Deploy Development Server
+name: CI/CD Deploy Development Backend Server
 
 on:
   push:
@@ -9,14 +9,14 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: UzTube
+    environment: wstream-backend
     if: github.ref == 'refs/heads/dev'
-    name: Build and Deploy to Development
+    name: Build and Deploy to Development Backend Server
     
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to UzTube Development Server
+      - name: Deploy to WSTREAM Development Backend Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_HOST }}
@@ -24,8 +24,20 @@ jobs:
           password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
           script: |
-            echo ">>> ENTERING PROJECT DIRECTORY"
-            cd /home/wwlinux/projects/uztube/development/uztube-backend
+            set -e
+            
+            PROJECT_DIR="/home/wwlinux/projects/wstream/development/wstream-backend"
+            REPO_URL="git@github.com:${{ github.repository }}.git"
+            
+            echo ">>> CHECKING PROJECT DIRECTORY"
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo ">>> CREATING PROJECT DIRECTORY"
+              mkdir -p "$PROJECT_DIR"
+              cd "$PROJECT_DIR"
+              git clone -b dev "$REPO_URL" .
+            else
+              cd "$PROJECT_DIR"
+            fi
 
             echo ">>> CLEANING GIT"
             git clean -fd
@@ -35,7 +47,7 @@ jobs:
             git pull origin dev
 
             echo ">>> STOPPING DOCKER CONTAINERS"
-            docker compose down --remove-orphans
+            docker compose down --remove-orphans || true
 
             echo ">>> BUILDING AND STARTING DOCKER"
             docker compose build
