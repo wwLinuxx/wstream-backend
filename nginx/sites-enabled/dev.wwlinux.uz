@@ -16,7 +16,7 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     
-    root /home/wwlinux/projects/uztube/development/uztube-frontend;
+    root /home/wwlinux/projects/wstream/development/wstream-frontend/dist;
     index index.html;
     
     # Static content
