@@ -15,7 +15,7 @@ public class PostController(
 ) : ControllerBase
 {
     [HttpPost("upload-video")]
-    [RequirePermission(SystemPermissions.PostCreate)]
+    //[RequirePermission(SystemPermissions.PostCreate)]
     [RequestSizeLimit(10L * 1024 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024)]
     public async Task<IActionResult> UploadVideoFileAsync(IFormFile file)

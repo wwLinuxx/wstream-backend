@@ -12,7 +12,7 @@ using UzTube.DataAccess.Persistence;
 namespace UzTube.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20251220143303_InitDb")]
+    [Migration("20251221074936_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />

@@ -11,24 +11,12 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordR
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
                 .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-                .WithMessage($"Old Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.")
-            .Matches(@"[A-Z]")
-                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordBigLetterLength} big characters.")
-            .Matches(@"[a-z]")
-                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
-            .Matches(@"\d")
-                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
+                .WithMessage($"Old Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
 
         RuleFor(u => u.NewPassword)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
                 .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-                .WithMessage($"New Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.")
-            .Matches(@"[A-Z]")
-                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordBigLetterLength} big characters.")
-            .Matches(@"[a-z]")
-                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
-            .Matches(@"\d")
-                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
+                .WithMessage($"New Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
     }
 }

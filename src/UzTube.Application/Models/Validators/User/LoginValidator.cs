@@ -11,12 +11,6 @@ public class LoginValidator : AbstractValidator<LoginUserRequest>
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
                 .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-                .WithMessage($"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.")
-            .Matches(@"[A-Z]")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordBigLetterLength} big characters.")
-            .Matches(@"[a-z]")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordSmallLetterLength} small characters.")
-            .Matches(@"\d")
-                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordNumberLength} number characters.");
+                .WithMessage($"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
     }
 }
