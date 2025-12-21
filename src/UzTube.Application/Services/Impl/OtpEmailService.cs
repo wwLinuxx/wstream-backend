@@ -89,7 +89,7 @@ public class OtpEmailService(
         if (!string.Equals(lastOtpCode.Code?.Trim(), code.Trim(), StringComparison.Ordinal))
             throw new BadRequestException("OTP code is not correct.");
 
-        user.Status = UserStatus.Active;
+        user.Status = UserStatus.Verified;
 
         if (_otpSettings.RemoveAfterVerify)
             context.OtpCodes.Remove(lastOtpCode);

@@ -165,17 +165,26 @@ public static class DataAccessDependencyInjection
         Guid rootUserId = SystemIds.User.Root;
         Guid rootRoleId = SystemIds.Role.Root;
 
+        bool userExists = await context.Users.AnyAsync(u => u.Id == rootUserId);
+        if (!userExists)
+            return;
+
+        bool roleExists = await context.Roles.AnyAsync(r => r.Id == rootRoleId);
+        if (!roleExists)
+            return;
+
         bool rootUserHasAdminRole = await context.UserRoles
             .AnyAsync(ur => ur.UserId == rootUserId && ur.RoleId == rootRoleId);
 
         if (!rootUserHasAdminRole)
+        {
             context.UserRoles.Add(new UserRole
             {
                 UserId = rootUserId,
                 RoleId = rootRoleId
             });
-
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
     }
 
     private static async Task GrantAllPermissionsToRootRoleAsync(DatabaseContext context)

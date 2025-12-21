@@ -12,7 +12,7 @@ using UzTube.DataAccess.Persistence;
 namespace UzTube.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20251209183334_InitDb")]
+    [Migration("20251220143303_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -401,47 +401,6 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.ToTable("PostCategories");
                 });
 
-            modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("Age")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("CountryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("CountryId")
-                        .IsUnique();
-
-                    b.HasIndex("PhoneNumber")
-                        .IsUnique();
-
-                    b.ToTable("Profiles", t =>
-                        {
-                            t.HasCheckConstraint("CK_UserProfile_Age_Min_7_Max_90", "\"Age\" BETWEEN 7 AND 90");
-                        });
-                });
-
             modelBuilder.Entity("UzTube.Core.Entities.Rating", b =>
                 {
                     b.Property<Guid>("Id")
@@ -517,6 +476,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("CountryId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone");
 
@@ -525,18 +487,12 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -546,24 +502,15 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
+                    b.HasIndex("CountryId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "uztube@uztube.uz",
-                            IsDeleted = false,
-                            PasswordHash = "xBnXc1meu9etiq5hYF3jgE1IPX+bWl7YIkp76wkM8OJuz2QKcmweMmph6Yxxg1AkdCY=",
-                            Salt = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD",
-                            Status = 3
-                        });
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.UserRole", b =>
@@ -769,23 +716,6 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("UzTube.Core.Entities.Profile", b =>
-                {
-                    b.HasOne("UzTube.Core.Entities.Country", "Country")
-                        .WithOne("UserProfile")
-                        .HasForeignKey("UzTube.Core.Entities.Profile", "CountryId");
-
-                    b.HasOne("UzTube.Core.Entities.User", "User")
-                        .WithOne("Profile")
-                        .HasForeignKey("UzTube.Core.Entities.Profile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("UzTube.Core.Entities.Rating", b =>
                 {
                     b.HasOne("UzTube.Core.Entities.Post", "Post")
@@ -822,6 +752,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("UzTube.Core.Entities.User", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.Country", "Country")
+                        .WithMany("Users")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.UserRole", b =>
@@ -876,8 +817,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
             modelBuilder.Entity("UzTube.Core.Entities.Country", b =>
                 {
-                    b.Navigation("UserProfile")
-                        .IsRequired();
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.Permission", b =>
@@ -929,9 +869,6 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Playlists");
 
                     b.Navigation("Posts");
-
-                    b.Navigation("Profile")
-                        .IsRequired();
 
                     b.Navigation("Ratings");
 

@@ -2,7 +2,6 @@
 
 public record UpdateUserPasswordRequest(
     string OldPassword,
-    string NewPassword,
-    string ConfirmPassword);
+    string NewPassword);
 
 public record UpdateUserPasswordResponseModel : BaseResponseModel;

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using UzTube.Application.Exceptions;
 using UzTube.Application.Helpers.GenerateJwt;
-using UzTube.Application.Helpers.Interfaces;
+using UzTube.Shared.Helpers.Interfaces;
 using UzTube.Application.Models.User;
 using UzTube.Core.Entities;
 using UzTube.DataAccess.Persistence;
@@ -18,22 +18,14 @@ public class AuthService(
 {
     public async Task<CreateUserResponseModel> CreateAsync(CreateUserRequest request)
     {
-        string salt = passwordHasher.GenerateSalt();
-        string passwordHash = passwordHasher.Encrypt(request.Password, salt);
+        string hashedPassword = passwordHasher.Hash(request.Password);
 
         User newUser = new User
         {
+            Username = request.Username,
             Email = request.Email,
-            PasswordHash = passwordHash,
-            Salt = salt,
-            Profile = new Profile
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Age = request.Age,
-                PhoneNumber = request.PhoneNumber,
-                CountryId = request.CountryId
-            }
+            PasswordHash = hashedPassword,
+            CountryId = request.CountryId,
         };
 
         await context.Users.AddAsync(newUser);
@@ -44,10 +36,10 @@ public class AuthService(
 
     public async Task<LoginResponseModel> LoginAsync(LoginUserRequest request)
     {
-        User user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
-                    ?? throw new NotFoundException("User not found");
+        User user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Login)
+            ?? throw new NotFoundException("User not found");
 
-        if (!passwordHasher.Verify(user.PasswordHash, request.Password, user.Salt))
+        if (!passwordHasher.Verify(user.PasswordHash, request.Password))
             throw new BadRequestException("Email or Password not correct");
 
         List<string> permissions = await permissionService.GetUserPermissions(user.Id);

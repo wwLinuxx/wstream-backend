@@ -2,13 +2,11 @@
 
 public record UserResponseModel : BaseResponseModel
 {
+    public string Username { get; init; } = null!;
     public string Email { get; init; } = null!;
-    public string? FirstName { get; init; }
-    public string? LastName { get; init; }
-    public string? PhoneNumber { get; init; }
-    public int? Age { get; init; }
-    public Guid? CountryId { get; init; }
+    public Guid CountryId { get; init; }
     public DateTime CreatedOn { get; init; }
     public DateTime? UpdatedOn { get; init; }
+
     public IReadOnlyCollection<string> Roles { get; init; } = [];
 }

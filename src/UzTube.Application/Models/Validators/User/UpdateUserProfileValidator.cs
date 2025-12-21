@@ -7,26 +7,12 @@ public class UpdateUserProfileValidator : AbstractValidator<UpdateUserRequest>
 {
     public UpdateUserProfileValidator()
     {
-        RuleFor(u => u.FirstName)
-            .MinimumLength(UserValidatorConfiguration.MinimumFirstNameLength)
-            .WithMessage($"FirstName should have minimum {UserValidatorConfiguration.MinimumFirstNameLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumFirstNameLength)
-            .WithMessage($"FirstName should have maximum {UserValidatorConfiguration.MaximumFirstNameLength} characters.");
-
-        RuleFor(u => u.LastName)
-            .MinimumLength(UserValidatorConfiguration.MinimumLastNameLength)
-            .WithMessage($"LastName should have minimum {UserValidatorConfiguration.MinimumLastNameLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumLastNameLength)
-            .WithMessage($"LastName should have maximum {UserValidatorConfiguration.MaximumLastNameLength} characters.");
-
-        RuleFor(u => u.PhoneNumber)
-            .MinimumLength(UserValidatorConfiguration.MinimumPhoneNumberLength)
-            .WithMessage($"PhoneNumber should have minimum {UserValidatorConfiguration.MinimumPhoneNumberLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumPhoneNumberLength)
-            .WithMessage($"PhoneNumber should have maximum {UserValidatorConfiguration.MaximumPhoneNumberLength} characters.");
-
-        RuleFor(u => u.Age)
-            .InclusiveBetween(UserValidatorConfiguration.MinimumAge, UserValidatorConfiguration.MaximumAge)
-            .WithMessage($"Age must be between {UserValidatorConfiguration.MinimumAge} and {UserValidatorConfiguration.MaximumEmailLength} years old.");
+        RuleFor(x => x.Username)
+            .MinimumLength(3)
+                .WithMessage($"Username should have minimum {UserValidatorConfiguration.MinimumUsernameLength} characters.")
+            .MaximumLength(20)
+                .WithMessage($"Username should have maximum {UserValidatorConfiguration.MaximumUsernameLength} characters.")
+            .Matches(@"^[a-zA-Z0-9_]+$")
+                .WithMessage("Username should have letter, number and _");
     }
 }

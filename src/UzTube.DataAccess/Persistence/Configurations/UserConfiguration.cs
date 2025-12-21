@@ -1,59 +1,51 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Security.Cryptography;
-using System.Text;
 using UzTube.Core.Common;
-using User = UzTube.Core.Entities.User;
+using UzTube.Core.Entities;
+using UzTube.Shared.Helpers.Interfaces;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
-public class UserConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration(
+    IPasswordHasher passwordHasher
+) : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(u => u.Id);
 
-        //entity.HasIndex(u => u.Username)
-        //    .IsUnique();
-
-        //entity.Property(u => u.Username)
-        //    .HasMaxLength(50)
-        //    .IsUnicode(false);
-
-        builder.HasIndex(u => u.Email)
+        builder.Property(u => u.Username)
+            .IsRequired()
+            .HasMaxLength(50)
+            .IsUnicode(false);
+        builder.HasIndex(u => u.Username)
             .IsUnique();
 
         builder.Property(u => u.Email)
-            .HasMaxLength(100)
-            .IsUnicode(false);
+             .IsRequired()
+             .HasMaxLength(100)
+             .IsUnicode(false);
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
+
+        builder.Property(u => u.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.HasOne(u => u.Country)
+            .WithMany(c => c.Users)
+            .HasForeignKey(u => u.CountryId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasData(GetSeedUser());
     }
 
-    private static string Encrypt(string password, string salt)
+    private User GetSeedUser() => new()
     {
-        using Rfc2898DeriveBytes algorithm = new Rfc2898DeriveBytes(
-            password,
-            Encoding.UTF8.GetBytes(salt),
-            8192,
-            HashAlgorithmName.SHA256);
-
-        return Convert.ToBase64String(algorithm.GetBytes(50));
-    }
-
-    private static User GetSeedUser()
-    {
-        Guid seedRootId = SystemIds.User.Root;
-        string seedRootPassword = SystemPasswords.User.Root;
-        string seedRootSalt = SystemIds.Salt.Root;
-
-        return new User
-        {
-            Id = seedRootId,
-            Email = "uztube@uztube.uz",
-            PasswordHash = Encrypt(seedRootPassword, seedRootSalt),
-            Salt = seedRootSalt,
-            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-        }; ;
-    }
+        Id = SystemIds.User.Root,
+        Username = "wstream",
+        Email = "wstream@wstream.uz",
+        PasswordHash = passwordHasher.Hash(SystemPasswords.User.Root),
+        CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+    };
 }

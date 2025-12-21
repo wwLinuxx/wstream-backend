@@ -13,7 +13,6 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Follower> Followers { get; set; }
-    public DbSet<Profile> Profiles { get; set; }
     public DbSet<Country> Countries { get; set; }
     public DbSet<Playlist> Playlists { get; set; }
     public DbSet<Post> Posts { get; set; }
