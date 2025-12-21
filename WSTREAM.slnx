@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/UzTube.API/UzTube.API.csproj" />
+    <Project Path="src/UzTube.Application/UzTube.Application.csproj" />
+    <Project Path="src/UzTube.Core/UzTube.Core.csproj" />
+    <Project Path="src/UzTube.DataAccess/UzTube.DataAccess.csproj" />
+    <Project Path="src/UzTube.Shared/UzTube.Shared.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

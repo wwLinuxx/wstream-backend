@@ -4,7 +4,7 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "uztube.api": "StartDebugging"
+        "wstream-api": "StartDebugging"
       }
     }
   }

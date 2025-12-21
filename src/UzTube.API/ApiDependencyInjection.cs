@@ -24,9 +24,10 @@ public static class ApiDependencyInjection
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
             });
         });
     }
@@ -44,15 +45,17 @@ public static class ApiDependencyInjection
             {
                 document.Info = new OpenApiInfo
                 {
-                    Title = "UzTube API",
+                    Title = "WSTREAM API",
                     Version = "v1",
-                    Description = "UzTube API"
+                    Description = "WSTREAM API"
                 };
 
                 document.Servers =
                 [
-                    new() { Url = "https://api.wwlinux.uz", Description = "Production Server (HTTPS)" },
-                    new() { Url = "http://api.wwlinux.uz", Description = "Production Server (HTTP - auto redirects to HTTPS)" }
+                    new() { Url = "http://api.wwlinux.uz", Description = "Production (HTTP)" },
+                    new() { Url = "https://api.wwlinux.uz", Description = "Production (HTTPS)" },
+                    new() { Url = "http://localhost:4444", Description = "Local (HTTP)" },
+                    new() { Url = "https://localhost:4445", Description = "Local (HTTPS)" },
                 ];
 
                 document.Components ??= new OpenApiComponents();
@@ -93,13 +96,11 @@ public static class ApiDependencyInjection
     public static void UseScalar(this WebApplication app)
     {
         app.MapOpenApi();
-        app.MapScalarApiReference(options =>
-        {
-            options
-                .WithTitle("UzTube API")
-                .WithTheme(ScalarTheme.Default)
-                .WithEndpointPrefix("/api/{documentName}");
-        });
+        app.MapScalarApiReference(options => options
+            .WithTitle("WSTREAM API")
+            .WithTheme(ScalarTheme.DeepSpace)
+            .WithEndpointPrefix("/api/{documentName}")
+        );
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
