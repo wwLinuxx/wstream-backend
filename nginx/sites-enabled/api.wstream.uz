@@ -5,7 +5,7 @@ upstream wstream_api_servers {
 # HTTP to HTTPS redirect
 server {
     listen 80;
-    server_name api.wwlinux.uz www.api.wwlinux.uz;
+    server_name api.wstream.uz www.api.wstream.uz;
     
     return 301 https://$host$request_uri;
 }
@@ -13,10 +13,10 @@ server {
 # HTTPS server
 server {
     listen 443 ssl;
-    server_name api.wwlinux.uz www.api.wwlinux.uz;
+    server_name api.wstream.uz www.api.wstream.uz;
     
-    ssl_certificate /etc/letsencrypt/live/api.wwlinux.uz/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.wwlinux.uz/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/api.wstream.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.wstream.uz/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     
@@ -61,6 +61,6 @@ server {
     }
     
     # Error logging
-    error_log /var/log/nginx/api.wwlinux.uz-error.log crit;
-    access_log /var/log/nginx/api.wwlinux.uz-access.log;
+    error_log /var/log/nginx/api.wstream.uz-error.log crit;
+    access_log /var/log/nginx/api.wstream.uz-access.log;
 }
