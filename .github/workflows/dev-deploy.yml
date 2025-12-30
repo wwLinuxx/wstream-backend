@@ -22,30 +22,31 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
-            
+  
             PROJECT_DIR="/home/wwlinux/projects/wstream/development/wstream-backend"
             REPO_URL="git@github.com:${{ github.repository }}.git"
             BRANCH="dev"
-            
+  
             # Clone or update repository
             if [ ! -d "$PROJECT_DIR/.git" ]; then
               echo ">>> Cloning repository..."
-              mkdir -p "$PROJECT_DIR"
+              rm -rf "$PROJECT_DIR"
+              mkdir -p "$(dirname "$PROJECT_DIR")"
               git clone -b "$BRANCH" "$REPO_URL" "$PROJECT_DIR"
             fi
-            
+  
             cd "$PROJECT_DIR"
-            
+  
             echo ">>> Updating repository..."
             git fetch origin
             git reset --hard "origin/$BRANCH"
             git clean -fd
-            
+  
             echo ">>> Deploying containers..."
             docker compose down --remove-orphans 2>/dev/null || true
             docker compose up -d --build --force-recreate
-            
+  
             echo ">>> Cleanup..."
             docker image prune -f
-            
+  
             echo ">>> Done! ✓"
