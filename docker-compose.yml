@@ -49,7 +49,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - wstream-database:/var/lib/postgresql
+      - /home/wwlinux/projects/wstream/development/wstream-database:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
       interval: 30s
@@ -71,7 +71,7 @@ services:
       - "${SEQ_PORT}:5341"
       - "${SEQ_URL_PORT}:80"
     volumes:
-      - wstream-logs:/data
+      - /home/wwlinux/projects/wstream/development/wstream-logs:/data
     networks:
       - wstream-network
     restart: unless-stopped
@@ -88,7 +88,7 @@ services:
        - "${MINIO_URL_PORT}:9001"
        - "${MINIO_PORT}:9000"
      volumes:
-       - wstream-filemanager:/data
+       - /home/wwlinux/projects/wstream/development/wstream-filemanager:/data
      networks:
        - wstream-network
      restart: unless-stopped
@@ -113,7 +113,7 @@ services:
       - ./nginx/ssl/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
       - ./nginx/ssl/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
       # LOG
-      - wstream-nginx-logs:/var/log/nginx
+      - /home/wwlinux/projects/wstream/development/wstream-nginx-logs:/var/log/nginx
       # PROJECT
       - /home/wwlinux/projects:/home/wwlinux/projects:ro
     depends_on:
@@ -125,12 +125,6 @@ services:
 volumes:
   wstream-database:
     name: wstream-database
-  wstream-logs:
-    name: wstream-logs
-  wstream-nginx-logs:
-    name: wstream-nginx-logs
-  wstream-filemanager:
-    name: wstream-filemanager
     
 networks:
   wstream-network:
