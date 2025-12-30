@@ -1,52 +1,59 @@
-﻿name: CI/CD Deploy Development Backend
+﻿name: CI/CD Deploy Development Backend Server
 
 on:
   push:
-    branches: [dev]
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     environment: wstream-backend
-    name: Deploy to Dev Server
-    timeout-minutes: 10
-
+    if: github.ref == 'refs/heads/dev'
+    name: Build and Deploy to Development Backend Server
+    
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - uses: actions/checkout@v4
+
+      - name: Deploy to WSTREAM Development Backend Server
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USERNAME }}
           password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
-          command_timeout: 10m
           script: |
             set -e
-  
+            
             PROJECT_DIR="/home/wwlinux/projects/wstream/development/wstream-backend"
             REPO_URL="git@github.com:${{ github.repository }}.git"
-            BRANCH="dev"
-  
-            # Clone or update repository
-            if [ ! -d "$PROJECT_DIR/.git" ]; then
-              echo ">>> Cloning repository..."
-              rm -rf "$PROJECT_DIR"
-              mkdir -p "$(dirname "$PROJECT_DIR")"
-              git clone -b "$BRANCH" "$REPO_URL" "$PROJECT_DIR"
+            
+            echo ">>> CHECKING PROJECT DIRECTORY"
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo ">>> CREATING PROJECT DIRECTORY"
+              mkdir -p "$PROJECT_DIR"
+              cd "$PROJECT_DIR"
+              git clone -b dev "$REPO_URL" .
+            else
+              cd "$PROJECT_DIR"
             fi
-  
-            cd "$PROJECT_DIR"
-  
-            echo ">>> Updating repository..."
-            git fetch origin
-            git reset --hard "origin/$BRANCH"
+
+            echo ">>> CLEANING GIT"
             git clean -fd
-  
-            echo ">>> Deploying containers..."
-            docker compose down --remove-orphans 2>/dev/null || true
-            docker compose up -d --build --force-recreate
-  
-            echo ">>> Cleanup..."
+            git reset --hard HEAD
+            git fetch origin
+            git checkout dev
+            git pull origin dev
+
+            echo ">>> STOPPING DOCKER CONTAINERS"
+            docker compose down --remove-orphans || true
+
+            echo ">>> BUILDING AND STARTING DOCKER"
+            docker compose build
+            docker compose up -d
+
+            echo ">>> CLEANING UNUSED IMAGES"
             docker image prune -f
-  
-            echo ">>> Done! ✓"
+
+            echo ">>> DEPLOYMENT COMPLETED SUCCESSFULLY!"
