@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Options;
 using UzTube.Application.Common.Email;
 
 namespace UzTube.Application.Services.Impl;
@@ -28,7 +28,7 @@ public class EmailService(IOptions<SmtpSettings> smtpConfigs) : IEmailService
         };
 
         await client.SendMailAsync(mailMessage);
-        
+
         return true;
     }
 }

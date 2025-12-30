@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using UzTube.Application.Models.User;
 using UzTube.DataAccess.Persistence;
 
@@ -12,57 +13,45 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
     {
         _context = context;
 
+        RuleFor(x => x.Username)
+            .MinimumLength(3)
+                .WithMessage($"Username should have minimum {UserValidatorConfiguration.MinimumUsernameLength} characters.")
+            .MaximumLength(20)
+                .WithMessage($"Username should have maximum {UserValidatorConfiguration.MaximumUsernameLength} characters.")
+            .Must(UsernameAddressIsUnique)
+                .WithMessage("Email address is already in use.")
+            .Matches(@"^[a-zA-Z0-9_]+$")
+                .WithMessage("Username can only contain letters, numbers, and underscores.");
+
         RuleFor(u => u.Email)
             .MinimumLength(UserValidatorConfiguration.MinimumEmailLength)
-            .WithMessage($"Email should have minimum {UserValidatorConfiguration.MinimumEmailLength} characters.")
+                .WithMessage($"Email should have minimum {UserValidatorConfiguration.MinimumEmailLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumEmailLength)
-            .WithMessage($"Email should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters.")
+                .WithMessage($"Email should have maximum {UserValidatorConfiguration.MaximumEmailLength} characters.")
             .Must(EmailAddressIsUnique)
-            .WithMessage("Email address is already in use.");
+                .WithMessage("Email address is already in use.")
+            .Matches(UserValidatorConfiguration.EmailAddressRegexPattern)
+                .WithMessage("Email is not valid");
 
         RuleFor(u => u.Password)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
-            .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
+                .WithMessage($"Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-            .WithMessage($"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
-
-        RuleFor(u => u.PhoneNumber)
-            .MinimumLength(UserValidatorConfiguration.MinimumPhoneNumberLength)
-            .WithMessage(
-                $"Phone number should have minimum {UserValidatorConfiguration.MinimumPhoneNumberLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumPhoneNumberLength)
-            .WithMessage($"Phone number should have maximum {UserValidatorConfiguration.MaximumPhoneNumberLength} characters.")
-            .Must(PhoneNumberIsUnique)
-            .WithMessage("Phone number is already in user.");
-
-        RuleFor(u => u.FirstName)
-            .MinimumLength(UserValidatorConfiguration.MinimumFirstNameLength)
-            .WithMessage($"FirstName should have minimum {UserValidatorConfiguration.MinimumFirstNameLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumFirstNameLength)
-            .WithMessage($"FirstName should have maximum {UserValidatorConfiguration.MaximumFirstNameLength} characters.");
-
-        RuleFor(u => u.LastName)
-            .MinimumLength(UserValidatorConfiguration.MinimumLastNameLength)
-            .WithMessage($"LastName should have minimum {UserValidatorConfiguration.MinimumLastNameLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumLastNameLength)
-            .WithMessage($"LastName should have maximum {UserValidatorConfiguration.MaximumLastNameLength} characters.");
-
-        RuleFor(u => u.Age)
-            .InclusiveBetween(UserValidatorConfiguration.MinimumAge, UserValidatorConfiguration.MaximumAge)
-            .WithMessage($"Age must be between {UserValidatorConfiguration.MinimumAge} and {UserValidatorConfiguration.MaximumEmailLength} years old.");
+                .WithMessage($"Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
 
         RuleFor(u => u.CountryId)
             .NotEmpty()
-            .WithMessage("Country is not valid");
+                .WithMessage("Country is not valid.")
+            .Must(HasCountry)
+                .WithMessage("Country not found.");
     }
+
+    private bool UsernameAddressIsUnique(string username)
+        => _context.Users.Any(u => u.Username != username);
 
     private bool EmailAddressIsUnique(string email)
-    {
-        return _context.Users.Any(u => u.Email != email);
-    }
+        => _context.Users.Any(u => u.Email != email);
 
-    private bool PhoneNumberIsUnique(string phoneNumber)
-    {
-        return _context.Users.Any(u => u.Profile.PhoneNumber != phoneNumber);
-    }
+    private bool HasCountry(Guid countryId)
+        => _context.Categories.Any(u => u.Id != countryId);
 }

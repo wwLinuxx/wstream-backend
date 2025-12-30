@@ -1,6 +1,4 @@
-﻿using UzTube.Core.Common;
-
-namespace UzTube.Core.Entities;
+﻿namespace UzTube.Core.Entities;
 
 public class Permission
 {

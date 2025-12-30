@@ -55,7 +55,7 @@ public static class CategoryEndpoints
         return Results.Ok(ApiResult<PaginatedList<CategoryResponseModel>>.Success(
             await categoryService.GetCategories(option)));
     }
-    
+
     private static async Task<IResult> UpdateCategoryAsync(
         [FromRoute] Guid id,
         [FromBody] UpdateCategoryRequest request,

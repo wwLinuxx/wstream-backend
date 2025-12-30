@@ -1,0 +1,131 @@
+services:
+  # WSTREAM API
+  wstream-api:
+    build:
+      context: .
+      dockerfile: src/UzTube.API/Dockerfile
+    image: wstream-api:dev
+    container_name: wstream-api
+    environment:
+    # ASPNETCORE 
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+      - ASPNETCORE_ENVIRONMENT=${ASPNET_ENVIRONMENT}
+      # DATABASE
+      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER};Port=${DB_PORT};Database=${DB};User Id=${DB_USER};Password=${DB_PASSWORD};
+      # JWT 
+      - JwtSettings__SecretKey=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      # SMTP 
+      - SmtpSettings__Username=${EMAIL_USERNAME}
+      - SmtpSettings__Password=${EMAIL_PASSWORD}
+      # SERILOG
+      - Serilog__WriteTo__1__Name=${LOG_WRITE_TO}
+      - Serilog__WriteTo__1__Args__serverUrl=${SEQ_URL}:${SEQ_PORT}
+      # MINIO
+      - MinioSettings__Endpoint=${MINIO_SERVER}
+      - MinioSettings__Port=${MINIO_PORT}
+      - MinioSettings__AccessKey=${MINIO_ACCESS_KEY}
+      - MinioSettings__SecretKey=${MINIO_SECRET_KEY}
+      - MinioSettings__UseSSL=false
+    ports:
+      - "${API_CONTAINER_PORT}:${API_CONTAINER_PORT}"
+    depends_on:
+      - wstream-database
+      - wstream-logs
+      - wstream-filemanager
+    networks:
+      - wstream-network
+    restart: unless-stopped
+  
+  # PostgreSQL
+  wstream-database:
+    image: postgres:latest
+    container_name: wstream-database
+    environment:
+      POSTGRES_DB: ${DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - /home/wwlinux/projects/wstream/development/wstream-database:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - wstream-network
+    restart: unless-stopped
+    
+  # SEQ
+  wstream-logs:
+    image: datalust/seq:latest
+    container_name: wstream-logs
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINUSERNAME: ${SEQ_FIRSTRUN_ADMINUSERNAME}
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_FIRSTRUN_ADMINPASSWORD}
+    ports:
+      - "${SEQ_PORT}:5341"
+      - "${SEQ_URL_PORT}:80"
+    volumes:
+      - /home/wwlinux/projects/wstream/development/wstream-logs:/data
+    networks:
+      - wstream-network
+    restart: unless-stopped
+    
+  # MinIO
+  wstream-filemanager:
+     image: minio/minio:latest
+     container_name: wstream-filemanager
+     command: server --console-address ":9001" /data/
+     environment:
+       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+     ports:
+       - "${MINIO_URL_PORT}:9001"
+       - "${MINIO_PORT}:9000"
+     volumes:
+       - /home/wwlinux/projects/wstream/development/wstream-filemanager:/data
+     networks:
+       - wstream-network
+     restart: unless-stopped
+      
+  # Nginx
+  wstream-nginx:
+    image: nginx:latest
+    container_name: wstream-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # CONF
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites-enabled/wwlinux.uz:/etc/nginx/sites-enabled/wwlinux.uz:ro
+      - ./nginx/sites-enabled/dev.wwlinux.uz:/etc/nginx/sites-enabled/dev.wwlinux.uz:ro
+      - ./nginx/sites-enabled/api.wwlinux.uz:/etc/nginx/sites-enabled/api.wwlinux.uz:ro
+      # SSL
+      - ./nginx/ssl/letsencrypt/wwlinux.uz:/etc/letsencrypt/live/wwlinux.uz:ro
+      - ./nginx/ssl/letsencrypt/dev.wwlinux.uz:/etc/letsencrypt/live/dev.wwlinux.uz:ro
+      - ./nginx/ssl/letsencrypt/api.wwlinux.uz:/etc/letsencrypt/live/api.wwlinux.uz:ro
+      - ./nginx/ssl/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
+      - ./nginx/ssl/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
+      # LOG
+      - /home/wwlinux/projects/wstream/development/wstream-nginx-logs:/var/log/nginx
+      # PROJECT
+      - /home/wwlinux/projects:/home/wwlinux/projects:ro
+    depends_on:
+      - wstream-api
+    networks:
+      - wstream-network
+    restart: unless-stopped
+
+volumes:
+  wstream-database:
+    name: wstream-database
+    
+networks:
+  wstream-network:
+    driver: bridge

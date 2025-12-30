@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using UzTube.Application.Exceptions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
@@ -10,9 +11,74 @@ namespace UzTube.Application.Services.Impl;
 
 public class PostService(
     DatabaseContext context,
-    IClaimService claimService
+    IClaimService claimService,
+    IFileStorageService fileStorageService
 ) : IPostService
 {
+    private const string VideoFolder = "videos";
+    private const long MaxVideoSize = 10L * 1024 * 1024 * 1024; // 10GB
+
+    private static readonly Dictionary<string, string> ContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // Widely supported by browsers (native support)
+        [".mp4"] = "video/mp4",                // Best compatibility (H.264/AAC)
+        [".m4v"] = "video/mp4",
+        [".mp4v"] = "video/mp4",
+
+        [".webm"] = "video/webm",               // Modern browsers (VP8/VP9/AV1)
+
+        [".ogv"] = "video/ogg",                // Theora (older but supported)
+
+        [".mpeg"] = "video/mpeg",
+        [".mpg"] = "video/mpeg",
+
+        // Transport streams / segments (used in streaming workflows)
+        [".ts"] = "video/mp2t",               // used in HLS segments sometimes
+
+        // Streaming manifests (often require a player like hls.js or dash.js)
+        [".m3u8"] = "application/vnd.apple.mpegurl", // HLS playlist
+        [".mpd"] = "application/dash+xml"          // MPEG-DASH manifest
+    };
+
+    private static readonly HashSet<string> AllowedVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".webm", ".mkv", ".avi", ".mov"
+    };
+
+    public async Task<UploadVideoFileResponseModel> UploadVideoFileAsync(IFormFile file)
+    {
+        ValidateVideoFile(file);
+
+        string? extension = Path.GetExtension(file.FileName).ToLower();
+        string? fileName = $"{Guid.NewGuid()}{extension}";
+
+        await using Stream? stream = file.OpenReadStream();
+
+        await fileStorageService.UploadFileAsync(
+            VideoFolder,
+            fileName,
+            stream,
+            GetContentType(fileName),
+            file.Length
+        );
+
+        return new UploadVideoFileResponseModel { FileUrl = fileName };
+    }
+
+    public async Task StreamVideoFileAsync(string fileName, HttpResponse response)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new BadRequestException("File name is required");
+
+        string folderName = "videos";
+
+        response.ContentType = GetContentType(fileName);
+        response.Headers.Append("Accept-Ranges", "bytes");
+        response.Headers.Append("Content-Disposition", $"inline; filename=\"{fileName}\"");
+
+        await fileStorageService.StreamFileAsync(folderName, fileName, response.Body);
+    }
+
     public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel request)
     {
         Guid userId = claimService.GetUserId();
@@ -31,7 +97,7 @@ public class PostService(
         await context.SaveChangesAsync();
 
         return new CreatePostResponseModel { Id = newPost.Id };
-    } //TODO: Create Post Min.io ni o'rnatish
+    }
 
     public async Task<PostResponseModel> GetPostAsync(Guid id)
     {
@@ -170,6 +236,8 @@ public class PostService(
         Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
                     ?? throw new NotFoundException("Post not found");
 
+        await fileStorageService.DeleteFileAsync(VideoFolder, post.VideoUrl);
+
         post.IsDeleted = true;
         post.DeletedAt = DateTime.Now;
 
@@ -189,5 +257,29 @@ public class PostService(
         await context.SaveChangesAsync();
 
         return new RestorePostResponseModel("Success");
+    }
+
+    private static void ValidateVideoFile(IFormFile? file)
+    {
+        if (file is null || file.Length == 0)
+            throw new BadRequestException("Video file is required");
+
+        string? extension = Path.GetExtension(file.FileName);
+
+        if (string.IsNullOrEmpty(extension))
+            throw new BadRequestException("File must have an extension");
+
+        if (!AllowedVideoExtensions.Contains(extension))
+            throw new BadRequestException($"Invalid format. Allowed: {string.Join(", ", AllowedVideoExtensions)}");
+
+        if (file.Length > MaxVideoSize)
+            throw new BadRequestException($"File size exceeds {MaxVideoSize / (1024 * 1024 * 1024)}GB limit");
+    }
+
+    private static string GetContentType(string fileName)
+    {
+        string? ext = Path.GetExtension(fileName);
+
+        return ContentTypes.GetValueOrDefault(ext, "application/octet-stream");
     }
 }

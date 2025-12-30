@@ -6,16 +6,17 @@ namespace UzTube.Core.Entities;
 public class User : BaseEntity
 {
     // TODO: Need delete SaftDelete and change to HistoryTable
-    public UserStatus Status { get; set; } = UserStatus.Inactive;
+    public string Username { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
-    public string Salt { get; set; } = null!;
+    public Guid CountryId { get; set; }
+    public UserStatus Status { get; set; } = UserStatus.NotVerified;
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
     public DateTime? UpdatedOn { get; set; }
     public DateTime? DeletedOn { get; set; }
 
-    public Profile Profile { get; set; } = null!;
+    public Country Country { get; set; } = null!;
     public ICollection<Follower> Followers { get; set; } = [];
     public ICollection<Follower> Followings { get; set; } = [];
     public ICollection<Post> Posts { get; set; } = [];

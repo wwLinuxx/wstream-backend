@@ -1,0 +1,30 @@
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name wstream.uz www.wstream.uz;
+    
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl;
+    server_name wstream.uz www.wstream.uz;
+    
+    ssl_certificate /etc/letsencrypt/live/dev.wstream.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/dev.wstream.uz/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    
+    root /home/wwlinux/projects/wstream/development/wstream-frontend/dist;
+    index index.html;
+    
+    # Static content
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Error logging
+    error_log /var/log/nginx/wstream.uz-error.log crit;
+    access_log /var/log/nginx/wstream.uz-access.log;
+}

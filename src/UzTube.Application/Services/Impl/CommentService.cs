@@ -34,7 +34,7 @@ public class CommentService(
     }
 
     public async Task<CommentResponseModel> GetCommentAsync(Guid commentId)
-    { 
+    {
         CommentResponseModel? comment = await context.Comments
             .Where(c => c.Id == commentId)
             .Select(c => new CommentResponseModel
@@ -44,7 +44,7 @@ public class CommentService(
                 CreatedAt = c.CreatedAt
             })
             .FirstOrDefaultAsync();
-        
+
         return comment ?? throw new NotFoundException("Comment not found");
     }
 
@@ -63,7 +63,7 @@ public class CommentService(
             })
             .ToListAsync();
 
-        if (comments.Count > 0)
+        if (comments.Count == 0)
             throw new NotFoundException("Comments not found");
 
         int commentsCount = context.Comments.Count();

@@ -21,7 +21,7 @@ public static class DataAccessDependencyInjection
 
     private static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionSql = configuration.GetConnectionString("DefaultConnection");
+        string? connectionSql = configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContextPool<DatabaseContext>(options =>
             options.UseNpgsql(connectionSql));
@@ -116,10 +116,10 @@ public static class DataAccessDependencyInjection
 
     private static async Task SeedRolesAsync(DatabaseContext context)
     {
-        var rootRoleId = SystemIds.Role.Root;
-        var adminRoleId = SystemIds.Role.Admin;
-        var moderatorRoleId = SystemIds.Role.Moderator;
-        var userRoleId = SystemIds.Role.User;
+        Guid rootRoleId = SystemIds.Role.Root;
+        Guid adminRoleId = SystemIds.Role.Admin;
+        Guid moderatorRoleId = SystemIds.Role.Moderator;
+        Guid userRoleId = SystemIds.Role.User;
 
         if (!await context.Roles.AnyAsync(r => r.Id == rootRoleId))
             context.Roles.Add(new Role
@@ -162,27 +162,36 @@ public static class DataAccessDependencyInjection
 
     private static async Task AssignRootRoleToRootUserAsync(DatabaseContext context)
     {
-        var rootUserId = SystemIds.User.Root;
-        var rootRoleId = SystemIds.Role.Root;
+        Guid rootUserId = SystemIds.User.Root;
+        Guid rootRoleId = SystemIds.Role.Root;
 
-        var rootUserHasAdminRole = await context.UserRoles
+        bool userExists = await context.Users.AnyAsync(u => u.Id == rootUserId);
+        if (!userExists)
+            return;
+
+        bool roleExists = await context.Roles.AnyAsync(r => r.Id == rootRoleId);
+        if (!roleExists)
+            return;
+
+        bool rootUserHasAdminRole = await context.UserRoles
             .AnyAsync(ur => ur.UserId == rootUserId && ur.RoleId == rootRoleId);
 
         if (!rootUserHasAdminRole)
+        {
             context.UserRoles.Add(new UserRole
             {
                 UserId = rootUserId,
                 RoleId = rootRoleId
             });
-
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
     }
 
     private static async Task GrantAllPermissionsToRootRoleAsync(DatabaseContext context)
     {
-        var rootRoleId = SystemIds.Role.Root;
+        Guid rootRoleId = SystemIds.Role.Root;
 
-        var missingRootRolePermissions = await context.Permissions
+        List<Permission>? missingRootRolePermissions = await context.Permissions
             .Where(p => !context.RolePermissions
                 .Any(rp => rp.RoleId == rootRoleId && rp.PermissionId == p.Id))
             .ToListAsync();

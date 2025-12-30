@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Options;
+using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.Extensions.Options;
 using UzTube.Application.Common.Performance;
 
 namespace UzTube.API.Middleware;
@@ -16,7 +16,7 @@ public class PerformanceMiddleware(
     public async Task Invoke(HttpContext context)
     {
         int warningThresholdMs = _performanceSettings.MaxRequestTiming;
-    
+
         Stopwatch sw = new Stopwatch();
 
         sw.Start();
@@ -38,7 +38,7 @@ public class PerformanceMiddleware(
                 user,
                 elapsed
             );
-        else 
+        else
             logger.LogInformation(
                 "[PERFORMANCE] {Method} {Path} | {StatusCode} | {User} | {Elapsed} ms",
                 context.Request.Method,

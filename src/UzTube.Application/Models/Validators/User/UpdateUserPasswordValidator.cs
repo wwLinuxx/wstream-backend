@@ -9,20 +9,14 @@ public class UpdateUserPasswordValidator : AbstractValidator<UpdateUserPasswordR
     {
         RuleFor(u => u.OldPassword)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
-            .WithMessage($"Old password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
+                .WithMessage($"Old Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-            .WithMessage($"Old password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
-        
+                .WithMessage($"Old Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
+
         RuleFor(u => u.NewPassword)
             .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
-            .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
+                .WithMessage($"New Password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
             .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-            .WithMessage($"New password  should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
-        
-        RuleFor(u => u.ConfirmPassword)
-            .MinimumLength(UserValidatorConfiguration.MinimumPasswordLength)
-            .WithMessage($"Confirm password should have minimum {UserValidatorConfiguration.MinimumPasswordLength} characters.")
-            .MaximumLength(UserValidatorConfiguration.MaximumPasswordLength)
-            .WithMessage($"Confirm password  should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
+                .WithMessage($"New Password should have maximum {UserValidatorConfiguration.MaximumPasswordLength} characters.");
     }
 }

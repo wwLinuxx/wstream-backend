@@ -24,11 +24,11 @@ public class CategoryService(
         {
             Name = request.Name,
             Translates = request.Translates.Select(t => new CategoryTranslate
-                {
-                    LanguageId = t.LanguageId,
-                    ColumnName = t.ColumnName,
-                    TranslateText = t.TranslateText
-                })
+            {
+                LanguageId = t.LanguageId,
+                ColumnName = t.ColumnName,
+                TranslateText = t.TranslateText
+            })
                 .ToList()
         };
 

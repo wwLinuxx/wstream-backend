@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UzTube.Application.Exceptions;
-using UzTube.Application.Helpers.Interfaces;
+using UzTube.Shared.Helpers.Interfaces;
 using UzTube.Application.Models;
 using UzTube.Application.Models.User;
 using UzTube.Core.Entities;
@@ -24,13 +24,11 @@ public class UserService(
             .Select(u => new UserResponseModel
             {
                 Id = u.Id,
+                Username = u.Username,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                CountryId = u.Profile.CountryId,
+                CountryId = u.CountryId,
                 CreatedOn = u.CreatedOn,
+                UpdatedOn = u.UpdatedOn,
                 Roles = u.Roles.Select(ur => ur.Role.Name).ToArray()
             })
             .FirstOrDefaultAsync();
@@ -45,13 +43,11 @@ public class UserService(
             .Select(u => new UserResponseModel
             {
                 Id = u.Id,
+                Username = u.Username,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn
+                CountryId = u.CountryId,
+                CreatedOn = u.CreatedOn,
+                UpdatedOn = u.UpdatedOn
             })
             .FirstOrDefaultAsync();
 
@@ -65,7 +61,7 @@ public class UserService(
         IQueryable<User> query = context.Users;
 
         if (!string.IsNullOrEmpty(option.Search))
-            query = query.Where(u => u.Email.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
+            query = query.Where(u => u.Email.Contains(option.Search.Trim()));
 
         List<UserResponseModel> users = await query
             .Skip((option.PageNumber - 1) * option.PageSize)
@@ -73,13 +69,11 @@ public class UserService(
             .Select(u => new UserResponseModel
             {
                 Id = u.Id,
+                Username = u.Username,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn
+                CountryId = u.CountryId,
+                CreatedOn = u.CreatedOn,
+                UpdatedOn = u.UpdatedOn
             })
             .ToListAsync();
 
@@ -97,18 +91,15 @@ public class UserService(
             query = query.Trim();
 
         UserResponseModel? user = await context.Users
-            .Include(u => u.Profile)
             .Where(u => u.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
             .Select(u => new UserResponseModel
             {
                 Id = u.Id,
+                Username = u.Username,
                 Email = u.Email,
-                FirstName = u.Profile.FirstName,
-                LastName = u.Profile.LastName,
-                PhoneNumber = u.Profile.PhoneNumber,
-                Age = u.Profile.Age,
-                CountryId = u.Profile.CountryId,
-                CreatedOn = u.CreatedOn
+                CountryId = u.CountryId,
+                CreatedOn = u.CreatedOn,
+                UpdatedOn = u.UpdatedOn
             })
             .FirstOrDefaultAsync();
 
@@ -118,18 +109,12 @@ public class UserService(
     public async Task<UpdateUserProfileResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request)
     {
         User? user = await context.Users
-                         .Include(u => u.Profile)
-                         .ThenInclude(p => p.Country)
-                         .FirstOrDefaultAsync(u => u.Id == id)
-                     ?? throw new NotFoundException("User not found");
+            .FirstOrDefaultAsync(u => u.Id == id)
+            ?? throw new NotFoundException("User not found");
 
-        user.Profile.FirstName = request.FirstName;
-        user.Profile.LastName = request.LastName;
-        user.Profile.PhoneNumber = request.PhoneNumber;
-        user.Profile.Age = request.Age;
-        user.Profile.CountryId = request.CountryId;
+        user.Username = request.Username;
 
-        user.UpdatedOn = DateTime.Now;
+        user.UpdatedOn = DateTime.UtcNow;
 
         context.Users.Update(user);
         await context.SaveChangesAsync();
@@ -140,18 +125,13 @@ public class UserService(
     public async Task<UpdateUserPasswordResponseModel> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request)
     {
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)
-                    ?? throw new NotFoundException("User not found");
+            ?? throw new NotFoundException("User not found");
 
-        if (!passwordHasher.Verify(user.PasswordHash, request.OldPassword, user.Salt))
+        if (!passwordHasher.Verify(user.PasswordHash, request.OldPassword))
             throw new BadRequestException("Old Password not correct");
 
-        if (request.NewPassword != request.ConfirmPassword)
-            throw new BadRequestException("NewPassword and ConfirmPassword not equal");
+        string newHashedPassword = passwordHasher.Hash(request.NewPassword);
 
-        string newSalt = passwordHasher.GenerateSalt();
-        string newHashedPassword = passwordHasher.Encrypt(request.NewPassword, newSalt);
-
-        user.Salt = newSalt;
         user.PasswordHash = newHashedPassword;
 
         context.Users.Update(user);
@@ -163,9 +143,9 @@ public class UserService(
     public async Task<UpdateUserRoleResponseModel> UpdateUserRolesAsync(Guid id, UpdateUserRolesRequest request)
     {
         User user = await context.Users
-                        .Include(u => u.Roles)
-                        .FirstOrDefaultAsync(u => u.Id == id)
-                    ?? throw new NotFoundException("User not found");
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == id)
+            ?? throw new NotFoundException("User not found");
 
         user.Roles = request.Roles
             .Select(rid => new UserRole
@@ -184,10 +164,10 @@ public class UserService(
     {
         // TODO: When delete user copy User and user's any posts to HistoryTable
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)
-                    ?? throw new NotFoundException("User not found");
+            ?? throw new NotFoundException("User not found");
 
         user.IsDeleted = true;
-        user.DeletedOn = DateTime.Now;
+        user.DeletedOn = DateTime.UtcNow;
 
         await context.SaveChangesAsync();
 
@@ -198,7 +178,7 @@ public class UserService(
     {
         // TODO: When restore user copy user and user's any posts from HistoryTable
         User user = await context.Users.FirstOrDefaultAsync(u => u.Id == id)
-                    ?? throw new NotFoundException("User not found");
+            ?? throw new NotFoundException("User not found");
 
         user.IsDeleted = false;
         user.DeletedOn = null;

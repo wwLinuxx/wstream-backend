@@ -1,10 +1,6 @@
 ﻿namespace UzTube.Application.Models.User;
 
 public record UpdateUserRequest(
-    string FirstName,
-    string LastName,
-    string PhoneNumber,
-    int Age,
-    Guid CountryId);
+    string Username);
 
 public record UpdateUserProfileResponseModel : BaseResponseModel;

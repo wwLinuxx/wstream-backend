@@ -36,14 +36,6 @@ public static class SystemIds
         public static readonly Guid User = Guid.Parse("44444444-4444-4444-4444-444444444444");
     }
 
-    public static class Salt
-    {
-        /// <summary>
-        ///     The root (super) salt ID.
-        /// </summary>
-        public const string Root = "ROOTSALT-AAAA-BBBB-CCCC-DDDDDDDDDDDD";
-    }
-
     public static class Country
     {
         public static readonly Guid Uzbekistan = Guid.Parse("11111111-1111-1111-1111-111111111111");

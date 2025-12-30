@@ -1,11 +1,9 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Minio;
+using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 using Serilog;
-using UzTube.Application.Common.Minio;
+using System.Text;
 using UzTube.Application.Helpers.GenerateJwt;
 
 namespace UzTube.API;
@@ -14,89 +12,124 @@ public static class ApiDependencyInjection
 {
     public static void AddSerilog(this ConfigureHostBuilder hosts)
     {
-        hosts.UseSerilog((context, loggerConfiguration) => { loggerConfiguration.ReadFrom.Configuration(context.Configuration); });
+        hosts.UseSerilog((context, loggerConfiguration) =>
+        {
+            loggerConfiguration.ReadFrom.Configuration(context.Configuration);
+        });
+    }
+
+    public static void AddCorsPolicy(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+    }
+
+    public static void UseCorsPolicy(this IApplicationBuilder app)
+    {
+        app.UseCors();
+    }
+
+    public static void AddScalar(this IServiceCollection services)
+    {
+        services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer((document, context, ct) =>
+            {
+                document.Info = new OpenApiInfo
+                {
+                    Title = "WSTREAM API",
+                    Version = "v1",
+                    Description = "WSTREAM API"
+                };
+
+                document.Servers =
+                [
+                    new() { Url = "http://api.wwlinux.uz", Description = "Production (HTTP)" },
+                    new() { Url = "https://api.wwlinux.uz", Description = "Production (HTTPS)" },
+                    new() { Url = "http://localhost:4444", Description = "Local (HTTP)" },
+                    new() { Url = "https://localhost:4445", Description = "Local (HTTPS)" },
+                ];
+
+                document.Components ??= new OpenApiComponents();
+
+                if (document.Components.SecuritySchemes == null)
+                {
+                    document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>();
+                }
+
+                document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer YOUR_TOKEN')",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                };
+
+                return Task.CompletedTask;
+            });
+
+            options.AddOperationTransformer((operation, context, ct) =>
+            {
+                OpenApiSecurityRequirement? securityRequirement = [];
+                OpenApiSecuritySchemeReference? schemeReference = new("Bearer");
+
+                securityRequirement.Add(schemeReference, new List<string>());
+
+                operation.Security ??= [];
+                operation.Security.Add(securityRequirement);
+
+                return Task.CompletedTask;
+            });
+        });
+    }
+
+    public static void UseScalar(this WebApplication app)
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference(options => options
+            .WithTitle("WSTREAM API")
+            .WithTheme(ScalarTheme.DeepSpace)
+            .WithEndpointPrefix("/api/{documentName}")
+        );
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
-        JwtSettings? jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+        JwtSettings? jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+            ?? throw new InvalidOperationException("JwtSettings not configured");
 
-        byte[] key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
+        byte[] key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
-        services.AddAuthentication(s =>
-            {
-                s.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                s.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(s =>
-            {
-                s.RequireHttpsMetadata = false;
-                s.SaveToken = true;
-                s.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience
-                };
-            });
-    }
-
-    public static void AddSwagger(this IServiceCollection services)
-    {
-        services.AddSwaggerGen(s =>
+        services.AddAuthentication(options =>
         {
-            s.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer YOUR_TOKEN')",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-
-            s.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
-    }
-
-    public static void AddMinio(this IServiceCollection services)
-    {
-        services.AddSingleton<IMinioClient>(sp =>
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
         {
-            MinioSettings minioSettings = sp.GetRequiredService<IOptions<MinioSettings>>().Value;
-
-            IMinioClient? client = new MinioClient()
-                .WithEndpoint(minioSettings.Endpoint)
-                .WithCredentials(minioSettings.AccessKey, minioSettings.SecretKey);
-
-            // Agar SSL yoqilgan bo'lsa
-            if (minioSettings.UseSsl) client = client.WithSSL();
-
-            return client.Build(); // MinioClient ni qurish
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
         });
-    }
-
-    public static void AddCors(this IApplicationBuilder app)
-    {
-        app.UseCors(corsPolicyBuilder =>
-            corsPolicyBuilder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-        );
     }
 }

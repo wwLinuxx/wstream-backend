@@ -7,9 +7,9 @@ public static class AutomatedMigration
 {
     public static async Task MigrateAsync(IServiceProvider service)
     {
-        var context = service.GetRequiredService<DatabaseContext>();
-        
-        if (context.Database.IsNpgsql()) 
+        DatabaseContext? context = service.GetRequiredService<DatabaseContext>();
+
+        if (context.Database.IsNpgsql())
             await context.Database.MigrateAsync();
     }
 }

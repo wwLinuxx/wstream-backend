@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Scalar.AspNetCore;
 using UzTube.API;
 using UzTube.API.Extensions;
 using UzTube.API.Filters;
@@ -27,9 +29,20 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDataAccess(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 
-builder.Services.AddSwagger();
+builder.Services.AddCorsPolicy();
+builder.Services.AddScalar();
 builder.Services.AddJwt(builder.Configuration);
-builder.Services.AddMinio();
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 10L * 1024 * 1024 * 1024;
+    options.AllowSynchronousIO = true;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024;
+});
 
 WebApplication app = builder.Build();
 
@@ -40,12 +53,9 @@ await AutomatedMigration.MigrateAsync(scope.ServiceProvider);
 await app.SeedRolesAndPermissionsAsync();
 await app.SyncPermissionsAsync();
 
-app.UseSwagger();
-app.UseSwaggerUI(s => { s.SwaggerEndpoint("/swagger/v1/swagger.json", "UZTUBE"); });
+app.UseCorsPolicy();
 
-app.UseHttpsRedirection();
-
-app.AddCors();
+app.UseScalar();
 
 app.UseAuthentication();
 app.UseAuthorization();
