@@ -130,7 +130,7 @@ public class MinioFileStorageService(
 
         await minioClient.PutObjectAsync(putObjectArgs);
 
-        return $"http://wstream.uz:{_minioSettings.Port}/{folderName}/{fileName}";
+        return $"https://wstream.uz:{_minioSettings.Port}/{folderName}/{fileName}";
     }
 
     public async Task StreamFileAsync(string folderName, string fileName, Stream outputStream)
