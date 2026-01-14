@@ -101,7 +101,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 5;
-      mc alias set wstream http://wstream-filemanager:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      mc alias set wstream http://wstream.uz:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       mc mb --ignore-existing wstream/avatars;
       mc mb --ignore-existing wstream/videos;
       mc mb --ignore-existing wstream/previews;
@@ -124,6 +124,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/sites-enabled/wstream.uz:/etc/nginx/sites-enabled/wstream.uz:ro
       - ./nginx/sites-enabled/api.wstream.uz:/etc/nginx/sites-enabled/api.wstream.uz:ro
+      - ./nginx/sites-enabled/files.wstream.uz:/etc/nginx/sites-enabled/files.wstream.uz:ro
       - ./nginx/sites-enabled/wwlinux.uz:/etc/nginx/sites-enabled/wwlinux.uz:ro
       # SSL
       - ./nginx/ssl/letsencrypt/wstream.uz:/etc/letsencrypt/live/wstream.uz:ro
