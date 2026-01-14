@@ -7,6 +7,6 @@ public static class SystemPasswords
         /// <summary>
         ///     The root (super) salt ID.
         /// </summary>
-        public const string Root = "qwe1112233";
+        public const string Root = "$2a$12$y1fbOaHRSitejev3HqXkCOV1EggDqBFB3ya03NAeD347KQ8E/EjvO";
     }
 }

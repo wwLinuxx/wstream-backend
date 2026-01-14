@@ -2,12 +2,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UzTube.Core.Common;
 using UzTube.Core.Entities;
-using UzTube.Shared.Helpers.Interfaces;
 
 namespace UzTube.DataAccess.Persistence.Configurations;
 
 public class UserConfiguration(
-    IPasswordHasher passwordHasher
 ) : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
@@ -45,7 +43,8 @@ public class UserConfiguration(
         Id = SystemIds.User.Root,
         Username = "wstream",
         Email = "wstream@wstream.uz",
-        PasswordHash = passwordHasher.Hash(SystemPasswords.User.Root),
-        CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        PasswordHash = SystemPasswords.User.Root,
+        CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+        CountryId = SystemIds.Country.Uzbekistan
     };
 }

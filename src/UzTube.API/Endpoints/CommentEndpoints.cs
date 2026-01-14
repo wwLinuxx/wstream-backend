@@ -14,12 +14,11 @@ public static class CommentEndpoints
         RouteGroupBuilder endpoints = app.MapGroup("api/comments");
 
         endpoints.MapPost("{postId:guid}", CreateCommentAsync)
-            .RequirePermission(SystemPermissions.CommentCreate);
+            .RequirePermission();
 
         endpoints.MapGet("{commentId:guid}", GetCommentAsync);
 
-        endpoints.MapPost("get-comments", GetCommentsAsync)
-            .RequirePermission(SystemPermissions.CommentView);
+        endpoints.MapPost(@"get-comments/{postId:guid}", GetCommentsAsync);
 
         return app;
     }
@@ -42,10 +41,11 @@ public static class CommentEndpoints
     }
 
     private static async Task<IResult> GetCommentsAsync(
+        [FromRoute] Guid postId,
         [FromBody] PageOption option,
         [FromServices] ICommentService commentService)
     {
         return Results.Ok(ApiResult<PaginatedList<CommentResponseModel>>.Success(
-            await commentService.GetCommentsAsync(option)));
+            await commentService.GetCommentsAsync(postId, option)));
     }
 }

@@ -22,12 +22,27 @@ public class UserController(
             await userService.GetUserAsync(id)));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetUserAsync([FromQuery] string username)
+    {
+        return Ok(ApiResult<UserResponseModel>.Success(
+            await userService.GetUserAsync(username)));
+    }
+
     // [RequirePermission(SystemPermissions.ManageUsers)]
     [HttpPost("get-users")]
     public async Task<IActionResult> GetUsersAsync([FromBody] PageOption option)
     {
         return Ok(ApiResult<PaginatedList<UserResponseModel>>.Success(
             await userService.GetUsersAsync(option)));
+    }
+
+    [HttpGet("preview/{userId:Guid}")]
+    //[RequirePermission(SystemPermissions.PostView)]
+    public async Task<IActionResult> GetUserPreviewAsync([FromRoute] Guid userId)
+    {
+        return Ok(ApiResult<UserPreviewResponseModel>.Success(
+            await userService.GetUserPreviewAsync(userId)));
     }
 
     [HttpGet("search")]
@@ -39,9 +54,10 @@ public class UserController(
 
     // [UserOrAdmin]
     [HttpPut("{id:Guid}")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateUserAsync(
         [FromRoute] Guid id,
-        [FromBody] UpdateUserRequest model)
+        [FromForm] UpdateUserRequest model)
     {
         return Ok(ApiResult<UpdateUserProfileResponseModel>.Success(
             await userService.UpdateUserProfileAsync(id, model)));
@@ -68,7 +84,7 @@ public class UserController(
     }
 
     // [UserOrAdmin]
-    [HttpGet("{id:Guid}/posts")]
+    [HttpPost("{id:Guid}/posts")]
     public async Task<IActionResult> GetUserPostsAsync(
         [FromRoute] Guid id,
         [FromBody] PageOption option)

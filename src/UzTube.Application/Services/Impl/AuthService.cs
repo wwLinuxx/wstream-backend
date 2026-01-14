@@ -1,9 +1,10 @@
-        using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using UzTube.Application.Exceptions;
 using UzTube.Application.Helpers.GenerateJwt;
-using UzTube.Shared.Helpers.Interfaces;
+using UzTube.Application.Helpers.Interfaces;
 using UzTube.Application.Models.User;
+using UzTube.Core.Common;
 using UzTube.Core.Entities;
 using UzTube.DataAccess.Persistence;
 
@@ -13,7 +14,8 @@ public class AuthService(
     DatabaseContext context,
     IPermissionService permissionService,
     IPasswordHasher passwordHasher,
-    IConfiguration configuration
+    IConfiguration configuration,
+    IFileStorageService fileStorageService
 ) : IAuthService
 {
     public async Task<CreateUserResponseModel> CreateAsync(CreateUserRequest request)
@@ -21,13 +23,25 @@ public class AuthService(
         if (!await context.Countries.AnyAsync(c => c.Id == request.CountryId))
             throw new NotFoundException("Country topilmadi");
 
-        User newUser = new()
+        string? userAvatarUrl = null;
+
+        if (request.AvatarFile != null)
+            userAvatarUrl = await fileStorageService.UploadAvatarFileAsync(request.AvatarFile);
+            
+
+        User newUser = new User
         {
             Username = request.Username,
             Email = request.Email,
             PasswordHash = passwordHasher.Hash(request.Password),
-            CountryId = request.CountryId
+            CountryId = request.CountryId,
+            AvatarUrl = userAvatarUrl
         };
+
+        newUser.Roles.Add(new UserRole
+        {
+            RoleId = SystemIds.Role.User
+        });
 
         context.Users.Add(newUser);
         await context.SaveChangesAsync();
@@ -45,6 +59,7 @@ public class AuthService(
             throw new UnauthorizedException("Email or Password not correct");
 
         List<string> permissions = await permissionService.GetUserPermissions(user.Id);
+
         string token = JwtTokenHandler.GenerateToken(user, permissions, configuration);
 
         return new LoginResponseModel(user.Email, token);

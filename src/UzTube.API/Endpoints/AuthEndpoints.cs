@@ -13,11 +13,13 @@ public static class AuthEndpoints
     {
         RouteGroupBuilder endpoints = app.MapGroup("api/auth");
 
-        endpoints.MapPost("register", RegisterAsync);
+        endpoints.MapPost("register", RegisterAsync)
+            .Accepts<CreateUserRequest>("multipart/form-data")
+            .DisableAntiforgery();
 
         endpoints.MapPost("login", LoginAsync);
 
-        endpoints.MapGet("me", GetMeAsync)
+        endpoints.MapGet("profile", GetProfileAsync)
             .RequirePermission();
 
         endpoints.MapPost("send-otp/{userId:guid}", SendOtpAsync)
@@ -30,7 +32,7 @@ public static class AuthEndpoints
     }
 
     private static async Task<IResult> RegisterAsync(
-        [FromBody] CreateUserRequest request,
+        [FromForm] CreateUserRequest request,
         [FromServices] IAuthService authService)
     {
         return Results.Ok(ApiResult<CreateUserResponseModel>.Success(
@@ -45,11 +47,11 @@ public static class AuthEndpoints
             await authService.LoginAsync(request)));
     }
 
-    private static async Task<IResult> GetMeAsync(
+    private static async Task<IResult> GetProfileAsync(
         [FromServices] IUserService userService)
     {
         return Results.Ok(ApiResult<UserResponseModel>.Success(
-            await userService.GetMeAsync()));
+            await userService.GetProfileAsync()));
     }
 
     private static async Task<IResult> SendOtpAsync(

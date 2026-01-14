@@ -9,7 +9,7 @@ public class Post : BaseEntity
     public Guid UserId { get; set; }
     public string Title { get; set; } = null!;
     public string Description { get; set; } = null!;
-    public string ThumbnailUrl { get; set; } = null!;
+    public string PreviewUrl { get; set; } = null!;
     public string VideoUrl { get; set; } = null!;
     public string Duration { get; set; } = null!;
     public int ViewsCount { get; set; }

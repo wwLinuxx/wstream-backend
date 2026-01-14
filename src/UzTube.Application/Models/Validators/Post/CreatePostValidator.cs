@@ -3,7 +3,7 @@ using UzTube.Application.Models.Post;
 
 namespace UzTube.Application.Models.Validators.Post;
 
-public class CreatePostValidator : AbstractValidator<CreatePostModel>
+public class CreatePostValidator : AbstractValidator<CreatePostRequest>
 {
     public CreatePostValidator()
     {
@@ -21,13 +21,7 @@ public class CreatePostValidator : AbstractValidator<CreatePostModel>
             .WithMessage(
                 $"Description should have maximum {PostValidatorConfiguration.MaximumDescriptionLength} characters.");
 
-        RuleFor(p => p.ThumbnailUrl)
-            .NotEmpty().WithMessage("ThumbnailFileUrl is required.");
-
-        RuleFor(p => p.VideoUrl)
-            .NotEmpty().WithMessage("VideoFileUrl is required.");
-
-        RuleFor(p => p.IsPrivate)
-            .NotEmpty().WithMessage("IsPrivate is required.");
+        //RuleFor(p => p.IsPrivate)
+        //    .NotEmpty().WithMessage("IsPrivate is required.");
     }
 }

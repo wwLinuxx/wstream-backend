@@ -1,6 +1,6 @@
-﻿using UzTube.Shared.Helpers.Interfaces;
+﻿using UzTube.Application.Helpers.Interfaces;
 
-namespace UzTube.Shared.Helpers;
+namespace UzTube.Application.Helpers;
 
 public class PasswordHasher : IPasswordHasher
 {

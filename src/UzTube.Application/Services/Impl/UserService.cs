@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UzTube.Application.Exceptions;
-using UzTube.Shared.Helpers.Interfaces;
+using UzTube.Application.Helpers.Interfaces;
 using UzTube.Application.Models;
 using UzTube.Application.Models.User;
 using UzTube.Core.Entities;
@@ -12,12 +12,15 @@ namespace UzTube.Application.Services.Impl;
 public class UserService(
     DatabaseContext context,
     IClaimService claimService,
-    IPasswordHasher passwordHasher
+    IPasswordHasher passwordHasher,
+    IFileStorageService fileStorageService
 ) : IUserService
 {
-    public async Task<UserResponseModel> GetMeAsync()
+    public async Task<UserResponseModel> GetProfileAsync()
     {
         Guid userId = claimService.GetUserId();
+
+
 
         UserResponseModel? user = await context.Users
             .Where(u => u.Id == userId)
@@ -26,6 +29,7 @@ public class UserService(
                 Id = u.Id,
                 Username = u.Username,
                 Email = u.Email,
+                AvatarFile = u.AvatarUrl,
                 CountryId = u.CountryId,
                 CreatedOn = u.CreatedOn,
                 UpdatedOn = u.UpdatedOn,
@@ -48,6 +52,41 @@ public class UserService(
                 CountryId = u.CountryId,
                 CreatedOn = u.CreatedOn,
                 UpdatedOn = u.UpdatedOn
+            })
+            .FirstOrDefaultAsync();
+
+        return user ?? throw new NotFoundException("User not found");
+    }
+
+    public async Task<UserResponseModel> GetUserAsync(string username)
+    {
+        UserResponseModel? user = await context.Users
+            .Where(u => u.Username == username)
+            .Select(u => new UserResponseModel
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                AvatarFile = u.AvatarUrl,
+                CountryId = u.CountryId,
+                CreatedOn = u.CreatedOn,
+                UpdatedOn = u.UpdatedOn
+            })
+            .FirstOrDefaultAsync();
+
+        return user ?? throw new NotFoundException("User not found");
+    }
+
+    public async Task<UserPreviewResponseModel> GetUserPreviewAsync(Guid id)
+    {
+        UserPreviewResponseModel? user = await context.Users
+            .Where(u => u.Id == id)
+            .Select(u => new UserPreviewResponseModel
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                AvatarUrl = u.AvatarUrl
             })
             .FirstOrDefaultAsync();
 
@@ -112,9 +151,16 @@ public class UserService(
             .FirstOrDefaultAsync(u => u.Id == id)
             ?? throw new NotFoundException("User not found");
 
-        user.Username = request.Username;
+
+        if (request.AvatarFile != null)
+        {
+            string? avatarUrl = await fileStorageService.UploadAvatarFileAsync(request.AvatarFile);
+
+            user.AvatarUrl = avatarUrl;
+        }
 
         user.UpdatedOn = DateTime.UtcNow;
+        user.Username = request.Username;
 
         context.Users.Update(user);
         await context.SaveChangesAsync();

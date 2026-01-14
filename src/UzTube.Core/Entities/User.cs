@@ -9,6 +9,7 @@ public class User : BaseEntity
     public string Username { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
+    public string? AvatarUrl { get; set; }
     public Guid CountryId { get; set; }
     public UserStatus Status { get; set; } = UserStatus.NotVerified;
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;

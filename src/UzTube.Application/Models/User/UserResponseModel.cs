@@ -4,6 +4,7 @@ public record UserResponseModel : BaseResponseModel
 {
     public string Username { get; init; } = null!;
     public string Email { get; init; } = null!;
+    public string? AvatarFile { get; init; }
     public Guid CountryId { get; init; }
     public DateTime CreatedOn { get; init; }
     public DateTime? UpdatedOn { get; init; }

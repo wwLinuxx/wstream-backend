@@ -340,17 +340,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Property<DateTime>("PostedOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("PreviewUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .IsUnicode(false)
-                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -473,6 +473,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("CountryId")
                         .HasColumnType("uuid");
 
@@ -484,14 +487,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -501,13 +507,34 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CountryId");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CountryId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedOn = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "wstream@wstream.uz",
+                            IsDeleted = false,
+                            PasswordHash = "$2a$12$y1fbOaHRSitejev3HqXkCOV1EggDqBFB3ya03NAeD347KQ8E/EjvO",
+                            Status = 1,
+                            Username = "wstream"
+                        });
                 });
 
             modelBuilder.Entity("UzTube.Core.Entities.UserRole", b =>
@@ -535,22 +562,25 @@ namespace UzTube.DataAccess.Persistence.Migrations
             modelBuilder.Entity("UzTube.Core.Entities.View", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("ViewedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id", "UserId", "PostId");
+                    b.HasKey("Id");
 
                     b.HasIndex("PostId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "PostId")
+                        .IsUnique()
+                        .HasFilter("\"UserId\" IS NOT NULL");
 
                     b.ToTable("Views");
                 });
@@ -756,7 +786,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.HasOne("UzTube.Core.Entities.Country", "Country")
                         .WithMany("Users")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.Navigation("Country");
@@ -792,8 +822,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.HasOne("UzTube.Core.Entities.User", "User")
                         .WithMany("Views")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Post");
 

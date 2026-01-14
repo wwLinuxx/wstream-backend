@@ -27,7 +27,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .HasMaxLength(20)
             .IsUnicode(false);
 
-        builder.Property(p => p.ThumbnailUrl)
+        builder.Property(p => p.PreviewUrl)
             .HasMaxLength(1000)
             .IsUnicode(false);
 

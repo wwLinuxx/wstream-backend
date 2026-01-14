@@ -9,6 +9,7 @@ using UzTube.API.Filters;
 using UzTube.API.Middleware;
 using UzTube.Application;
 using UzTube.Application.Models.Validators;
+using UzTube.Core.Common;
 using UzTube.DataAccess;
 using UzTube.DataAccess.Persistence;
 
@@ -35,13 +36,13 @@ builder.Services.AddJwt(builder.Configuration);
 
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 10L * 1024 * 1024 * 1024;
+    options.Limits.MaxRequestBodySize = SystemFileSizeLimit.Upload.Video;
     options.AllowSynchronousIO = true;
 });
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024;
+    options.MultipartBodyLengthLimit = SystemFileSizeLimit.Upload.Video;
 });
 
 WebApplication app = builder.Build();

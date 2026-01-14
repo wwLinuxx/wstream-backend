@@ -8,7 +8,21 @@ public class ClaimService(IHttpContextAccessor httpContextAccessor) : IClaimServ
 {
     public Guid GetUserId()
     {
-        return Guid.Parse(GetClaim(CustomClaimNames.Id));
+        if (!IsAuthenticated())
+            return Guid.Empty;
+
+        string? value = GetClaim(CustomClaimNames.Id);
+
+        if (Guid.TryParse(value, out Guid userId))
+            return userId;
+
+        return Guid.Empty;
+    }
+
+
+    public bool IsAuthenticated()
+    {
+        return httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
     }
 
     public SystemLanguages GetUserLanguage()

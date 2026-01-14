@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UzTube.Application.Exceptions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Post;
+using UzTube.Core.Common;
 using UzTube.Core.Entities;
 using UzTube.DataAccess.Persistence;
 using UzTube.Shared.Services;
@@ -15,82 +16,37 @@ public class PostService(
     IFileStorageService fileStorageService
 ) : IPostService
 {
-    private const string VideoFolder = "videos";
-    private const long MaxVideoSize = 10L * 1024 * 1024 * 1024; // 10GB
-
-    private static readonly Dictionary<string, string> ContentTypes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Widely supported by browsers (native support)
-        [".mp4"] = "video/mp4",                // Best compatibility (H.264/AAC)
-        [".m4v"] = "video/mp4",
-        [".mp4v"] = "video/mp4",
-
-        [".webm"] = "video/webm",               // Modern browsers (VP8/VP9/AV1)
-
-        [".ogv"] = "video/ogg",                // Theora (older but supported)
-
-        [".mpeg"] = "video/mpeg",
-        [".mpg"] = "video/mpeg",
-
-        // Transport streams / segments (used in streaming workflows)
-        [".ts"] = "video/mp2t",               // used in HLS segments sometimes
-
-        // Streaming manifests (often require a player like hls.js or dash.js)
-        [".m3u8"] = "application/vnd.apple.mpegurl", // HLS playlist
-        [".mpd"] = "application/dash+xml"          // MPEG-DASH manifest
-    };
-
-    private static readonly HashSet<string> AllowedVideoExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".mp4", ".webm", ".mkv", ".avi", ".mov"
-    };
-
-    public async Task<UploadVideoFileResponseModel> UploadVideoFileAsync(IFormFile file)
-    {
-        ValidateVideoFile(file);
-
-        string? extension = Path.GetExtension(file.FileName).ToLower();
-        string? fileName = $"{Guid.NewGuid()}{extension}";
-
-        await using Stream? stream = file.OpenReadStream();
-
-        await fileStorageService.UploadFileAsync(
-            VideoFolder,
-            fileName,
-            stream,
-            GetContentType(fileName),
-            file.Length
-        );
-
-        return new UploadVideoFileResponseModel { FileUrl = fileName };
-    }
-
     public async Task StreamVideoFileAsync(string fileName, HttpResponse response)
     {
         if (string.IsNullOrWhiteSpace(fileName))
             throw new BadRequestException("File name is required");
 
-        string folderName = "videos";
+        string folderName = SystemFolderNames.Video;
 
-        response.ContentType = GetContentType(fileName);
+        //response.ContentType = GetContentType(fileName);
         response.Headers.Append("Accept-Ranges", "bytes");
         response.Headers.Append("Content-Disposition", $"inline; filename=\"{fileName}\"");
 
         await fileStorageService.StreamFileAsync(folderName, fileName, response.Body);
     }
 
-    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostModel request)
+    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostRequest request)
     {
         Guid userId = claimService.GetUserId();
+
+        string? videoFileUrl = await fileStorageService.UploadVideoFileAsync(request.VideoFile);
+        string? previewFileUrl = await fileStorageService.UploadPreviewFileAsync(request.PreviewFile);
+
+        string? videoDuration = "24:12:60"; // TODO: Video ni vaqtini hisoblash
 
         Post newPost = new Post
         {
             UserId = userId,
             Title = request.Title,
             Description = request.Description,
-            ThumbnailUrl = request.ThumbnailUrl,
-            VideoUrl = request.VideoUrl,
-            Duration = "00:00:00" // TODO: Video file ni vaqtini hisoblididan qilish
+            VideoUrl = videoFileUrl,
+            PreviewUrl = previewFileUrl,
+            Duration = videoDuration
         };
 
         await context.Posts.AddAsync(newPost);
@@ -109,7 +65,7 @@ public class PostService(
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.ThumbnailUrl,
+                PreviewUrl = p.PreviewUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
                 PostedOn = p.PostedOn,
@@ -120,18 +76,29 @@ public class PostService(
             })
             .FirstOrDefaultAsync();
 
-        return post ?? throw new NotFoundException("Post not found");
+        return post ?? throw new NotFoundException("Video not found");
     }
 
     public async Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option)
     {
-        IQueryable<Post> query = context.Posts;
+        IQueryable<Post> query = context.Posts
+            .Where(p => !p.IsPrivate);
 
-        if (!string.IsNullOrEmpty(option.Search))
-            query = query.Where(p => p.Title.Contains(option.Search.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(option.Search))
+        {
+            string search = option.Search.Trim();
+
+            query = query.Where(p =>
+                EF.Functions.ILike(p.Title, $"%{search}%")); // PostgreSQL case-insensitive
+        }
+
+        int postsCount = await query.CountAsync();
+
+        if (postsCount == 0)
+           throw new NotFoundException("Video not found");
 
         List<PostResponseModel> posts = await query
-            .Where(p => !p.IsPrivate)
+            .OrderBy(p => EF.Functions.Random()) // REAL RANDOM (PostgreSQL)
             .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(p => new PostResponseModel
@@ -140,7 +107,7 @@ public class PostService(
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.ThumbnailUrl,
+                PreviewUrl = p.PreviewUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
                 PostedOn = p.PostedOn,
@@ -151,12 +118,12 @@ public class PostService(
             })
             .ToListAsync();
 
-        if (posts.Count == 0)
-            throw new NotFoundException("Posts not found");
-
-        int postsCount = await context.Posts.CountAsync();
-
-        return PaginatedList<PostResponseModel>.Create(posts, postsCount, option.PageNumber, option.PageSize);
+        return PaginatedList<PostResponseModel>.Create(
+            posts,
+            postsCount,
+            option.PageNumber,
+            option.PageSize
+        );
     }
 
     public async Task<PostResponseModel> SearchPostAsync(string query)
@@ -172,7 +139,7 @@ public class PostService(
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.ThumbnailUrl,
+                PreviewUrl = p.PreviewUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
                 PostedOn = p.PostedOn,
@@ -183,7 +150,7 @@ public class PostService(
             })
             .FirstOrDefaultAsync();
 
-        return post ?? throw new NotFoundException("Post not found");
+        return post ?? throw new NotFoundException("Video not found");
     }
 
     public async Task<List<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option)
@@ -200,7 +167,7 @@ public class PostService(
                 UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
-                PhotoUrl = p.ThumbnailUrl,
+                PreviewUrl = p.PreviewUrl,
                 VideoUrl = p.VideoUrl,
                 Duration = p.Duration,
                 PostedOn = p.PostedOn,
@@ -211,17 +178,17 @@ public class PostService(
             })
             .ToListAsync();
 
-        return posts.Count == 0 ? throw new NotFoundException("Post not found") : posts;
+        return posts.Count == 0 ? throw new NotFoundException("Video not found") : posts;
     }
 
     public async Task<UpdatePostResponseModel> UpdatePostAsync(Guid id, UpdatePostRequest request)
     {
         Post post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id)
-                    ?? throw new NotFoundException("Post not found");
+                    ?? throw new NotFoundException("Video not found");
 
         post.Title = request.Title;
         post.Description = request.Description;
-        post.ThumbnailUrl = request.ThumbnailUrl;
+        post.PreviewUrl = request.ThumbnailUrl;
         post.IsPrivate = request.IsPrivate;
 
         context.Posts.Update(post);
@@ -234,9 +201,9 @@ public class PostService(
     {
         // TODO: When delete post need copy to HistoryTable
         Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
-                    ?? throw new NotFoundException("Post not found");
+                    ?? throw new NotFoundException("Video not found");
 
-        await fileStorageService.DeleteFileAsync(VideoFolder, post.VideoUrl);
+        await fileStorageService.DeleteFileAsync(SystemFolderNames.Video, post.VideoUrl);
 
         post.IsDeleted = true;
         post.DeletedAt = DateTime.Now;
@@ -249,7 +216,7 @@ public class PostService(
     public async Task<RestorePostResponseModel> RestorePostAsync(Guid userId)
     {
         Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == userId)
-                    ?? throw new NotFoundException("Post not found");
+                    ?? throw new NotFoundException("Video not found");
 
         post.IsDeleted = false;
         post.DeletedAt = null;
@@ -257,29 +224,5 @@ public class PostService(
         await context.SaveChangesAsync();
 
         return new RestorePostResponseModel("Success");
-    }
-
-    private static void ValidateVideoFile(IFormFile? file)
-    {
-        if (file is null || file.Length == 0)
-            throw new BadRequestException("Video file is required");
-
-        string? extension = Path.GetExtension(file.FileName);
-
-        if (string.IsNullOrEmpty(extension))
-            throw new BadRequestException("File must have an extension");
-
-        if (!AllowedVideoExtensions.Contains(extension))
-            throw new BadRequestException($"Invalid format. Allowed: {string.Join(", ", AllowedVideoExtensions)}");
-
-        if (file.Length > MaxVideoSize)
-            throw new BadRequestException($"File size exceeds {MaxVideoSize / (1024 * 1024 * 1024)}GB limit");
-    }
-
-    private static string GetContentType(string fileName)
-    {
-        string? ext = Path.GetExtension(fileName);
-
-        return ContentTypes.GetValueOrDefault(ext, "application/octet-stream");
     }
 }

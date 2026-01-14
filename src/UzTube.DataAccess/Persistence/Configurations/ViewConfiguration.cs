@@ -8,17 +8,16 @@ public class ViewConfiguration : IEntityTypeConfiguration<View>
 {
     public void Configure(EntityTypeBuilder<View> builder)
     {
-        // TODO: Need refactor HasKey
-        builder.HasKey(pv => new
-        {
-            pv.Id,
-            pv.UserId,
-            pv.PostId
-        });
+        builder.HasKey(pv => pv.Id);
+
+        builder.HasIndex(pv => new { pv.UserId, pv.PostId })
+            .IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
 
         builder.HasOne(pv => pv.User)
             .WithMany(u => u.Views)
             .HasForeignKey(pv => pv.UserId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(pv => pv.Post)

@@ -8,6 +8,8 @@ public static class ApiExtensions
     {
         app.MapAuthEndpoints();
         app.MapCommentEndpoints();
+        app.MapViewEndpoints();
+        app.MapLikeEndpoints();
         app.MapCategoryEndpoints();
         app.MapCountryEndpoints();
     }

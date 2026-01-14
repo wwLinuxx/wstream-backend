@@ -96,9 +96,10 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", unicode: false, maxLength: 100, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    AvatarUrl = table.Column<string>(type: "text", nullable: true),
                     CountryId = table.Column<Guid>(type: "uuid", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -114,7 +115,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         column: x => x.CountryId,
                         principalTable: "Countries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -217,7 +218,7 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(100)", unicode: false, maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "character varying(1000)", unicode: false, maxLength: 1000, nullable: false),
-                    ThumbnailUrl = table.Column<string>(type: "character varying(1000)", unicode: false, maxLength: 1000, nullable: false),
+                    PreviewUrl = table.Column<string>(type: "character varying(1000)", unicode: false, maxLength: 1000, nullable: false),
                     VideoUrl = table.Column<string>(type: "character varying(1000)", unicode: false, maxLength: 1000, nullable: false),
                     Duration = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: false),
                     ViewsCount = table.Column<int>(type: "integer", nullable: false),
@@ -400,12 +401,12 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     ViewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Views", x => new { x.Id, x.UserId, x.PostId });
+                    table.PrimaryKey("PK_Views", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Views_Posts_PostId",
                         column: x => x.PostId,
@@ -450,6 +451,11 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 table: "Countries",
                 columns: new[] { "Id", "Code", "FullName" },
                 values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "UZ", "Uzbekistan" });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "AvatarUrl", "CountryId", "CreatedOn", "DeletedOn", "Email", "IsDeleted", "PasswordHash", "Status", "UpdatedOn", "Username" },
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), null, new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "wstream@wstream.uz", false, "$2a$12$y1fbOaHRSitejev3HqXkCOV1EggDqBFB3ya03NAeD347KQ8E/EjvO", 1, null, "wstream" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_Name",
@@ -565,14 +571,28 @@ namespace UzTube.DataAccess.Persistence.Migrations
                 column: "CountryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Views_PostId",
                 table: "Views",
                 column: "PostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Views_UserId",
+                name: "IX_Views_UserId_PostId",
                 table: "Views",
-                column: "UserId");
+                columns: new[] { "UserId", "PostId" },
+                unique: true,
+                filter: "\"UserId\" IS NOT NULL");
         }
 
         /// <inheritdoc />

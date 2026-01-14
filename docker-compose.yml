@@ -49,12 +49,13 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - /home/wwlinux/projects/wstream/development/wstream-database:/var/lib/postgresql
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      # - /home/wwlinux/projects/wstream/development/wstream-database:/var/lib/postgresql
+      - wstream-database:/var/lib/postgresql
+    # healthcheck:
+    #   test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
     networks:
       - wstream-network
     restart: unless-stopped
@@ -71,7 +72,7 @@ services:
       - "${SEQ_PORT}:5341"
       - "${SEQ_URL_PORT}:80"
     volumes:
-      - /home/wwlinux/projects/wstream/development/wstream-logs:/data
+      - wstream-logs:/data
     networks:
       - wstream-network
     restart: unless-stopped
@@ -88,10 +89,28 @@ services:
        - "${MINIO_URL_PORT}:9001"
        - "${MINIO_PORT}:9000"
      volumes:
-       - /home/wwlinux/projects/wstream/development/wstream-filemanager:/data
+       - wstream-filemanager:/data
      networks:
        - wstream-network
      restart: unless-stopped
+
+  wstream-filemanager-init:
+    image: minio/mc:latest
+    depends_on:
+      - wstream-filemanager
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set wstream http://wstream-filemanager:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      mc mb --ignore-existing wstream/avatars;
+      mc mb --ignore-existing wstream/videos;
+      mc mb --ignore-existing wstream/previews;
+      mc anonymous set download wstream/avatars;
+      mc anonymous set download wstream/videos;
+      mc anonymous set download wstream/previews;
+      exit 0;"
+    networks:
+      - wstream-network
       
   # Nginx
   wstream-nginx:
@@ -114,7 +133,8 @@ services:
       - ./nginx/ssl/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
       - ./nginx/ssl/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem:ro
       # LOG
-      - /home/wwlinux/projects/wstream/development/wstream-nginx-logs:/var/log/nginx
+      # - /home/wwlinux/projects/wstream/development/wstream-nginx-logs:/var/log/nginx
+      - wstream-nginx-logs:/var/log/nginx
       # PROJECT
       - /home/wwlinux/projects:/home/wwlinux/projects:ro
     depends_on:
@@ -126,6 +146,12 @@ services:
 volumes:
   wstream-database:
     name: wstream-database
+  wstream-logs:
+    name: wstream-logs
+  wstream-filemanager:
+    name: wstream-filemanager
+  wstream-nginx-logs:
+    name: wstream-nginx-logs
     
 networks:
   wstream-network:

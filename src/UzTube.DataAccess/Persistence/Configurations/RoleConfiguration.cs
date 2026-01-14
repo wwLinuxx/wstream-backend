@@ -17,41 +17,5 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.Property(r => r.Description)
             .HasMaxLength(100)
             .IsUnicode(false);
-
-        #region
-        // Seed Roles
-        /*builder.HasData(
-            new Role
-            {
-                Id = 1,
-                Name = "root",
-                Description = "root - Role",
-                RolePermissions = new List<RolePermission>
-                {
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewUsers },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ManageUser },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewRoles },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ManageRoles },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewPermissions },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewAuditLogs },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ManageSystem },
-                    new RolePermission { RoleId = 1, PermissionId = (int)SystemPermissions.ViewPost }
-                }
-            },
-            new Role
-            {
-                Id = 2,
-                Name = "Admin",
-                Description = "Admin - Role",
-                RolePermissions = new List<RolePermission>
-                {
-                    new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ViewUsers },
-                    new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ManageUser },
-                    new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ViewRoles },
-                    new RolePermission { RoleId = 2, PermissionId = (int)SystemPermissions.ManageRoles }
-                }
-            }
-        );*/
-        #endregion
     }
 }

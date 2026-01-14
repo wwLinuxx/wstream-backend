@@ -5,7 +5,7 @@ public record PostResponseModel : BaseResponseModel
     public Guid UserId { get; set; }
     public string Title { get; init; } = null!;
     public string Description { get; init; } = null!;
-    public string PhotoUrl { get; init; } = null!;
+    public string PreviewUrl { get; init; } = null!;
     public string VideoUrl { get; init; } = null!;
     public string Duration { get; init; } = null!;
     public DateTime PostedOn { get; init; }

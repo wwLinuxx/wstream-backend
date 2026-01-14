@@ -1,4 +1,4 @@
-﻿namespace UzTube.Shared.Helpers.Interfaces;
+﻿namespace UzTube.Application.Helpers.Interfaces;
 
 public interface IPasswordHasher
 {

@@ -14,32 +14,17 @@ public class PostController(
     IPostService postService
 ) : ControllerBase
 {
-    [HttpPost("upload-video")]
-    //[RequirePermission(SystemPermissions.PostCreate)]
-    [RequestSizeLimit(10L * 1024 * 1024 * 1024)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024)]
-    public async Task<IActionResult> UploadVideoFileAsync(IFormFile file)
-    {
-        return Ok(ApiResult<UploadVideoFileResponseModel>.Success(
-            await postService.UploadVideoFileAsync(file)));
-    }
-
-    [HttpGet("stream-video")]
-    public async Task<IActionResult> StreamVideoFileAsync([FromQuery] string fileName)
-    {
-        await postService.StreamVideoFileAsync(fileName, Response);
-
-        return new EmptyResult();
-    }
-
     [HttpPost]
-    public async Task<IActionResult> CreatePostAsync([FromForm] CreatePostModel model)
+    //[RequirePermission(SystemPermissions.PostCreate)]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreatePostAsync([FromForm] CreatePostRequest model)
     {
         return Ok(ApiResult<CreatePostResponseModel>.Success(
             await postService.CreatePostAsync(model)));
     }
 
     [HttpGet("{id:Guid}")]
+    //[RequirePermission(SystemPermissions.PostView)]
     public async Task<IActionResult> GetPostAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<PostResponseModel>.Success(

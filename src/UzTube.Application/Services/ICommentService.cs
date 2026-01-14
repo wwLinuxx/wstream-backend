@@ -7,5 +7,5 @@ public interface ICommentService
 {
     Task<CreateCommentResponseModel> CreateCommentAsync(Guid postId, CreateCommentRequest request);
     Task<CommentResponseModel> GetCommentAsync(Guid commentId);
-    Task<PaginatedList<CommentResponseModel>> GetCommentsAsync(PageOption option);
+    Task<PaginatedList<CommentResponseModel>> GetCommentsAsync(Guid postId, PageOption option);
 }

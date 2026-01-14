@@ -16,7 +16,7 @@ public class CommentService(
     public async Task<CreateCommentResponseModel> CreateCommentAsync(Guid postId, CreateCommentRequest request)
     {
         if (!await context.Posts.AnyAsync(p => p.Id == postId))
-            throw new NotFoundException("Post not found");
+            throw new NotFoundException("Video not found");
 
         Guid userId = claimService.GetUserId();
 
@@ -40,6 +40,8 @@ public class CommentService(
             .Select(c => new CommentResponseModel
             {
                 Id = c.Id,
+                PostId = c.PostId,
+                UserId = c.UserId,
                 CommentText = c.CommentText,
                 CreatedAt = c.CreatedAt
             })
@@ -48,30 +50,46 @@ public class CommentService(
         return comment ?? throw new NotFoundException("Comment not found");
     }
 
-    public async Task<PaginatedList<CommentResponseModel>> GetCommentsAsync(PageOption option)
+    public async Task<PaginatedList<CommentResponseModel>> GetCommentsAsync(Guid postId, PageOption option)
     {
+        if (!await context.Posts.AnyAsync(p => p.Id == postId))
+            throw new NotFoundException("Video not found");
+
         IQueryable<Comment> query = context.Comments;
 
+        if (!string.IsNullOrWhiteSpace(option.Search))
+        {
+            string search = option.Search.Trim();
+
+            query = query.Where(p =>
+                EF.Functions.ILike(p.CommentText, $"%{search}%")); // PostgreSQL case-insensitive
+        }
+
+        int commentsCount = await query.CountAsync();
+
+        if (commentsCount == 0)
+            throw new NotFoundException("Comments not found");
+
         List<CommentResponseModel> comments = await query
-            .Skip(option.PageSize * (option.PageNumber - 1))
+            .Where(p => p.PostId == postId)
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(c => new CommentResponseModel
             {
                 Id = c.Id,
+                PostId = c.PostId,
+                UserId = c.UserId,
                 CommentText = c.CommentText,
                 CreatedAt = c.CreatedAt
             })
             .ToListAsync();
 
-        if (comments.Count == 0)
-            throw new NotFoundException("Comments not found");
-
-        int commentsCount = context.Comments.Count();
-
         return PaginatedList<CommentResponseModel>.Create(
             comments,
             commentsCount,
             option.PageNumber,
-            option.PageSize);
+            option.PageSize
+        );
     }
 }

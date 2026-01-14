@@ -1,6 +1,6 @@
 namespace UzTube.Application.Models.Post;
 
-public record UploadVideoModel
+public record UploadVideoFileModel
 {
 
 }
