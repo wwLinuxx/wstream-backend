@@ -13,11 +13,14 @@ public static class LikeEndpoints
     {
         RouteGroupBuilder endpoints = app.MapGroup("api/likes");
 
-        endpoints.MapPost("{postId:guid}", LikeAsync);
+        endpoints.MapPost("{postId:guid}", LikeAsync)
+            .RequirePermission();
 
-        endpoints.MapGet("{postId:guid}", LikeStatusAsync);
+        endpoints.MapGet("{postId:guid}", LikeStatusAsync)
+            .RequirePermission();
 
-        endpoints.MapDelete("{postId:guid}", UnLikeAsync);
+        endpoints.MapDelete("{postId:guid}", UnLikeAsync)
+            .RequirePermission();
 
         return app;
     }
