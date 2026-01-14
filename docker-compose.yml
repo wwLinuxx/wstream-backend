@@ -125,10 +125,13 @@ services:
       - ./nginx/sites-enabled/wstream.uz:/etc/nginx/sites-enabled/wstream.uz:ro
       - ./nginx/sites-enabled/api.wstream.uz:/etc/nginx/sites-enabled/api.wstream.uz:ro
       - ./nginx/sites-enabled/files.wstream.uz:/etc/nginx/sites-enabled/files.wstream.uz:ro
+      - ./nginx/sites-enabled/logs.wstream.uz:/etc/nginx/sites-enabled/logs.wstream.uz:ro
       - ./nginx/sites-enabled/wwlinux.uz:/etc/nginx/sites-enabled/wwlinux.uz:ro
       # SSL
       - ./nginx/ssl/letsencrypt/wstream.uz:/etc/letsencrypt/live/wstream.uz:ro
       - ./nginx/ssl/letsencrypt/api.wstream.uz:/etc/letsencrypt/live/api.wstream.uz:ro
+      - ./nginx/ssl/letsencrypt/files.wstream.uz:/etc/letsencrypt/live/files.wstream.uz:ro
+      - ./nginx/ssl/letsencrypt/logs.wstream.uz:/etc/letsencrypt/live/logs.wstream.uz:ro
       - ./nginx/ssl/letsencrypt/wwlinux.uz:/etc/letsencrypt/live/wwlinux.uz:ro
       # SSL OPTIONS
       - ./nginx/ssl/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf:ro
