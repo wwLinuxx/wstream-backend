@@ -1,11 +1,11 @@
-upstream wstream_file_servers {
-    server wstream-filemanager:9000;
+upstream wstream_log_servers {
+    server wstream-logs:8080;
 }
 
 # HTTP to HTTPS redirect
 server {
     listen 80;
-    server_name files.wstream.uz www.files.wstream.uz;
+    server_name logs.wstream.uz www.logs.wstream.uz;
     
     return 301 https://$host$request_uri;
 }
@@ -13,11 +13,11 @@ server {
 # HTTPS server
 server {
     listen 443 ssl;
-    server_name files.wstream.uz www.files.wstream.uz;
+    server_name logs.wstream.uz www.logs.wstream.uz;
     
     # SSL
-    ssl_certificate /etc/letsencrypt/live/files.wstream.uz/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/files.wstream.uz/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/logs.wstream.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/logs.wstream.uz/privkey.pem;
 
     # CONF
     include /etc/letsencrypt/options-ssl-nginx.conf;
@@ -39,6 +39,6 @@ server {
     }
     
     # Error logging
-    error_log /var/log/nginx/files.wstream.uz-error.log crit;
-    access_log /var/log/nginx/files.wstream.uz-access.log;
+    error_log /var/log/nginx/logs.wstream.uz-error.log crit;
+    access_log /var/log/nginx/logs.wstream.uz-access.log;
 }
