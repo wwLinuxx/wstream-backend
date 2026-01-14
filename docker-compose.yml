@@ -101,7 +101,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 5;
-      mc alias set wstream http://wstream.uz:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      mc alias set wstream http://files.wstream.uz:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       mc mb --ignore-existing wstream/avatars;
       mc mb --ignore-existing wstream/videos;
       mc mb --ignore-existing wstream/previews;
