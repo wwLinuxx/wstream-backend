@@ -1,4 +1,4 @@
-﻿# HTTP to HTTPS redirect
+# HTTP to HTTPS redirect
 server {
     listen 80;
     server_name wstream.uz www.wstream.uz;
