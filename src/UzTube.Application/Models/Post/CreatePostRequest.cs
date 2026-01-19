@@ -4,9 +4,9 @@ namespace UzTube.Application.Models.Post;
 
 public record CreatePostRequest(
     string Title,
-    string Description,
+    string? Description,
     IFormFile VideoFile,
-    IFormFile PreviewFile,
+    IFormFile? PreviewFile,
     bool IsPrivate);
 
 public record CreatePostResponseModel : BaseResponseModel;

@@ -59,7 +59,7 @@ public class UserController(
         [FromRoute] Guid id,
         [FromForm] UpdateUserRequest model)
     {
-        return Ok(ApiResult<UpdateUserProfileResponseModel>.Success(
+        return Ok(ApiResult<UserResponseModel>.Success(
             await userService.UpdateUserProfileAsync(id, model)));
     }
 
@@ -89,7 +89,7 @@ public class UserController(
         [FromRoute] Guid id,
         [FromBody] PageOption option)
     {
-        return Ok(ApiResult<List<PostResponseModel>>.Success(
+        return Ok(ApiResult<PaginatedList<PostResponseModel>>.Success(
             await postService.GetUserPostsAsync(id, option)));
     }
 

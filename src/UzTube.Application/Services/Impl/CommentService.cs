@@ -55,7 +55,8 @@ public class CommentService(
         if (!await context.Posts.AnyAsync(p => p.Id == postId))
             throw new NotFoundException("Video not found");
 
-        IQueryable<Comment> query = context.Comments;
+        IQueryable<Comment> query = context.Comments
+            .Where(p => p.PostId == postId);
 
         if (!string.IsNullOrWhiteSpace(option.Search))
         {
@@ -71,7 +72,6 @@ public class CommentService(
             throw new NotFoundException("Comments not found");
 
         List<CommentResponseModel> comments = await query
-            .Where(p => p.PostId == postId)
             .OrderByDescending(p => p.CreatedAt)
             .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
@@ -79,9 +79,11 @@ public class CommentService(
             {
                 Id = c.Id,
                 PostId = c.PostId,
-                UserId = c.UserId,
                 CommentText = c.CommentText,
-                CreatedAt = c.CreatedAt
+                CreatedAt = c.CreatedAt,
+                UserId = c.User.Id,
+                Username = c.User.Username,
+                UserAvatarUrl = c.User.AvatarUrl
             })
             .ToListAsync();
 

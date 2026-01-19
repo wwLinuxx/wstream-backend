@@ -14,14 +14,10 @@ public class CreatePostValidator : AbstractValidator<CreatePostRequest>
             .WithMessage($"Title should have maximum {PostValidatorConfiguration.MaximumTitleLength} characters.");
 
         RuleFor(p => p.Description)
-            .MinimumLength(PostValidatorConfiguration.MinimumDescriptionLength)
-            .WithMessage(
-                $"Description should have minimum {PostValidatorConfiguration.MinimumDescriptionLength} characters.")
             .MaximumLength(PostValidatorConfiguration.MaximumDescriptionLength)
-            .WithMessage(
-                $"Description should have maximum {PostValidatorConfiguration.MaximumDescriptionLength} characters.");
+            .WithMessage($"Description should have maximum {PostValidatorConfiguration.MaximumDescriptionLength} characters.");
 
-        //RuleFor(p => p.IsPrivate)
-        //    .NotEmpty().WithMessage("IsPrivate is required.");
+        RuleFor(p => p.IsPrivate)
+            .NotNull().WithMessage("IsPrivate is required.");
     }
 }

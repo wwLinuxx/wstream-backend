@@ -8,12 +8,12 @@ public class Post : BaseEntity
     // TODO: Need change SoftDelete to HistoryTable
     public Guid UserId { get; set; }
     public string Title { get; set; } = null!;
-    public string Description { get; set; } = null!;
-    public string PreviewUrl { get; set; } = null!;
+    public string? Description { get; set; }
     public string VideoUrl { get; set; } = null!;
+    public string? PreviewUrl { get; set; }
     public string Duration { get; set; } = null!;
-    public int ViewsCount { get; set; }
     public int LikesCount { get; set; }
+    public int ViewsCount { get; set; }
     public int Rating { get; set; }
     public DateTime PostedOn { get; set; } = DateTime.UtcNow;
     public VideoStatus Status { get; set; } = VideoStatus.Checking;

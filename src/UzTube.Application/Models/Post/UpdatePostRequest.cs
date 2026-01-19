@@ -1,9 +1,11 @@
-﻿namespace UzTube.Application.Models.Post;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace UzTube.Application.Models.Post;
 
 public record UpdatePostRequest(
     string Title,
-    string Description,
-    string ThumbnailUrl,
+    string? Description,
+    FormFile? PreviewFile,
     bool IsPrivate);
 
 public record UpdatePostResponseModel : BaseResponseModel;

@@ -56,7 +56,7 @@ public class AuthService(
             : await context.Users.FirstOrDefaultAsync(u => u.Username == request.Login);
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
-            throw new UnauthorizedException("Email or Password not correct");
+            throw new NotFoundException("Email or Password not correct");
 
         List<string> permissions = await permissionService.GetUserPermissions(user.Id);
 

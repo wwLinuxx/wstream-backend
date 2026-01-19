@@ -8,49 +8,62 @@ using UzTube.Shared.Services;
 namespace UzTube.Application.Services.Impl;
 
 public class LikeService(
-    DatabaseContext context,
+    DatabaseContext db,
     IClaimService claimService
 ) : ILikeService
 {
-    public async Task<CreateLikeResponseModel> LikeAsync(Guid postId)
+    private readonly Guid _currentUserId = claimService.GetUserId();
+
+    public async Task<LikeResponseModel> LikeAsync(Guid postId)
     {
-        Guid userId = claimService.GetUserId();
+        await ValidatePostAsync(postId);
 
-        if (await context.Likes.AnyAsync(l => l.UserId == userId && l.PostId == postId))
-            throw new BadRequestException("Post already liked");
+        if (await IsLikedAsync(postId))
+            throw new BadRequestException("Video already liked");
 
-        Like newLike = new Like
+        Like like = new Like
         {
-            UserId = userId,
+            UserId = _currentUserId,
             PostId = postId
         };
 
-        await context.Likes.AddAsync(newLike);
-        await context.SaveChangesAsync();
+        db.Likes.Add(like);
+        await db.SaveChangesAsync();
 
-        return new CreateLikeResponseModel("Success");
+        return new LikeResponseModel { IsLiked = true };
+    }
+
+    public async Task<LikeResponseModel> UnLikeAsync(Guid postId)
+    {
+        await ValidatePostAsync(postId);
+
+        Like like = await db.Likes
+            .FirstOrDefaultAsync(l => l.UserId == _currentUserId && l.PostId == postId)
+            ?? throw new BadRequestException("Video already unliked");
+
+        db.Likes.Remove(like);
+        await db.SaveChangesAsync();
+
+        return new LikeResponseModel { IsLiked = false };
     }
 
     public async Task<LikeResponseModel> LikeStatusAsync(Guid postId)
     {
-        Guid userId = claimService.GetUserId();
+        await ValidatePostAsync(postId);
 
-        if (await context.Likes.AnyAsync(l => l.UserId == userId && l.PostId == postId))
-            return new LikeResponseModel { IsLiked = true };
-        else
-            return new LikeResponseModel { IsLiked = false };
+        bool isLiked = await IsLikedAsync(postId);
+
+        return new LikeResponseModel { IsLiked = isLiked };
     }
 
-    public async Task<DeleteLikeResponseModel> UnLikeAsync(Guid postId)
+    // ===================== Private Methods =====================
+
+    private async Task ValidatePostAsync(Guid postId)
     {
-        Guid userId = claimService.GetUserId();
-
-        Like like = await context.Likes.FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId)
-            ?? throw new BadRequestException("Post already unliked");
-
-        context.Likes.Remove(like);
-        await context.SaveChangesAsync();
-
-        return new DeleteLikeResponseModel("Success");
+        if (!await db.Posts.AnyAsync(p => p.Id == postId))
+            throw new NotFoundException("Post not found");
     }
+
+    private Task<bool> IsLikedAsync(Guid postId) =>
+        db.Likes.AnyAsync(l => l.UserId == _currentUserId && l.PostId == postId);
 }

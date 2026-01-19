@@ -17,7 +17,7 @@ public interface IUserService
 
     Task<UserResponseModel> SearchUserAsync(string query);
 
-    Task<UpdateUserProfileResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request);
+    Task<UserResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request);
 
     Task<UpdateUserPasswordResponseModel> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request);
 

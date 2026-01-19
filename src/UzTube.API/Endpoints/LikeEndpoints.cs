@@ -3,7 +3,6 @@ using UzTube.API.Extensions;
 using UzTube.Application.Models;
 using UzTube.Application.Models.Like;
 using UzTube.Application.Services;
-using UzTube.Core.Enums;
 
 namespace UzTube.API.Endpoints;
 
@@ -16,10 +15,10 @@ public static class LikeEndpoints
         endpoints.MapPost("{postId:guid}", LikeAsync)
             .RequirePermission();
 
-        endpoints.MapGet("{postId:guid}", LikeStatusAsync)
+        endpoints.MapDelete("{postId:guid}", UnLikeAsync)
             .RequirePermission();
 
-        endpoints.MapDelete("{postId:guid}", UnLikeAsync)
+        endpoints.MapGet("{postId:guid}", LikeStatusAsync)
             .RequirePermission();
 
         return app;
@@ -29,8 +28,16 @@ public static class LikeEndpoints
         [FromRoute] Guid postId,
         [FromServices] ILikeService likeService)
     {
-        return Results.Ok(ApiResult<CreateLikeResponseModel>.Success(
+        return Results.Ok(ApiResult<LikeResponseModel>.Success(
             await likeService.LikeAsync(postId)));
+    }
+
+    private static async Task<IResult> UnLikeAsync(
+        [FromRoute] Guid postId,
+        [FromServices] ILikeService likeService)
+    {
+        return Results.Ok(ApiResult<LikeResponseModel>.Success(
+            await likeService.UnLikeAsync(postId)));
     }
 
     private static async Task<IResult> LikeStatusAsync(
@@ -39,13 +46,5 @@ public static class LikeEndpoints
     {
         return Results.Ok(ApiResult<LikeResponseModel>.Success(
             await likeService.LikeStatusAsync(postId)));
-    }
-
-    private static async Task<IResult> UnLikeAsync(
-        [FromRoute] Guid postId,
-        [FromServices] ILikeService likeService)
-    {
-        return Results.Ok(ApiResult<DeleteLikeResponseModel>.Success(
-            await likeService.UnLikeAsync(postId)));
     }
 }

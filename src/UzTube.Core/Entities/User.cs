@@ -21,6 +21,7 @@ public class User : BaseEntity
     public ICollection<Follower> Followers { get; set; } = [];
     public ICollection<Follower> Followings { get; set; } = [];
     public ICollection<Post> Posts { get; set; } = [];
+    public ICollection<Stream> LiveStreams { get; set; } = [];
     public ICollection<View> Views { get; set; } = [];
     public ICollection<Like> Likes { get; set; } = [];
     public ICollection<Comment> Comments { get; set; } = [];

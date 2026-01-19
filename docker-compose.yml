@@ -1,4 +1,4 @@
-services:
+﻿services:
   # WSTREAM API
   wstream-api:
     build:
@@ -22,8 +22,14 @@ services:
       # SERILOG
       - Serilog__WriteTo__1__Name=${LOG_WRITE_TO}
       - Serilog__WriteTo__1__Args__serverUrl=${SEQ_URL}:${SEQ_PORT}
+      # MEDIAMTX
+      - StreamSettings__RtmpServer=${MEDIAMTX_RTMP_SERVER}
+      - StreamSettings__RtmpPort=${MEDIAMTX_RTMP_PORT}
+      - StreamSettings__HlsServer=${MEDIAMTX_HLS_URL}
+      - StreamSettings__HlsPort=${MEDIAMTX_HLS_PORT}
       # MINIO
-      - MinioSettings__Endpoint=${MINIO_SERVER}
+      - MinioSettings__Url=${MINIO_URL}
+      - MinioSettings__Server=${MINIO_SERVER}
       - MinioSettings__Port=${MINIO_PORT}
       - MinioSettings__AccessKey=${MINIO_ACCESS_KEY}
       - MinioSettings__SecretKey=${MINIO_SECRET_KEY}
@@ -77,6 +83,28 @@ services:
       - wstream-network
     restart: unless-stopped
     
+  # MediaMTX
+  wstream-streammanager:
+    build:
+      context: ./mediamtx
+      dockerfile: Dockerfile
+    image: wstream-streammanager:custom
+    container_name: wstream-streammanager
+    ports:
+      - "${MEDIAMTX_RTMP_PORT}:1935"       # RTMP
+      - "${MEDIAMTX_HLS_PORT}:8888"        # HLS
+     #  - "8554:8554"                      # RTSP
+     #  - "8889:8889"                      # WebRTC HTTP
+     #  - "8189:8189/udp"                  # WebRTC UDP
+     #  - "8189:8189/tcp"                  # WebRTC TCP fallback
+     #  - "8890:8890/udp"                  # SRT
+     #  - "9997:9997"                      # API
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml
+    restart: unless-stopped
+    networks:
+      - wstream-network
+
   # MinIO
   wstream-filemanager:
      image: minio/minio:latest
@@ -101,7 +129,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 5;
-      mc alias set wstream http://files.wstream.uz:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      mc alias set wstream http://wstream-filemanager:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       mc mb --ignore-existing wstream/avatars;
       mc mb --ignore-existing wstream/videos;
       mc mb --ignore-existing wstream/previews;

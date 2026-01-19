@@ -7,20 +7,20 @@ namespace UzTube.Application.Models.Validators.User;
 
 public class CreateUserValidator : AbstractValidator<CreateUserRequest>
 {
-    private readonly DatabaseContext _context;
+    private readonly DatabaseContext _db;
 
-    public CreateUserValidator(DatabaseContext context)
+    public CreateUserValidator(DatabaseContext db)
     {
-        _context = context;
+        _db = db;
 
         RuleFor(x => x.Username)
-            .MinimumLength(3)
+            .MinimumLength(UserValidatorConfiguration.MinimumUsernameLength)
                 .WithMessage($"Username should have minimum {UserValidatorConfiguration.MinimumUsernameLength} characters.")
-            .MaximumLength(20)
+            .MaximumLength(UserValidatorConfiguration.MaximumUsernameLength)
                 .WithMessage($"Username should have maximum {UserValidatorConfiguration.MaximumUsernameLength} characters.")
             .Must(UsernameAddressIsUnique)
                 .WithMessage("Email address is already in use.")
-            .Matches(@"^[a-zA-Z0-9_]+$")
+            .Matches(UserValidatorConfiguration.UsernameRegexPattern)
                 .WithMessage("Username can only contain letters, numbers, and underscores.");
 
         RuleFor(u => u.Email)
@@ -46,12 +46,12 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
                 .WithMessage("Country not found.");
     }
 
-    private bool UsernameAddressIsUnique(string username)
-        => _context.Users.Any(u => u.Username != username);
+    private bool UsernameAddressIsUnique(string username) =>
+        _db.Users.Any(u => u.Username != username);
 
-    private bool EmailAddressIsUnique(string email)
-        => _context.Users.Any(u => u.Email != email);
+    private bool EmailAddressIsUnique(string email) =>
+        _db.Users.Any(u => u.Email != email);
 
-    private bool HasCountry(Guid countryId)
-        => _context.Categories.Any(u => u.Id != countryId);
+    private bool HasCountry(Guid countryId) =>
+        _db.Categories.Any(u => u.Id != countryId);
 }

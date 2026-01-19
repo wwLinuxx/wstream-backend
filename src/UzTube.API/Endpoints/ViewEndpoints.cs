@@ -9,7 +9,7 @@ public static class ViewEndpoints
 {
     public static IEndpointRouteBuilder MapViewEndpoints(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder endpoints = app.MapGroup("api/view");
+        RouteGroupBuilder endpoints = app.MapGroup("api/views");
 
         endpoints.MapPost("{postId:guid}", ViewPostAsync);
 

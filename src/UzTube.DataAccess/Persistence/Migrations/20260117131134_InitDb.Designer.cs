@@ -12,7 +12,7 @@ using UzTube.DataAccess.Persistence;
 namespace UzTube.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260113165037_InitDb")]
+    [Migration("20260117131134_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -320,7 +320,6 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .IsUnicode(false)
                         .HasColumnType("character varying(1000)");
@@ -344,7 +343,6 @@ namespace UzTube.DataAccess.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PreviewUrl")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .IsUnicode(false)
                         .HasColumnType("character varying(1000)");
@@ -470,6 +468,66 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.ToTable("RolePermissions");
                 });
 
+            modelBuilder.Entity("UzTube.Core.Entities.Stream", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("EndedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsLive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LikesCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PreviewUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StreamKey")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("TotalViews")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ViewerCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StreamKey")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Streams");
+                });
+
             modelBuilder.Entity("UzTube.Core.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -510,9 +568,9 @@ namespace UzTube.DataAccess.Persistence.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
@@ -784,6 +842,17 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("UzTube.Core.Entities.Stream", b =>
+                {
+                    b.HasOne("UzTube.Core.Entities.User", "User")
+                        .WithMany("LiveStreams")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("UzTube.Core.Entities.User", b =>
                 {
                     b.HasOne("UzTube.Core.Entities.Country", "Country")
@@ -892,6 +961,8 @@ namespace UzTube.DataAccess.Persistence.Migrations
                     b.Navigation("Followings");
 
                     b.Navigation("Likes");
+
+                    b.Navigation("LiveStreams");
 
                     b.Navigation("OtpCodes");
 

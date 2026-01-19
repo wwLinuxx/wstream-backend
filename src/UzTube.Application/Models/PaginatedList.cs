@@ -26,4 +26,7 @@ public record PaginatedList<T>
         int pageNumber,
         int pageSize)
         => new(values, totalCount, pageNumber, pageSize);
+
+    public static PaginatedList<T> Empty(int pageNumber, int pageSize)
+         => new([], 0, pageNumber, pageSize);
 }

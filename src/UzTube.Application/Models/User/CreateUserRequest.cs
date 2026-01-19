@@ -7,7 +7,7 @@ public record CreateUserRequest
     public string Username { get; init; } = null!;
     public string Email { get; init; } = null!;
     public string Password { get; init; } = null!;
-    public IFormFile? AvatarFile { get; init; }
+    public IFormFile? AvatarFile { get; init; } = null;
     public Guid CountryId { get; init; }
 }
 

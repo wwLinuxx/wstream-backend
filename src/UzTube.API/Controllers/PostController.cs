@@ -15,16 +15,16 @@ public class PostController(
 ) : ControllerBase
 {
     [HttpPost]
-    //[RequirePermission(SystemPermissions.PostCreate)]
+    //[RequirePermission(SystemPermissions.)]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> CreatePostAsync([FromForm] CreatePostRequest model)
     {
-        return Ok(ApiResult<CreatePostResponseModel>.Success(
+        return Ok(ApiResult<PostResponseModel>.Success(
             await postService.CreatePostAsync(model)));
     }
 
     [HttpGet("{id:Guid}")]
-    //[RequirePermission(SystemPermissions.PostView)]
+    //[RequirePermission()]
     public async Task<IActionResult> GetPostAsync([FromRoute] Guid id)
     {
         return Ok(ApiResult<PostResponseModel>.Success(

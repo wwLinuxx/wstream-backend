@@ -11,7 +11,7 @@ using UzTube.Shared.Services;
 namespace UzTube.Application.Services.Impl;
 
 public class PostService(
-    DatabaseContext context,
+    DatabaseContext db,
     IClaimService claimService,
     IFileStorageService fileStorageService
 ) : IPostService
@@ -30,39 +30,43 @@ public class PostService(
         await fileStorageService.StreamFileAsync(folderName, fileName, response.Body);
     }
 
-    public async Task<CreatePostResponseModel> CreatePostAsync(CreatePostRequest request)
+    public async Task<PostResponseModel> CreatePostAsync(CreatePostRequest request)
     {
         Guid userId = claimService.GetUserId();
 
-        string? videoFileUrl = await fileStorageService.UploadVideoFileAsync(request.VideoFile);
-        string? previewFileUrl = await fileStorageService.UploadPreviewFileAsync(request.PreviewFile);
+        string? previewFileUrl = null;
 
-        string? videoDuration = "24:12:60"; // TODO: Video ni vaqtini hisoblash
+        string videoFileUrl = await fileStorageService.UploadVideoFileAsync(request.VideoFile);
+
+        if (request.PreviewFile != null)
+            previewFileUrl = await fileStorageService.UploadPreviewFileAsync(request.PreviewFile);
+
+        string videoDuration = "24:12:60"; // TODO: Video ni vaqtini hisoblash
 
         Post newPost = new Post
         {
             UserId = userId,
             Title = request.Title,
             Description = request.Description,
-            VideoUrl = videoFileUrl,
             PreviewUrl = previewFileUrl,
+            VideoUrl = videoFileUrl,
             Duration = videoDuration
         };
 
-        await context.Posts.AddAsync(newPost);
-        await context.SaveChangesAsync();
+        await db.Posts.AddAsync(newPost);
+        await db.SaveChangesAsync();
 
-        return new CreatePostResponseModel { Id = newPost.Id };
+        return await GetPostAsync(newPost.Id);
     }
 
     public async Task<PostResponseModel> GetPostAsync(Guid id)
     {
-        PostResponseModel? post = await context.Posts
+        PostResponseModel post = await db.Posts
             .Where(p => p.Id == id)
+            .Include(p => p.User)
             .Select(p => new PostResponseModel
             {
-                Id = id,
-                UserId = p.UserId,
+                Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
                 PreviewUrl = p.PreviewUrl,
@@ -72,39 +76,39 @@ public class PostService(
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
-                IsPrivate = p.IsPrivate
+                IsPrivate = p.IsPrivate,
+                UserId = p.UserId,
+                Username = p.User.Username,
+                UserAvatarUrl = p.User.AvatarUrl
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new NotFoundException("Video not found");
 
-        return post ?? throw new NotFoundException("Video not found");
+        return post;
     }
 
     public async Task<PaginatedList<PostResponseModel>> GetPostsAsync(PageOption option)
     {
-        IQueryable<Post> query = context.Posts
-            .Where(p => !p.IsPrivate);
+        IQueryable<Post> query = db.Posts.Where(p => !p.IsPrivate);
 
         if (!string.IsNullOrWhiteSpace(option.Search))
         {
             string search = option.Search.Trim();
-
-            query = query.Where(p =>
-                EF.Functions.ILike(p.Title, $"%{search}%")); // PostgreSQL case-insensitive
+            query = query.Where(p => EF.Functions.ILike(p.Title, $"%{search}%"));
         }
 
-        int postsCount = await query.CountAsync();
+        int totalCount = await query.CountAsync();
 
-        if (postsCount == 0)
-           throw new NotFoundException("Video not found");
+        if (totalCount == 0)
+            return PaginatedList<PostResponseModel>.Empty(option.PageNumber, option.PageSize);
 
         List<PostResponseModel> posts = await query
-            .OrderBy(p => EF.Functions.Random()) // REAL RANDOM (PostgreSQL)
+            .OrderByDescending(p => EF.Functions.Random())
             .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(p => new PostResponseModel
             {
                 Id = p.Id,
-                UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
                 PreviewUrl = p.PreviewUrl,
@@ -114,16 +118,14 @@ public class PostService(
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
-                IsPrivate = p.IsPrivate
+                IsPrivate = p.IsPrivate,
+                UserId = p.UserId,
+                Username = p.User.Username,
+                UserAvatarUrl = p.User.AvatarUrl
             })
             .ToListAsync();
 
-        return PaginatedList<PostResponseModel>.Create(
-            posts,
-            postsCount,
-            option.PageNumber,
-            option.PageSize
-        );
+        return PaginatedList<PostResponseModel>.Create(posts, totalCount, option.PageNumber, option.PageSize);
     }
 
     public async Task<PostResponseModel> SearchPostAsync(string query)
@@ -131,7 +133,7 @@ public class PostService(
         if (!string.IsNullOrEmpty(query))
             query = query.Trim();
 
-        PostResponseModel? post = await context.Posts
+        PostResponseModel? post = await db.Posts
             .Where(p => p.Title.Contains(query) && !p.IsPrivate)
             .Select(p => new PostResponseModel
             {
@@ -153,18 +155,28 @@ public class PostService(
         return post ?? throw new NotFoundException("Video not found");
     }
 
-    public async Task<List<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option)
+    public async Task<PaginatedList<PostResponseModel>> GetUserPostsAsync(Guid userId, PageOption option)
     {
-        IQueryable<Post> query = context.Posts.AsQueryable();
+        IQueryable<Post> query = db.Posts.Where(p => p.UserId == userId && !p.IsPrivate);
+
+        if (!string.IsNullOrWhiteSpace(option.Search))
+        {
+            string search = option.Search.Trim();
+            query = query.Where(p => EF.Functions.ILike(p.Title, $"%{search}%"));
+        }
+
+        int totalCount = await query.CountAsync();
+
+        if (totalCount == 0)
+            return PaginatedList<PostResponseModel>.Empty(option.PageNumber, option.PageSize);
 
         List<PostResponseModel> posts = await query
-            .Where(p => p.UserId == userId && !p.IsPrivate)
-            .Skip(option.PageSize * (option.PageNumber - 1))
+            .OrderByDescending(p => p.PostedOn)
+            .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(p => new PostResponseModel
             {
                 Id = p.Id,
-                UserId = p.UserId,
                 Title = p.Title,
                 Description = p.Description,
                 PreviewUrl = p.PreviewUrl,
@@ -174,25 +186,33 @@ public class PostService(
                 ViewsCount = p.ViewsCount,
                 LikesCount = p.LikesCount,
                 Rating = p.Rating,
-                IsPrivate = p.IsPrivate
+                IsPrivate = p.IsPrivate,
+                UserId = p.UserId,
+                Username = p.User.Username,
+                UserAvatarUrl = p.User.AvatarUrl
             })
             .ToListAsync();
 
-        return posts.Count == 0 ? throw new NotFoundException("Video not found") : posts;
+        return PaginatedList<PostResponseModel>.Create(posts, totalCount, option.PageNumber, option.PageSize);
     }
 
     public async Task<UpdatePostResponseModel> UpdatePostAsync(Guid id, UpdatePostRequest request)
     {
-        Post post = await context.Posts.FirstOrDefaultAsync(p => p.Id == id)
+        Post post = await db.Posts.FirstOrDefaultAsync(p => p.Id == id)
                     ?? throw new NotFoundException("Video not found");
+
+        string? previewFileUrl = null;
+
+        if (request.PreviewFile != null)
+            previewFileUrl = await fileStorageService.UploadPreviewFileAsync(request.PreviewFile);
 
         post.Title = request.Title;
         post.Description = request.Description;
-        post.PreviewUrl = request.ThumbnailUrl;
+        post.PreviewUrl = previewFileUrl;
         post.IsPrivate = request.IsPrivate;
 
-        context.Posts.Update(post);
-        await context.SaveChangesAsync();
+        db.Posts.Update(post);
+        await db.SaveChangesAsync();
 
         return new UpdatePostResponseModel { Id = post.Id };
     }
@@ -200,7 +220,7 @@ public class PostService(
     public async Task<DeletePostResponseModel> DeletePostAsync(Guid id)
     {
         // TODO: When delete post need copy to HistoryTable
-        Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == id)
+        Post post = await db.Posts.FirstOrDefaultAsync(u => u.Id == id)
                     ?? throw new NotFoundException("Video not found");
 
         await fileStorageService.DeleteFileAsync(SystemFolderNames.Video, post.VideoUrl);
@@ -208,20 +228,20 @@ public class PostService(
         post.IsDeleted = true;
         post.DeletedAt = DateTime.Now;
 
-        await context.SaveChangesAsync();
+        await db.SaveChangesAsync();
 
         return new DeletePostResponseModel("Success");
     }
 
     public async Task<RestorePostResponseModel> RestorePostAsync(Guid userId)
     {
-        Post post = await context.Posts.FirstOrDefaultAsync(u => u.Id == userId)
+        Post post = await db.Posts.FirstOrDefaultAsync(u => u.Id == userId)
                     ?? throw new NotFoundException("Video not found");
 
         post.IsDeleted = false;
         post.DeletedAt = null;
 
-        await context.SaveChangesAsync();
+        await db.SaveChangesAsync();
 
         return new RestorePostResponseModel("Success");
     }

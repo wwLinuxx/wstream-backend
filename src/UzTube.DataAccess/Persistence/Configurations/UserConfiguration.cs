@@ -14,7 +14,7 @@ public class UserConfiguration(
 
         builder.Property(u => u.Username)
             .IsRequired()
-            .HasMaxLength(50)
+            .HasMaxLength(20)
             .IsUnicode(false);
         builder.HasIndex(u => u.Username)
             .IsUnique();

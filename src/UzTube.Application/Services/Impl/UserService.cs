@@ -20,8 +20,6 @@ public class UserService(
     {
         Guid userId = claimService.GetUserId();
 
-
-
         UserResponseModel? user = await context.Users
             .Where(u => u.Id == userId)
             .Select(u => new UserResponseModel
@@ -145,7 +143,7 @@ public class UserService(
         return user ?? throw new NotFoundException("User not found");
     }
 
-    public async Task<UpdateUserProfileResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request)
+    public async Task<UserResponseModel> UpdateUserProfileAsync(Guid id, UpdateUserRequest request)
     {
         User? user = await context.Users
             .FirstOrDefaultAsync(u => u.Id == id)
@@ -165,7 +163,7 @@ public class UserService(
         context.Users.Update(user);
         await context.SaveChangesAsync();
 
-        return new UpdateUserProfileResponseModel { Id = user.Id };
+        return await GetProfileAsync();
     }
 
     public async Task<UpdateUserPasswordResponseModel> UpdateUserPasswordAsync(Guid id, UpdateUserPasswordRequest request)

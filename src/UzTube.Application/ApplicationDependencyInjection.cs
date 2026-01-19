@@ -6,6 +6,7 @@ using UzTube.Application.Common.Email;
 using UzTube.Application.Common.Minio;
 using UzTube.Application.Common.Otp;
 using UzTube.Application.Common.Performance;
+using UzTube.Application.Common.Stream;
 using UzTube.Application.Helpers;
 using UzTube.Application.Helpers.Interfaces;
 using UzTube.Application.Services;
@@ -33,9 +34,11 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IFileStorageService, MinioFileStorageService>();
         services.AddScoped<IOtpService, OtpEmailService>();
+        services.AddScoped<IStreamService, StreamService>();
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<IViewService, ViewService>();
         services.AddScoped<ILikeService, LikeService>();
+        services.AddScoped<ISubscribeService, SubscribeService>();
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ICountryService, CountryService>();
@@ -47,6 +50,7 @@ public static class ApplicationDependencyInjection
     private static void AddConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        services.Configure<StreamSettings>(configuration.GetSection("StreamSettings"));
         services.Configure<MinioSettings>(configuration.GetSection("MinioSettings"));
         services.Configure<OtpSettings>(configuration.GetSection("OtpSettings"));
         services.Configure<PerformanceSettings>(configuration.GetSection("PerformanceSettings"));
@@ -59,7 +63,7 @@ public static class ApplicationDependencyInjection
             MinioSettings? config = sp.GetRequiredService<IOptions<MinioSettings>>().Value;
 
             IMinioClient? client = new MinioClient()
-                .WithEndpoint(config.Endpoint, config.Port)
+                .WithEndpoint(config.Server, config.Port)
                 .WithCredentials(config.AccessKey, config.SecretKey);
 
             if (config.UseSSL)

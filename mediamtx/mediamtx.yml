@@ -1,0 +1,76 @@
+###############################################
+# MediaMTX Configuration - WStream
+###############################################
+# Logging
+logLevel: info
+logDestinations: [stdout]
+
+###############################################
+# API (o'chirilgan)
+###############################################
+# api: yes
+# apiAddress: :9997
+# apiAllowOrigins: ['*']
+
+###############################################
+# Authentication
+###############################################
+authInternalUsers:
+  - user: any
+    pass:
+    ips: []
+    permissions:
+      - action: publish
+        path:
+      - action: read
+        path:
+      - action: playback
+        path:
+
+###############################################
+# RTMP (OBS dan qabul qilish)
+###############################################
+rtmpAddress: :1935
+
+###############################################
+# HLS (Low Latency)
+###############################################
+hlsAddress: :8888
+hlsAllowOrigins: ['*']
+hlsVariant: lowLatency
+hlsSegmentCount: 7
+hlsSegmentDuration: 500ms
+hlsPartDuration: 100ms
+hlsAlwaysRemux: yes
+
+###############################################
+# RTSP (o'chirilgan)
+###############################################
+# rtspAddress: :8554
+
+###############################################
+# WebRTC (o'chirilgan)
+###############################################
+webrtc: no
+# webrtcAddress: :8889
+# webrtcAllowOrigins: ['*']
+# webrtcLocalUDPAddress: :8189
+# webrtcLocalTCPAddress: :8189
+# webrtcAdditionalHosts:
+#   - "127.0.0.1"
+
+###############################################
+# SRT (o'chirilgan)
+###############################################
+srt: no
+# srtAddress: :8890
+
+###############################################
+# Paths
+###############################################
+paths:
+  all_others:
+    runOnReady: >
+      curl -s "http://wstream-api:4444/api/streams/webhook/on?streamKey=$MTX_PATH"
+    runOnNotReady: >
+      curl -s "http://wstream-api:4444/api/streams/webhook/off?streamKey=$MTX_PATH"

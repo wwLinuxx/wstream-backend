@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel.Args;
+using System;
 using UzTube.Application.Common.Minio;
 using UzTube.Application.Exceptions;
 using UzTube.Core.Common;
@@ -87,7 +89,7 @@ public class MinioFileStorageService(
 
         await using Stream? stream = file.OpenReadStream();
 
-        string? videoFileUrl = await UploadFileAsync(folderName, fileName, stream, contentType, fileLength);
+        string videoFileUrl = await UploadFileAsync(folderName, fileName, stream, contentType, fileLength);
 
         return videoFileUrl;
     }
@@ -121,7 +123,7 @@ public class MinioFileStorageService(
 
         await EnsureFolderExistsAsync(folderName);
 
-        PutObjectArgs? putObjectArgs = new PutObjectArgs()
+        PutObjectArgs putObjectArgs = new PutObjectArgs()
             .WithBucket(folderName)
             .WithObject(fileName)
             .WithStreamData(fileStream)
@@ -130,7 +132,10 @@ public class MinioFileStorageService(
 
         await minioClient.PutObjectAsync(putObjectArgs);
 
-        return $"https://files.wstream.uz/{folderName}/{fileName}";
+        //if (environment.IsProduction())
+        //    return $"{_minioSettings.Url}:{_minioSettings.Port}/{folderName}/{fileName}";
+
+        return $"{_minioSettings.Url}:{_minioSettings.Port}/{folderName}/{fileName}";
     }
 
     public async Task StreamFileAsync(string folderName, string fileName, Stream outputStream)
@@ -181,7 +186,7 @@ public class MinioFileStorageService(
         await minioClient.RemoveObjectAsync(removeArgs);
     }
 
-
+    // ===================== Private Methods =====================
     private async Task EnsureFolderExistsAsync(string folderName)
     {
         bool exists = await minioClient.BucketExistsAsync(
