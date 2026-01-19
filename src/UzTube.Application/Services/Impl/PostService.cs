@@ -50,7 +50,8 @@ public class PostService(
             Description = request.Description,
             PreviewUrl = previewFileUrl,
             VideoUrl = videoFileUrl,
-            Duration = videoDuration
+            Duration = videoDuration,
+            IsPrivate = request.IsPrivate
         };
 
         await db.Posts.AddAsync(newPost);
