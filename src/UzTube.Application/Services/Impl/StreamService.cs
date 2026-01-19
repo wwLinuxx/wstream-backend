@@ -57,11 +57,9 @@ public class StreamService(
                 Title = s.Title,
                 Description = s.Description,
                 PreviewUrl = s.PreviewUrl,
-                StreamUrl = $"{_streamSettings.HlsServer}/{s.StreamKey}/index.m3u8",
-                //StreamUrl = string.IsNullOrEmpty(_streamSettings.HlsPort)
-                    //$"{_streamSettings.HlsServer}/{s.StreamKey}/index.m3u8",
-                    //? $"{_streamSettings.HlsServer}/{s.StreamKey}/index.m3u8"
-                    //: $"{_streamSettings.HlsServer}:{_streamSettings.HlsPort}/{s.StreamKey}/index.m3u8",
+                StreamUrl = _streamSettings.HlsServer.Contains("localhost")
+                    ? $"{_streamSettings.HlsServer}:{_streamSettings.HlsPort}/{s.StreamKey}/index.m3u8"
+                    : $"{_streamSettings.HlsServer}/{s.StreamKey}/index.m3u8",
                 IsLive = s.IsLive,
                 StartedAt = s.StartedAt,
                 ViewerCount = s.ViewerCount,
