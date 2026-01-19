@@ -12,7 +12,7 @@ server {
 
 # HTTPS server
 server {
-    listen 8888 ssl;
+    listen 443 ssl;
     server_name stream.wstream.uz www.stream.wstream.uz;
     
     # SSL
