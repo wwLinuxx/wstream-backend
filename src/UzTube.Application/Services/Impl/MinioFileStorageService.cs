@@ -132,10 +132,8 @@ public class MinioFileStorageService(
 
         await minioClient.PutObjectAsync(putObjectArgs);
 
-        //if (environment.IsProduction())
-        //    return $"{_minioSettings.Url}:{_minioSettings.Port}/{folderName}/{fileName}";
-
-        return $"{_minioSettings.Url}:{_minioSettings.Port}/{folderName}/{fileName}";
+        return $"{_minioSettings.Url}/{folderName}/{fileName}";
+        //return $"{_minioSettings.Url}:{_minioSettings.Port}/{folderName}/{fileName}";
     }
 
     public async Task StreamFileAsync(string folderName, string fileName, Stream outputStream)
