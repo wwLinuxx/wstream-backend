@@ -1,44 +1,73 @@
+# ============================================
+# WSTREAM - Stream Manager (Port 8888)
+# ============================================
+
+# WebSocket upgrade map (nginx.conf da http{} ichiga qo'shing)
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+# Upstream
 upstream wstream_stream_servers {
     server wstream-streammanager:8888;
+    keepalive 32;
 }
 
-# HTTP to HTTPS redirect
+# HTTP redirect (optional)
 server {
     listen 80;
-    server_name stream.wstream.uz www.stream.wstream.uz;
+    server_name stream.wstream.uz;
     
-    return 301 https://$host$request_uri;
+    # location /.well-known/acme-challenge/ {
+    #     root /var/www/certbot;
+    # }
+    
+    location / {
+        return 301 https://$host:8888$request_uri;
+    }
 }
 
-# HTTPS server
+# HTTPS on port 8888
 server {
-    listen 443 ssl;
-    server_name stream.wstream.uz www.stream.wstream.uz;
+    listen 8888 ssl http2;
+    server_name stream.wstream.uz;
     
     # SSL
     ssl_certificate /etc/letsencrypt/live/stream.wstream.uz/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/stream.wstream.uz/privkey.pem;
-
-    # CONF
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-
-    # STREAM-MANAGERS endpoints
+    
+    # General
+    client_max_body_size 500M;
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+    
+    # CORS headers
+    add_header Access-Control-Allow-Origin "*" always;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept" always;
+    
+    # Main location
     location / {
         proxy_pass http://wstream_stream_servers;
         
+        proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-        # Video upload/download uchun
-        client_max_body_size 100M;
-        proxy_read_timeout 600s;
-        proxy_send_timeout 600s;
+        # WebSocket
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        
+        # Streaming uchun
+        proxy_buffering off;
     }
     
-    # Error logging
-    error_log /var/log/nginx/stream.wstream.uz-error.log crit;
+    # Logging
+    error_log /var/log/nginx/stream.wstream.uz-error.log warn;
     access_log /var/log/nginx/stream.wstream.uz-access.log;
 }
