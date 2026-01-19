@@ -1,5 +1,5 @@
 upstream wstream_stream_servers {
-    server wstream-filemanager:8888;
+    server wstream-streammanager:8888;
 }
 
 # HTTP to HTTPS redirect
