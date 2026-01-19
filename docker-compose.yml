@@ -92,15 +92,13 @@
     container_name: wstream-streammanager
     ports:
       - "${MEDIAMTX_RTMP_PORT}:1935"       # RTMP
-     #  - "${MEDIAMTX_HLS_PORT}:8888"        # HLS
+      - "${MEDIAMTX_HLS_PORT}:8888"        # HLS
      #  - "8554:8554"                      # RTSP
      #  - "8889:8889"                      # WebRTC HTTP
      #  - "8189:8189/udp"                  # WebRTC UDP
      #  - "8189:8189/tcp"                  # WebRTC TCP fallback
      #  - "8890:8890/udp"                  # SRT
      #  - "9997:9997"                      # API
-    expose:
-      - "8888"  
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml
     restart: unless-stopped
