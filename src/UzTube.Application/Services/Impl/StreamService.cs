@@ -92,13 +92,13 @@ public class StreamService(
 
         List<StreamResponseModel> streams = await query
             .OrderByDescending(s => s.ViewerCount)
+                .ThenByDescending(s => s.StartedAt)
             .Skip((option.PageNumber - 1) * option.PageSize)
             .Take(option.PageSize)
             .Select(s => new StreamResponseModel
             {
                 Id = s.Id,
                 Title = s.Title,
-                Description = s.Description,
                 PreviewUrl = s.PreviewUrl,
                 StreamUrl = string.IsNullOrEmpty(_streamSettings.HlsPort)
                     ? $"{_streamSettings.HlsServer}/{s.StreamKey}/index.m3u8"
