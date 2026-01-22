@@ -35,12 +35,12 @@ rtmpAddress: :1935
 ###############################################
 # HLS (Low Latency)
 ###############################################
-hlsAddress: :8888
+hlsAddress: :8888     
 hlsAllowOrigins: ['*']
 hlsVariant: lowLatency
-hlsSegmentCount: 7
-hlsSegmentDuration: 500ms
-hlsPartDuration: 100ms
+hlsSegmentCount: 10
+hlsSegmentDuration: 1s
+hlsPartDuration: 250ms
 hlsAlwaysRemux: yes
 
 ###############################################
