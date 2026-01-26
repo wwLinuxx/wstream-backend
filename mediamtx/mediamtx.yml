@@ -33,14 +33,14 @@ authInternalUsers:
 rtmpAddress: :1935
 
 ###############################################
-# HLS (Low Latency)
+# HLS
 ###############################################
 hlsAddress: :8888     
 hlsAllowOrigins: ['*']
-hlsVariant: lowLatency
-hlsSegmentCount: 10
-hlsSegmentDuration: 1s
-hlsPartDuration: 250ms
+hlsVariant: fmp4
+hlsSegmentCount: 7
+hlsSegmentDuration: 2s
+hlsPartDuration: 500ms
 hlsAlwaysRemux: yes
 
 ###############################################
